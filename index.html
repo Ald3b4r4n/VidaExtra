@@ -5,26 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VidaExtra® - Calculadora AC-4</title>
   
-  <!-- PWA Meta Tags -->
+  <!-- Meta Tags PWA -->
   <meta name="theme-color" content="#0d6efd">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="VidaExtra">
   <link rel="manifest" href="manifest.json">
   
-  <!-- Bootstrap e Ícones -->
+  <!-- Favicon e Ícones -->
+  <link rel="icon" href="./operador.jpg" type="image/jpeg">
+  <link rel="apple-touch-icon" href="operador.jpg">
+  
+  <!-- CSS Externo -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
   
   <!-- CSS Local -->
   <link rel="stylesheet" href="style.css">
-  
-  <!-- Favicon usando a mesma imagem do operador -->
-  <link rel="icon" href="operador.jpg" type="image/jpeg">
 </head>
 <body>
   <div class="container py-4">
     <div class="text-center mb-4">
-      <img src="operador.jpg" alt="Operador" class="img-topo mb-3">
+      <img src="./operador.jpg" alt="Operador" class="img-topo mb-3">
       <h1 class="text-gradient fw-bold"><i class="bi bi-shield-lock"></i> VidaExtra<sup>®</sup></h1>
       <p class="text-muted">Calculadora de horas extras - AC-4</p>
     </div>
@@ -161,50 +163,73 @@
     </div>
   </footer>
 
-  <!-- Scripts -->
+  <!-- Scripts Externos -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="app.js"></script>
   
-  <!-- Service Worker Registration -->
+  <!-- Script Local -->
+  <script src="./app.js"></script>
+  
+  <!-- PWA Installation Handler -->
   <script>
+    let deferredPrompt;
+    
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      
+      // Mostra botão de instalação (opcional)
+      const installButton = document.createElement('button');
+      installButton.className = 'btn btn-primary d-block mx-auto mt-3';
+      installButton.innerHTML = '<i class="bi bi-download"></i> Instalar App';
+      installButton.addEventListener('click', () => {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('Usuário aceitou instalação');
+          }
+          deferredPrompt = null;
+        });
+      });
+      document.querySelector('footer').before(installButton);
+    });
+
+    // Service Worker Registration
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
+        navigator.serviceWorker.register('./sw.js')
           .then(registration => {
-            console.log('ServiceWorker registrado com sucesso:', registration.scope);
+            console.log('Service Worker registrado com escopo:', registration.scope);
             
-            // Verifica se há uma nova versão disponível
+            // Verifica atualizações a cada acesso
+            registration.update();
+            
+            // Monitora atualizações
             registration.addEventListener('updatefound', () => {
               const newWorker = registration.installing;
               newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed') {
-                  if (navigator.serviceWorker.controller) {
-                    // Nova versão disponível
-                    Swal.fire({
-                      title: 'Nova versão disponível!',
-                      text: 'Deseja atualizar o aplicativo agora?',
-                      icon: 'info',
-                      showCancelButton: true,
-                      confirmButtonColor: '#0d6efd',
-                      cancelButtonColor: '#6c757d',
-                      confirmButtonText: 'Atualizar',
-                      cancelButtonText: 'Depois'
-                    }).then((result) => {
-                      if (result.isConfirmed) {
-                        newWorker.postMessage({action: 'skipWaiting'});
-                        window.location.reload();
-                      }
-                    });
-                  }
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  Swal.fire({
+                    title: 'Nova versão disponível!',
+                    text: 'Atualize para a versão mais recente',
+                    icon: 'info',
+                    confirmButtonText: 'Atualizar'
+                  }).then(() => {
+                    window.location.reload();
+                  });
                 }
               });
             });
           })
           .catch(err => {
-            console.error('Falha no registro do ServiceWorker:', err);
+            console.error('Falha no registro do Service Worker:', err);
           });
+      });
+
+      // Força recarregamento quando novo Service Worker assumir controle
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        window.location.reload();
       });
     }
   </script>
