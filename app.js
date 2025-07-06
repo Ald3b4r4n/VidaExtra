@@ -206,7 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return diffHoras + (diffMinutos / 60);
   }
 
-  // Exibe os resultados na tabela (COM ALTERAÇÕES SOLICITADAS)
+  // Exibe os resultados na tabela 
   function exibirResultado(calculo) {
     document.getElementById('horas-diurnas').textContent = calculo.horasTotais.toFixed(2);
     document.getElementById('total-diurno').textContent = formatarMoeda(calculo.totalBruto);
