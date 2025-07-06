@@ -12,7 +12,7 @@
   <meta name="apple-mobile-web-app-title" content="VidaExtra">
   <link rel="manifest" href="manifest.json">
   
-  <!-- Favicon e Ícones -->
+  <!--Ícones -->
   <link rel="icon" href="./operador.jpg" type="image/jpeg">
   <link rel="apple-touch-icon" href="operador.jpg">
   
@@ -171,7 +171,7 @@
   <!-- Script Local -->
   <script src="./app.js"></script>
   
-  <!-- PWA Installation Handler -->
+  <!-- instalaçã PWA-->
   <script>
     let deferredPrompt;
     
@@ -179,7 +179,7 @@
       e.preventDefault();
       deferredPrompt = e;
       
-      // Mostra botão de instalação (opcional)
+      // Mostra botão de instalação 
       const installButton = document.createElement('button');
       installButton.className = 'btn btn-primary d-block mx-auto mt-3';
       installButton.innerHTML = '<i class="bi bi-download"></i> Instalar App';
@@ -195,7 +195,7 @@
       document.querySelector('footer').before(installButton);
     });
 
-    // Service Worker Registration
+    // Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
