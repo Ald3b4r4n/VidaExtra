@@ -178,6 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
       data: formatarData(dataObj), 
       periodo: `${horaInicio} às ${horaFim}`,
       horasTotais,
+      totalBruto,
       totalLiquido,
       percentualPensao: temPensao ? percentualPensao : 0 
     });
@@ -249,30 +250,105 @@ document.addEventListener('DOMContentLoaded', function() {
     resultadoContainer.style.display = 'block';
   }
 
-  // Adiciona item ao histórico
+  // Adiciona item ao histórico com botão de remoção
   function adicionarAoHistorico(calculo) {
+    const itemId = Date.now(); // ID único para o item
+    
     const item = document.createElement('div');
     item.className = 'list-group-item';
+    item.dataset.id = itemId;
+    
     item.innerHTML = `
       <div class="d-flex justify-content-between">
-        <div>
-          <h6 class="mb-1">${calculo.data}</h6>
+        <div class="flex-grow-1">
+          <div class="d-flex justify-content-between align-items-start">
+            <h6 class="mb-1">${calculo.data}</h6>
+            <button class="btn btn-sm btn-outline-danger btn-remover-item">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
           <small>${calculo.periodo}</small>
+          <div class="mt-2">
+            <span class="badge bg-primary">${calculo.horasTotais.toFixed(2)}h totais</span>
+            ${calculo.percentualPensao > 0 ? `<span class="badge bg-warning text-dark">Pensão ${calculo.percentualPensao}%</span>` : ''}
+          </div>
+          <div class="mt-2 d-flex align-items-center">
+            ${calculo.percentualPensao > 0 ? 
+              `<span class="valor-original">${formatarMoeda(calculo.totalBruto)}</span>
+               <i class="bi bi-arrow-right"></i>` : 
+              ''}
+            <span class="valor-liquido">${formatarMoeda(calculo.totalLiquido)}</span>
+          </div>
         </div>
-        <span class="badge bg-success">${formatarMoeda(calculo.totalLiquido)}</span>
-      </div>
-      <div class="mt-2">
-        <span class="badge bg-primary">${calculo.horasTotais.toFixed(2)}h totais</span>
-        ${calculo.percentualPensao > 0 ? `<span class="badge bg-warning text-dark">Pensão ${calculo.percentualPensao}%</span>` : ''}
       </div>
     `;
+    
     historicoLista.prepend(item);
     historicoVazio.style.display = 'none';
     atualizarTotais();
 
+    // Adiciona evento ao botão de remover
+    const btnRemover = item.querySelector('.btn-remover-item');
+    btnRemover.addEventListener('click', function() {
+      removerItemHistorico(itemId, calculo);
+    });
+
+    // Armazena no estado
     appState.historico.unshift({
       ...calculo,
+      id: itemId,
       timestamp: new Date().getTime()
+    });
+  }
+
+  // Remove um item específico do histórico
+  function removerItemHistorico(id, calculo) {
+    Swal.fire({
+      title: 'Remover item?',
+      text: 'Deseja remover este cálculo do histórico?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sim, remover',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Remove do DOM
+        const item = document.querySelector(`.list-group-item[data-id="${id}"]`);
+        if (item) item.remove();
+        
+        // Remove do estado
+        const index = appState.historico.findIndex(item => item.id === id);
+        if (index !== -1) {
+          const itemRemovido = appState.historico.splice(index, 1)[0];
+          
+          // Atualiza totais acumulados
+          appState.totalHoras -= itemRemovido.horasTotais;
+          appState.totalValor -= itemRemovido.totalLiquido;
+          atualizarTotais();
+          
+          // Salva dados
+          salvarDados();
+          
+          // Toca som de exclusão
+          tocarSomExclusao();
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'Item removido!',
+            text: 'O cálculo foi removido do histórico',
+            timer: 1500,
+            showConfirmButton: false
+          });
+        }
+        
+        // Mostra mensagem se o histórico estiver vazio
+        if (historicoLista.children.length === 0) {
+          historicoVazio.style.display = 'block';
+          totalAcumulado.style.display = 'none';
+        }
+      }
     });
   }
 
@@ -309,20 +385,40 @@ document.addEventListener('DOMContentLoaded', function() {
       historico.forEach(item => {
         const itemElement = document.createElement('div');
         itemElement.className = 'list-group-item';
+        itemElement.dataset.id = item.id;
+        
         itemElement.innerHTML = `
           <div class="d-flex justify-content-between">
-            <div>
-              <h6 class="mb-1">${item.data}</h6>
+            <div class="flex-grow-1">
+              <div class="d-flex justify-content-between align-items-start">
+                <h6 class="mb-1">${item.data}</h6>
+                <button class="btn btn-sm btn-outline-danger btn-remover-item">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              </div>
               <small>${item.periodo}</small>
+              <div class="mt-2">
+                <span class="badge bg-primary">${item.horasTotais.toFixed(2)}h totais</span>
+                ${item.percentualPensao > 0 ? `<span class="badge bg-warning text-dark">Pensão ${item.percentualPensao}%</span>` : ''}
+              </div>
+              <div class="mt-2 d-flex align-items-center">
+                ${item.percentualPensao > 0 ? 
+                  `<span class="valor-original">${formatarMoeda(item.totalBruto)}</span>
+                   <i class="bi bi-arrow-right"></i>` : 
+                  ''}
+                <span class="valor-liquido">${formatarMoeda(item.totalLiquido)}</span>
+              </div>
             </div>
-            <span class="badge bg-success">${formatarMoeda(item.totalLiquido)}</span>
-          </div>
-          <div class="mt-2">
-            <span class="badge bg-primary">${item.horasTotais.toFixed(2)}h totais</span>
-            ${item.percentualPensao > 0 ? `<span class="badge bg-warning text-dark">Pensão ${item.percentualPensao}%</span>` : ''}
           </div>
         `;
+        
         historicoLista.appendChild(itemElement);
+        
+        // Adiciona evento ao botão de remover
+        const btnRemover = itemElement.querySelector('.btn-remover-item');
+        btnRemover.addEventListener('click', function() {
+          removerItemHistorico(item.id, item);
+        });
       });
 
       if (historico.length > 0) {
@@ -413,6 +509,38 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  // Função para tocar som de exclusão (curto e agudo)
+  function tocarSomExclusao() {
+    try {
+      // Cria contexto de áudio
+      const context = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = context.createOscillator();
+      const gainNode = context.createGain();
+      
+      // Conecta os nós
+      oscillator.connect(gainNode);
+      gainNode.connect(context.destination);
+      
+      // Configura o oscilador
+      oscillator.type = 'sine';
+      oscillator.frequency.value = 1000; // Frequência mais aguda
+      
+      // Configura o ganho (volume)
+      gainNode.gain.value = 0.3;
+      
+      // Inicia o oscilador
+      oscillator.start();
+      
+      // Fade out rápido
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.15);
+      
+      // Para o oscilador após 150ms
+      oscillator.stop(context.currentTime + 0.15);
+    } catch (e) {
+      console.log("Erro ao reproduzir som de exclusão:", e);
+    }
+  }
+
   // =============================================
   // 7. FUNÇÕES DE CONTROLE (LIMPEZA E EXPORTAÇÃO)
   // =============================================
@@ -482,14 +610,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 </tr>
             </thead>
             <tbody>
-                ${Array.from(historicoLista.children).map(item => `
+                ${Array.from(historicoLista.children).map(item => {
+                  const data = item.querySelector('h6').textContent;
+                  const periodo = item.querySelector('small').textContent;
+                  const horas = item.querySelector('.badge.bg-primary').textContent.replace('h totais', '');
+                  const valor = item.querySelector('.valor-liquido').textContent;
+                  const valorOriginal = item.querySelector('.valor-original')?.textContent || '';
+                  
+                  return `
                     <tr>
-                        <td style="border:1px solid #ddd;padding:8px;">${item.querySelector('h6').textContent}</td>
-                        <td style="border:1px solid #ddd;padding:8px;">${item.querySelector('small').textContent}</td>
-                        <td style="border:1px solid #ddd;padding:8px;text-align:right;">${item.querySelector('.badge.bg-primary').textContent.replace('h totais', '')}</td>
-                        <td style="border:1px solid #ddd;padding:8px;text-align:right;">${item.querySelector('.badge.bg-success').textContent}</td>
+                      <td style="border:1px solid #ddd;padding:8px;">${data}</td>
+                      <td style="border:1px solid #ddd;padding:8px;">${periodo}</td>
+                      <td style="border:1px solid #ddd;padding:8px;text-align:right;">${horas}</td>
+                      <td style="border:1px solid #ddd;padding:8px;text-align:right;">
+                        ${valorOriginal ? `<span style="text-decoration:line-through;color:#999;">${valorOriginal}</span><br>` : ''}
+                        ${valor}
+                      </td>
                     </tr>
-                `).join('')}
+                  `;
+                }).join('')}
             </tbody>
         </table>
         
