@@ -183,6 +183,26 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     salvarDados();
+
+    // Toca som de confirmação
+    tocarSomSucesso();
+    
+    // Exibe mensagem de sucesso com detalhes
+    Swal.fire({
+      icon: 'success',
+      title: 'Cálculo adicionado!',
+      html: `
+        <div class="text-start">
+          <p><strong>Data:</strong> ${formatarData(dataObj)} (${diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1)})</p>
+          <p><strong>Período:</strong> ${horaInicio} às ${horaFim}</p>
+          <p><strong>Horas:</strong> ${horasTotais.toFixed(2)}h</p>
+          <p><strong>Valor líquido:</strong> ${formatarMoeda(totalLiquido)}</p>
+          ${temPensao ? `<p><strong>Desconto pensão:</strong> ${percentualPensao}% (${formatarMoeda(descontoPensao)})</p>` : ''}
+        </div>
+      `,
+      confirmButtonColor: '#0d6efd',
+      confirmButtonText: 'OK'
+    });
   }
 
   // =============================================
@@ -206,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return diffHoras + (diffMinutos / 60);
   }
 
-  // Exibe os resultados na tabela 
+  // Exibe os resultados na tabela
   function exibirResultado(calculo) {
     document.getElementById('horas-diurnas').textContent = calculo.horasTotais.toFixed(2);
     document.getElementById('total-diurno').textContent = formatarMoeda(calculo.totalBruto);
@@ -326,6 +346,73 @@ document.addEventListener('DOMContentLoaded', function() {
     return `${dia}/${mes}/${ano}`;
   }
 
+  // Função para tocar som de confirmação (bip)
+  function tocarSomSucesso() {
+    try {
+      // Cria contexto de áudio
+      const context = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = context.createOscillator();
+      const gainNode = context.createGain();
+      
+      // Conecta os nós
+      oscillator.connect(gainNode);
+      gainNode.connect(context.destination);
+      
+      // Configura o oscilador (tipo de onda e frequência)
+      oscillator.type = 'sine';
+      oscillator.frequency.value = 880; // Lá5 (frequência agradável)
+      
+      // Configura o ganho (volume)
+      gainNode.gain.value = 0.3; // Volume moderado
+      
+      // Inicia o oscilador
+      oscillator.start();
+      
+      // Fade out suave (para evitar estalo no fim)
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.3);
+      
+      // Para o oscilador após 300ms
+      oscillator.stop(context.currentTime + 0.3);
+    } catch (e) {
+      console.log("Erro ao reproduzir som:", e);
+    }
+  }
+
+  // Função para tocar som de limpeza (decrescente)
+  function tocarSomLimpeza() {
+    try {
+      // Cria contexto de áudio
+      const context = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = context.createOscillator();
+      const gainNode = context.createGain();
+      
+      // Conecta os nós
+      oscillator.connect(gainNode);
+      gainNode.connect(context.destination);
+      
+      // Configura o oscilador
+      oscillator.type = 'sine';
+      oscillator.frequency.value = 660; // Mi5 (frequência média)
+      
+      // Configura o ganho (volume)
+      gainNode.gain.value = 0.4;
+      
+      // Inicia o oscilador
+      oscillator.start();
+      
+      // Diminui a frequência gradualmente (de 660Hz para 220Hz)
+      oscillator.frequency.exponentialRampToValueAtTime(220, context.currentTime + 0.8);
+      
+      // Fade out suave
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.8);
+      
+      // Para o oscilador após 800ms
+      oscillator.stop(context.currentTime + 0.8);
+    } catch (e) {
+      console.log("Erro ao reproduzir som de limpeza:", e);
+    }
+  }
+
   // =============================================
   // 7. FUNÇÕES DE CONTROLE (LIMPEZA E EXPORTAÇÃO)
   // =============================================
@@ -355,11 +442,14 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.removeItem('ac4-historico');
         localStorage.removeItem('ac4-totais');
         Swal.fire('Limpo!', 'Todos os dados foram apagados.', 'success');
+        
+        // Toca som de limpeza
+        tocarSomLimpeza();
       }
     });
   }
 
-  // Função de exportação para PDF CORRIGIDA
+  // Função de exportação para PDF
   function exportarPDF() {
     if (historicoLista.children.length === 0) {
         Swal.fire({
@@ -377,83 +467,80 @@ document.addEventListener('DOMContentLoaded', function() {
     element.style.padding = '20px';
     element.style.width = '100%';
     
-    // Adicionar um pequeno delay para garantir que o elemento está pronto
-    setTimeout(() => {
-        // Construir o conteúdo do PDF
-        element.innerHTML = `
-            <h3 style="text-align:center;color:#0d6efd;margin-bottom:5px;">Histórico AC-4</h3>
-            <p style="text-align:center;color:#6c757d;margin-top:0;">Gerado em ${new Date().toLocaleDateString('pt-BR')}</p>
-            
-            <table style="width:100%;border-collapse:collapse;margin-top:20px;">
-                <thead>
-                    <tr style="background-color:#f8f9fa;">
-                        <th style="border:1px solid #ddd;padding:8px;text-align:left;">Data</th>
-                        <th style="border:1px solid #ddd;padding:8px;text-align:left;">Período</th>
-                        <th style="border:1px solid #ddd;padding:8px;text-align:right;">Horas</th>
-                        <th style="border:1px solid #ddd;padding:8px;text-align:right;">Valor</th>
+    // Construir o conteúdo do PDF
+    element.innerHTML = `
+        <h3 style="text-align:center;color:#0d6efd;margin-bottom:5px;">Histórico AC-4</h3>
+        <p style="text-align:center;color:#6c757d;margin-top:0;">Gerado em ${new Date().toLocaleDateString('pt-BR')}</p>
+        
+        <table style="width:100%;border-collapse:collapse;margin-top:20px;">
+            <thead>
+                <tr style="background-color:#f8f9fa;">
+                    <th style="border:1px solid #ddd;padding:8px;text-align:left;">Data</th>
+                    <th style="border:1px solid #ddd;padding:8px;text-align:left;">Período</th>
+                    <th style="border:1px solid #ddd;padding:8px;text-align:right;">Horas</th>
+                    <th style="border:1px solid #ddd;padding:8px;text-align:right;">Valor</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${Array.from(historicoLista.children).map(item => `
+                    <tr>
+                        <td style="border:1px solid #ddd;padding:8px;">${item.querySelector('h6').textContent}</td>
+                        <td style="border:1px solid #ddd;padding:8px;">${item.querySelector('small').textContent}</td>
+                        <td style="border:1px solid #ddd;padding:8px;text-align:right;">${item.querySelector('.badge.bg-primary').textContent.replace('h totais', '')}</td>
+                        <td style="border:1px solid #ddd;padding:8px;text-align:right;">${item.querySelector('.badge.bg-success').textContent}</td>
                     </tr>
-                </thead>
-                <tbody>
-                    ${Array.from(historicoLista.children).map(item => `
-                        <tr>
-                            <td style="border:1px solid #ddd;padding:8px;">${item.querySelector('h6').textContent}</td>
-                            <td style="border:1px solid #ddd;padding:8px;">${item.querySelector('small').textContent}</td>
-                            <td style="border:1px solid #ddd;padding:8px;text-align:right;">${item.querySelector('.badge.bg-primary').textContent.replace('h totais', '')}</td>
-                            <td style="border:1px solid #ddd;padding:8px;text-align:right;">${item.querySelector('.badge.bg-success').textContent}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-            
-            <div style="margin-top:20px;text-align:right;font-weight:bold;">
-                Total: ${formatarMoeda(appState.totalValor)} (${appState.totalHoras.toFixed(2)}h)
-            </div>
-        `;
+                `).join('')}
+            </tbody>
+        </table>
+        
+        <div style="margin-top:20px;text-align:right;font-weight:bold;">
+            Total: ${formatarMoeda(appState.totalValor)} (${appState.totalHoras.toFixed(2)}h)
+        </div>
+    `;
 
-        // Configurações do PDF
-        const opt = {
-            margin: 10,
-            filename: `historico_ac4_${new Date().toISOString().slice(0,10)}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { 
-                scale: 2,
-                logging: true,
-                useCORS: true,
-                allowTaint: true,
-                scrollX: 0,
-                scrollY: 0
-            },
-            jsPDF: { 
-                unit: 'mm', 
-                format: 'a4', 
-                orientation: 'portrait' 
-            }
-        };
+    // Configurações do PDF
+    const opt = {
+        margin: 10,
+        filename: `historico_ac4_${new Date().toISOString().slice(0,10)}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+            scale: 2,
+            logging: true,
+            useCORS: true,
+            allowTaint: true,
+            scrollX: 0,
+            scrollY: 0
+        },
+        jsPDF: { 
+            unit: 'mm', 
+            format: 'a4', 
+            orientation: 'portrait' 
+        }
+    };
 
-        // Gerar PDF
-        html2pdf()
-            .set(opt)
-            .from(element)
-            .save()
-            .then(() => {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'PDF gerado com sucesso!',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-            })
-            .catch(err => {
-                console.error('Erro ao gerar PDF:', err);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Erro',
-                    text: 'Falha ao gerar PDF. Verifique o console para detalhes.',
-                    confirmButtonColor: '#0d6efd'
-                });
+    // Gerar PDF
+    html2pdf()
+        .set(opt)
+        .from(element)
+        .save()
+        .then(() => {
+            Swal.fire({
+                icon: 'success',
+                title: 'PDF gerado com sucesso!',
+                showConfirmButton: false,
+                timer: 1500
             });
-    }, 100); // Pequeno delay de 100ms
-}
+        })
+        .catch(err => {
+            console.error('Erro ao gerar PDF:', err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: 'Falha ao gerar PDF. Verifique o console para detalhes.',
+                confirmButtonColor: '#0d6efd'
+            });
+        });
+  }
 
   // =============================================
   // 8. INICIALIZAÇÃO DA APLICAÇÃO
