@@ -98,6 +98,7 @@ body {
   margin-bottom: 0.5rem;
   padding: 1rem;
   border: 1px solid rgba(0,0,0,0.1);
+  position: relative;
 }
 
 .list-group-item:hover {
@@ -193,6 +194,29 @@ body {
   background-color: #fef2f2;
   border-radius: 4px;
   font-size: 0.9rem;
+}
+
+/* Botão de remoção */
+.btn-remover-item {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+/* Valor original com pensão */
+.valor-original {
+  font-size: 0.85rem;
+  color: #6c757d;
+  text-decoration: line-through;
+  margin-right: 5px;
+}
+
+/* Valor líquido */
+.valor-liquido {
+  font-weight: bold;
+  color: #198754;
 }
 
 /* Modal de conflito */
