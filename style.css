@@ -159,6 +159,13 @@ body {
   padding: 0.75rem 1.25rem;
 }
 
+#total-perdido-pensao {
+  border-radius: 8px;
+  font-weight: 600;
+  text-align: right;
+  padding: 0.75rem 1.25rem;
+}
+
 @media (max-width: 768px) {
   .card-body {
     padding: 1rem;
