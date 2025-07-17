@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const historicoLista = document.getElementById('historico-lista');
   const historicoVazio = document.getElementById('historico-vazio');
   const totalAcumulado = document.getElementById('total-acumulado');
+  const totalPerdidoPensao = document.getElementById('total-perdido-pensao');
 
   // =============================================
   // 2. ESTADO DA APLICAÇÃO
@@ -27,6 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
     historico: [],        // Histórico de cálculos
     totalHoras: 0,        // Total de horas acumuladas
     totalValor: 0,        // Total monetário acumulado
+    totalPensao: 0,       // Total de descontos de pensão
     carregado: false      // Flag se os dados foram carregados
   };
 
@@ -159,6 +161,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Atualiza estado
     appState.totalHoras += horasTotais;
     appState.totalValor += totalLiquido;
+    appState.totalPensao += descontoPensao;
 
     // Exibe resultados
     exibirResultado({ 
@@ -286,6 +289,7 @@ document.addEventListener('DOMContentLoaded', function() {
     historicoLista.prepend(item);
     historicoVazio.style.display = 'none';
     atualizarTotais();
+    atualizarTotalPensao();
 
     // Adiciona evento ao botão de remover
     const btnRemover = item.querySelector('.btn-remover-item');
@@ -326,7 +330,11 @@ document.addEventListener('DOMContentLoaded', function() {
           // Atualiza totais acumulados
           appState.totalHoras -= itemRemovido.horasTotais;
           appState.totalValor -= itemRemovido.totalLiquido;
+          appState.totalPensao -= itemRemovido.percentualPensao > 0 ? 
+            (itemRemovido.totalBruto * (itemRemovido.percentualPensao / 100)) : 0;
+          
           atualizarTotais();
+          atualizarTotalPensao();
           
           // Salva dados
           salvarDados();
@@ -347,6 +355,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (historicoLista.children.length === 0) {
           historicoVazio.style.display = 'block';
           totalAcumulado.style.display = 'none';
+          totalPerdidoPensao.style.display = 'none';
         }
       }
     });
@@ -359,13 +368,20 @@ document.addEventListener('DOMContentLoaded', function() {
     totalAcumulado.style.display = 'block';
   }
 
+  // Atualiza total perdido com pensão
+  function atualizarTotalPensao() {
+    document.getElementById('total-perdido-valor').textContent = formatarMoeda(appState.totalPensao);
+    totalPerdidoPensao.style.display = appState.totalPensao > 0 ? 'block' : 'none';
+  }
+
   // Persistência no localStorage
   function salvarDados() {
     try {
       localStorage.setItem('ac4-historico', JSON.stringify(appState.historico));
       localStorage.setItem('ac4-totais', JSON.stringify({
         horas: appState.totalHoras,
-        valor: appState.totalValor
+        valor: appState.totalValor,
+        pensao: appState.totalPensao
       }));
     } catch (error) {
       console.error('Erro ao salvar dados:', error);
@@ -376,11 +392,16 @@ document.addEventListener('DOMContentLoaded', function() {
   function carregarDados() {
     try {
       const historico = JSON.parse(localStorage.getItem('ac4-historico')) || [];
-      const totais = JSON.parse(localStorage.getItem('ac4-totais')) || { horas: 0, valor: 0 };
+      const totais = JSON.parse(localStorage.getItem('ac4-totais')) || { 
+        horas: 0, 
+        valor: 0,
+        pensao: 0
+      };
 
       appState.historico = historico;
       appState.totalHoras = totais.horas;
       appState.totalValor = totais.valor;
+      appState.totalPensao = totais.pensao || 0;
 
       historico.forEach(item => {
         const itemElement = document.createElement('div');
@@ -424,6 +445,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (historico.length > 0) {
         historicoVazio.style.display = 'none';
         atualizarTotais();
+        atualizarTotalPensao();
       }
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
@@ -566,7 +588,9 @@ document.addEventListener('DOMContentLoaded', function() {
         appState.historico = [];
         appState.totalHoras = 0;
         appState.totalValor = 0;
+        appState.totalPensao = 0;
         totalAcumulado.style.display = 'none';
+        totalPerdidoPensao.style.display = 'none';
         localStorage.removeItem('ac4-historico');
         localStorage.removeItem('ac4-totais');
         Swal.fire('Limpo!', 'Todos os dados foram apagados.', 'success');
@@ -633,8 +657,13 @@ document.addEventListener('DOMContentLoaded', function() {
         </table>
         
         <div style="margin-top:20px;text-align:right;font-weight:bold;">
-            Total: ${formatarMoeda(appState.totalValor)} (${appState.totalHoras.toFixed(2)}h)
+            Total Acumulado: ${formatarMoeda(appState.totalValor)} (${appState.totalHoras.toFixed(2)}h)
         </div>
+        ${appState.totalPensao > 0 ? `
+        <div style="margin-top:10px;text-align:right;font-weight:bold;color:#dc3545;">
+            Total Perdido para Pensão: ${formatarMoeda(appState.totalPensao)}
+        </div>
+        ` : ''}
     `;
 
     // Configurações do PDF
