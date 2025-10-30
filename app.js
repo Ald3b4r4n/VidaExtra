@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const pensaoContainer = document.getElementById('pensao-container');
   const resultadoContainer = document.getElementById('resultado-container');
   const resultadoVazio = document.getElementById('resultado-vazio');
+  const resumoAnotacoes = document.getElementById('resumo-anotacoes');
   const historicoLista = document.getElementById('historico-lista');
   const historicoVazio = document.getElementById('historico-vazio');
   const totalAcumulado = document.getElementById('total-acumulado');
@@ -102,6 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const horaFim = document.getElementById('hora-fim').value;
     const temPensao = pensaoCheckbox.checked;
     const percentualPensao = parseFloat(document.getElementById('percentual-pensao').value) || 0;
+    const anotacoes = (document.getElementById('anotacoes')?.value || '').trim();
 
     // Validação básica
     if (!dataInput || !horaInicio || !horaFim) {
@@ -173,7 +175,8 @@ document.addEventListener('DOMContentLoaded', function() {
       temPensao,
       percentualPensao, 
       descontoPensao, 
-      totalLiquido 
+      totalLiquido,
+      anotacoes
     });
 
     // Adiciona ao histórico
@@ -183,7 +186,9 @@ document.addEventListener('DOMContentLoaded', function() {
       horasTotais,
       totalBruto,
       totalLiquido,
-      percentualPensao: temPensao ? percentualPensao : 0 
+      percentualPensao: temPensao ? percentualPensao : 0,
+      anotacoes,
+      dataMillis: dataObj.getTime()
     });
 
     salvarDados();
@@ -249,6 +254,15 @@ document.addEventListener('DOMContentLoaded', function() {
       Período: ${calculo.periodo}
     `;
 
+    // Exibe anotações, se houver
+    if (calculo.anotacoes && calculo.anotacoes.length > 0) {
+      resumoAnotacoes.style.display = 'block';
+      resumoAnotacoes.innerHTML = `<i class="bi bi-journal-text"></i> <em>Anotações:</em> ${escaparHTML(calculo.anotacoes)}`;
+    } else {
+      resumoAnotacoes.style.display = 'none';
+      resumoAnotacoes.textContent = '';
+    }
+
     resultadoVazio.style.display = 'none';
     resultadoContainer.style.display = 'block';
   }
@@ -260,15 +274,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const item = document.createElement('div');
     item.className = 'list-group-item';
     item.dataset.id = itemId;
+    item.dataset.dateMilli = String(calculo.dataMillis || obterMillisDeDataBR(calculo.data));
     
     item.innerHTML = `
       <div class="d-flex justify-content-between">
         <div class="flex-grow-1">
           <div class="d-flex justify-content-between align-items-start">
             <h6 class="mb-1">${calculo.data}</h6>
-            <button class="btn btn-sm btn-outline-danger btn-remover-item">
-              <i class="bi bi-x-lg"></i>
-            </button>
+            <div class="btn-group btn-group-sm">
+              <button class="btn btn-outline-secondary btn-editar-item" title="Editar">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-outline-danger btn-remover-item" title="Remover">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
           </div>
           <small>${calculo.periodo}</small>
           <div class="mt-2">
@@ -282,11 +302,13 @@ document.addEventListener('DOMContentLoaded', function() {
               ''}
             <span class="valor-liquido">${formatarMoeda(calculo.totalLiquido)}</span>
           </div>
+          ${calculo.anotacoes && calculo.anotacoes.length > 0 ? `<div class="mt-1 text-muted"><small>Anotações: ${escaparHTML(calculo.anotacoes)}</small></div>` : ''}
         </div>
       </div>
     `;
     
-    historicoLista.prepend(item);
+    historicoLista.appendChild(item);
+    ordenarHistoricoDOMAsc();
     historicoVazio.style.display = 'none';
     atualizarTotais();
     atualizarTotalPensao();
@@ -295,6 +317,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnRemover = item.querySelector('.btn-remover-item');
     btnRemover.addEventListener('click', function() {
       removerItemHistorico(itemId, calculo);
+    });
+
+    const btnEditar = item.querySelector('.btn-editar-item');
+    btnEditar.addEventListener('click', function() {
+      editarItemHistorico(itemId);
     });
 
     // Armazena no estado
@@ -403,19 +430,30 @@ document.addEventListener('DOMContentLoaded', function() {
       appState.totalValor = totais.valor;
       appState.totalPensao = totais.pensao || 0;
 
-      historico.forEach(item => {
+      // Ordena por data crescente ao carregar
+      historico.sort((a, b) => {
+        const am = a.dataMillis || obterMillisDeDataBR(a.data);
+        const bm = b.dataMillis || obterMillisDeDataBR(b.data);
+        return am - bm;
+      }).forEach(item => {
         const itemElement = document.createElement('div');
         itemElement.className = 'list-group-item';
         itemElement.dataset.id = item.id;
+        itemElement.dataset.dateMilli = String(item.dataMillis || obterMillisDeDataBR(item.data));
         
         itemElement.innerHTML = `
           <div class="d-flex justify-content-between">
             <div class="flex-grow-1">
               <div class="d-flex justify-content-between align-items-start">
                 <h6 class="mb-1">${item.data}</h6>
-                <button class="btn btn-sm btn-outline-danger btn-remover-item">
-                  <i class="bi bi-x-lg"></i>
-                </button>
+                <div class="btn-group btn-group-sm">
+                  <button class="btn btn-outline-secondary btn-editar-item" title="Editar">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn btn-outline-danger btn-remover-item" title="Remover">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
               </div>
               <small>${item.periodo}</small>
               <div class="mt-2">
@@ -429,6 +467,7 @@ document.addEventListener('DOMContentLoaded', function() {
                   ''}
                 <span class="valor-liquido">${formatarMoeda(item.totalLiquido)}</span>
               </div>
+              ${item.anotacoes && item.anotacoes.length > 0 ? `<div class="mt-1 text-muted"><small>Anotações: ${escaparHTML(item.anotacoes)}</small></div>` : ''}
             </div>
           </div>
         `;
@@ -440,6 +479,11 @@ document.addEventListener('DOMContentLoaded', function() {
         btnRemover.addEventListener('click', function() {
           removerItemHistorico(item.id, item);
         });
+
+        const btnEditar = itemElement.querySelector('.btn-editar-item');
+        btnEditar.addEventListener('click', function() {
+          editarItemHistorico(item.id);
+        });
       });
 
       if (historico.length > 0) {
@@ -450,6 +494,217 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
     }
+  }
+
+  // Escapa texto para evitar inserção de HTML
+  function escaparHTML(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  // Converte dd/mm/aaaa para millis
+  function obterMillisDeDataBR(dataStr) {
+    const [dia, mes, ano] = dataStr.split('/').map(Number);
+    return new Date(ano, mes - 1, dia).getTime();
+  }
+
+  // Ordena DOM do histórico por data crescente
+  function ordenarHistoricoDOMAsc() {
+    const items = Array.from(historicoLista.children);
+    items.sort((a, b) => {
+      const am = Number(a.dataset.dateMilli || obterMillisDeDataBR(a.querySelector('h6').textContent));
+      const bm = Number(b.dataset.dateMilli || obterMillisDeDataBR(b.querySelector('h6').textContent));
+      return am - bm;
+    });
+    items.forEach(el => historicoLista.appendChild(el));
+  }
+
+  // Edita um item do histórico
+  function editarItemHistorico(id) {
+    const itemIndex = appState.historico.findIndex(h => h.id === id);
+    if (itemIndex === -1) return;
+    const antigo = appState.historico[itemIndex];
+
+    // Pré-preenche campos
+    const [dia, mes, ano] = antigo.data.split('/');
+    const dataISO = `${ano}-${mes}-${dia}`;
+    const [horaInicio, , horaFim] = antigo.periodo.split(' ');
+
+    Swal.fire({
+      title: 'Editar cálculo',
+      html: `
+        <div class="text-start">
+          <label class="form-label fw-bold">Data</label>
+          <input type="date" id="edit-data" class="form-control" value="${dataISO}">
+          <div class="row g-2 mt-2">
+            <div class="col">
+              <label class="form-label fw-bold">Hora Inicial</label>
+              <input type="time" id="edit-inicio" class="form-control" value="${horaInicio}">
+            </div>
+            <div class="col">
+              <label class="form-label fw-bold">Hora Final</label>
+              <input type="time" id="edit-fim" class="form-control" value="${horaFim}">
+            </div>
+          </div>
+          <label class="form-label fw-bold mt-2">Percentual de Pensão (%)</label>
+          <input type="number" id="edit-pensao" class="form-control" min="0" max="100" value="${antigo.percentualPensao || 0}">
+          <label class="form-label fw-bold mt-2">Anotações</label>
+          <textarea id="edit-anotacoes" class="form-control" rows="2">${antigo.anotacoes || ''}</textarea>
+        </div>
+      `,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: 'Salvar',
+      cancelButtonText: 'Cancelar',
+      preConfirm: () => {
+        const data = document.getElementById('edit-data').value;
+        const inicio = document.getElementById('edit-inicio').value;
+        const fim = document.getElementById('edit-fim').value;
+        const pensao = parseFloat(document.getElementById('edit-pensao').value) || 0;
+        const notas = (document.getElementById('edit-anotacoes').value || '').trim();
+        if (!data || !inicio || !fim) {
+          Swal.showValidationMessage('Preencha data e horários');
+          return false;
+        }
+        return { data, inicio, fim, pensao, notas };
+      }
+    }).then(result => {
+      if (!result.isConfirmed) return;
+      const { data, inicio, fim, pensao, notas } = result.value;
+
+      // Recalcula valores
+      const [anoN, mesN, diaN] = data.split('-').map(Number);
+      const dataObj = new Date(anoN, mesN - 1, diaN);
+      const diaSemana = ['domingo','segunda','terca','quarta','quinta','sexta','sabado'][dataObj.getDay()];
+
+      const formatarParaBusca = (hora) => {
+        const [h, m] = hora.split(':');
+        const horaFormatada = h.padStart(2, '0');
+        return m === '00' ? `${horaFormatada}h` : `${horaFormatada}h${m}m`;
+      };
+      const inicioFmt = formatarParaBusca(inicio);
+      const fimFmt = formatarParaBusca(fim);
+      const chaveBusca = `${inicioFmt} as ${fimFmt}`;
+      const valorEncontrado = appState.valoresAC4.find(item => item.horarioBusca.toLowerCase() === chaveBusca.toLowerCase());
+
+      if (!valorEncontrado) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Horário não encontrado',
+          text: `Nenhum valor cadastrado para ${inicio} às ${fim}`,
+          confirmButtonColor: '#0d6efd'
+        });
+        return;
+      }
+
+      const horasTotais = valorEncontrado.horas || calcularDiferencaHoras(inicio, fim);
+      const totalBruto = parseFloat(valorEncontrado[diaSemana]);
+      const descontoPensao = pensao > 0 ? parseFloat((totalBruto * (pensao / 100)).toFixed(2)) : 0;
+      const totalLiquido = parseFloat((totalBruto - descontoPensao).toFixed(2));
+
+      // Atualiza totais gerais: remove antigo, adiciona novo
+      appState.totalHoras -= antigo.horasTotais;
+      appState.totalValor -= antigo.totalLiquido;
+      appState.totalPensao -= antigo.percentualPensao > 0 ? (antigo.totalBruto * (antigo.percentualPensao / 100)) : 0;
+
+      appState.totalHoras += horasTotais;
+      appState.totalValor += totalLiquido;
+      appState.totalPensao += descontoPensao;
+
+      // Atualiza item no estado
+      const atualizado = {
+        ...antigo,
+        data: formatarData(dataObj),
+        periodo: `${inicio} às ${fim}`,
+        horasTotais,
+        totalBruto,
+        totalLiquido,
+        percentualPensao: pensao,
+        anotacoes: notas,
+        dataMillis: dataObj.getTime()
+      };
+      appState.historico[itemIndex] = atualizado;
+
+      // Atualiza DOM do item
+      const itemEl = document.querySelector(`.list-group-item[data-id="${id}"]`);
+      if (itemEl) {
+        itemEl.dataset.dateMilli = String(atualizado.dataMillis);
+        itemEl.querySelector('h6').textContent = atualizado.data;
+        itemEl.querySelector('small').textContent = atualizado.periodo;
+        itemEl.querySelector('.badge.bg-primary').textContent = `${horasTotais.toFixed(2)}h totais`;
+
+        const valorOriginalEl = itemEl.querySelector('.valor-original');
+        const valorLiquidoEl = itemEl.querySelector('.valor-liquido');
+        if (atualizado.percentualPensao > 0) {
+          if (valorOriginalEl) {
+            valorOriginalEl.textContent = formatarMoeda(totalBruto);
+          } else {
+            const container = valorLiquidoEl.parentElement;
+            const spanOriginal = document.createElement('span');
+            spanOriginal.className = 'valor-original';
+            spanOriginal.textContent = formatarMoeda(totalBruto);
+            const seta = document.createElement('i');
+            seta.className = 'bi bi-arrow-right';
+            container.insertBefore(spanOriginal, valorLiquidoEl);
+            container.insertBefore(seta, valorLiquidoEl);
+          }
+        } else {
+          // Remove indicação de valor original se não houver pensão
+          if (valorOriginalEl) {
+            const container = valorOriginalEl.parentElement;
+            const seta = container.querySelector('i.bi.bi-arrow-right');
+            valorOriginalEl.remove();
+            if (seta) seta.remove();
+          }
+        }
+        valorLiquidoEl.textContent = formatarMoeda(totalLiquido);
+
+        // Atualiza badge de pensão
+        const badgePensao = itemEl.querySelector('.badge.bg-warning');
+        if (atualizado.percentualPensao > 0) {
+          if (badgePensao) {
+            badgePensao.textContent = `Pensão ${atualizado.percentualPensao}%`;
+          } else {
+            const badgesContainer = itemEl.querySelector('.mt-2');
+            const novoBadge = document.createElement('span');
+            novoBadge.className = 'badge bg-warning text-dark';
+            novoBadge.textContent = `Pensão ${atualizado.percentualPensao}%`;
+            badgesContainer.appendChild(novoBadge);
+          }
+        } else if (badgePensao) {
+          badgePensao.remove();
+        }
+
+        // Atualiza anotações
+        const notasEl = itemEl.querySelector('.mt-1.text-muted');
+        if (atualizado.anotacoes && atualizado.anotacoes.length > 0) {
+          if (notasEl) {
+            notasEl.innerHTML = `<small>Anotações: ${escaparHTML(atualizado.anotacoes)}</small>`;
+          } else {
+            const novoNotas = document.createElement('div');
+            novoNotas.className = 'mt-1 text-muted';
+            novoNotas.innerHTML = `<small>Anotações: ${escaparHTML(atualizado.anotacoes)}</small>`;
+            itemEl.querySelector('.flex-grow-1').appendChild(novoNotas);
+          }
+        } else if (notasEl) {
+          notasEl.remove();
+        }
+      }
+
+      atualizarTotais();
+      atualizarTotalPensao();
+      salvarDados();
+      ordenarHistoricoDOMAsc();
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Item atualizado',
+        timer: 1200,
+        showConfirmButton: false
+      });
+    });
   }
 
   // Formatação de valores
@@ -629,14 +884,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 <tr style="background-color:#f8f9fa;">
                     <th style="border:1px solid #ddd;padding:8px;text-align:left;">Data</th>
                     <th style="border:1px solid #ddd;padding:8px;text-align:left;">Período</th>
+                    <th style="border:1px solid #ddd;padding:8px;text-align:left;">Anotações</th>
                     <th style="border:1px solid #ddd;padding:8px;text-align:right;">Horas</th>
                     <th style="border:1px solid #ddd;padding:8px;text-align:right;">Valor</th>
                 </tr>
             </thead>
             <tbody>
-                ${Array.from(historicoLista.children).map(item => {
+                ${Array.from(historicoLista.children)
+                  .sort((a, b) => Number(a.dataset.dateMilli || obterMillisDeDataBR(a.querySelector('h6').textContent)) - Number(b.dataset.dateMilli || obterMillisDeDataBR(b.querySelector('h6').textContent)))
+                  .map(item => {
                   const data = item.querySelector('h6').textContent;
                   const periodo = item.querySelector('small').textContent;
+                  const anotacoesEl = item.querySelector('.mt-1.text-muted');
+                  const anotacoes = anotacoesEl ? anotacoesEl.textContent.replace(/^Anotações:\s*/i, '') : '';
                   const horas = item.querySelector('.badge.bg-primary').textContent.replace('h totais', '');
                   const valor = item.querySelector('.valor-liquido').textContent;
                   const valorOriginal = item.querySelector('.valor-original')?.textContent || '';
@@ -645,6 +905,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <tr>
                       <td style="border:1px solid #ddd;padding:8px;">${data}</td>
                       <td style="border:1px solid #ddd;padding:8px;">${periodo}</td>
+                      <td style="border:1px solid #ddd;padding:8px;">${anotacoes}</td>
                       <td style="border:1px solid #ddd;padding:8px;text-align:right;">${horas}</td>
                       <td style="border:1px solid #ddd;padding:8px;text-align:right;">
                         ${valorOriginal ? `<span style="text-decoration:line-through;color:#999;">${valorOriginal}</span><br>` : ''}

@@ -203,13 +203,16 @@ body {
   font-size: 0.9rem;
 }
 
-/* Botão de remoção */
-.btn-remover-item {
-  position: absolute;
-  top: 8px;
-  right: 8px;
+/* Área de ações nos itens do histórico */
+.list-group-item .btn-group {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.btn-remover-item,
+.btn-editar-item {
   padding: 0.25rem 0.5rem;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
 }
 
 /* Valor original com pensão */
@@ -224,6 +227,24 @@ body {
 .valor-liquido {
   font-weight: bold;
   color: #198754;
+}
+
+/* Estilo para anotações */
+#resumo-anotacoes {
+  background-color: #f9fafb;
+  border-left: 3px solid var(--pm-blue);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+  font-style: italic;
+}
+
+.list-group-item .mt-1.text-muted {
+  background-color: #f9fafb;
+  border-left: 3px solid #e2e6ea;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-style: italic;
 }
 
 /* Modal de conflito */
@@ -275,4 +296,36 @@ body {
 .conflict-option-primary {
   background-color: #d1ecf1;
   color: #0c5460;
+}
+.btn {
+  border-radius: 6px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+.btn-outline-danger {
+  border-color: var(--pm-red);
+  color: var(--pm-red);
+}
+.btn-outline-danger:hover {
+  background-color: var(--pm-red);
+  color: #fff;
+}
+
+.btn-outline-secondary {
+  border-color: #6c757d;
+  color: #6c757d;
+}
+.btn-outline-secondary:hover {
+  background-color: #6c757d;
+  color: #fff;
+}
+
+.btn-outline-success {
+  border-color: #198754;
+  color: #198754;
+}
+.btn-outline-success:hover {
+  background-color: #198754;
+  color: #fff;
 }
