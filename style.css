@@ -5,6 +5,11 @@
   --pm-yellow: #ffc107;
 }
 
+/* Global layout safety for mobile */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { max-width: 100%; overflow-x: hidden; }
+img { max-width: 100%; height: auto; }
+
 body {
   font-family: 'Segoe UI', system-ui, sans-serif;
   background-color: #f8f9fa;
@@ -15,6 +20,15 @@ body {
   background: linear-gradient(to right, var(--pm-blue), #20c997);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* Subtítulo do cabeçalho */
+.app-subtitle {
+  font-size: 0.95rem;
+  color: #6c757d;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
+  margin-top: 2px;
 }
 
 .img-topo {
@@ -184,6 +198,24 @@ body {
     padding: 0.4rem 0.8rem;
     font-size: 0.9rem;
   }
+}
+
+/* Pequenas otimizações para telas muito pequenas */
+@media (max-width: 576px) {
+  /* Cabeçalho: permitir quebra e compactar ações */
+  .header-bar { row-gap: .5rem; }
+  .header-actions .btn .btn-text { display: none; }
+  .header-actions .btn { padding: 0.375rem 0.5rem; }
+
+  /* Rodapé: botões largura total para melhor toque */
+  .footer-btn { width: 100%; }
+
+  /* Totais centralizados para leitura agradável */
+  #total-acumulado,
+  #total-perdido-pensao { text-align: center; }
+
+  /* Evita auto-zoom em iOS quando focar inputs */
+  input, select, textarea { font-size: 16px; }
 }
 
 /* Novas classes para conflitos */
