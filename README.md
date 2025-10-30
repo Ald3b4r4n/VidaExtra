@@ -37,10 +37,14 @@ Aplicação PWA para cálculo de horas extras (AC-4), com histórico, exportaç�
    - Crie `.eslintrc.json` (exemplo abaixo) e rode:
      - `npx eslint .`
 
-## Scripts úteis (sugestão)
-- `npm run build:css` → `tailwindcss -i ./src/input.css -o ./dist/tailwind.css --minify`
-- `npm run lint` → `eslint .`
-- `npm run serve` → `python -m http.server 5500` (ou servidor de sua preferência)
+## Scripts
+- `npm run build:css` → Gera `dist/tailwind.css` minificado.
+- `npm run dev:css` → Compila Tailwind em modo watch para desenvolvimento.
+- `npm run lint` → Roda ESLint com flat config.
+- `npm run serve` → Serve estático na porta `5500`.
+- `npm start` → Alias para `serve`.
+
+Observação: o build do CSS roda automaticamente após `npm install` via `postinstall`.
 
 ## Como usar
 1. Abra `index.html` via servidor local.
