@@ -13,12 +13,15 @@ module.exports = [
       globals: {
         ...globals.browser,
         Swal: "readonly",
-        html2pdf: "readonly"
+        html2pdf: "readonly",
+        FullCalendar: "readonly",
+        luxon: "readonly"
       }
     },
     rules: {
       "no-unused-vars": ["warn", { args: "none" }],
-      "no-console": "off"
+      "no-console": "off",
+      "no-empty": ["error", { allowEmptyCatch: true }]
     }
   },
   // Node config files

@@ -248,6 +248,75 @@ body {
 }
 
 /* Modal de conflito */
+/* SweetAlert2 custom theme */
+.swal2-popup { border-radius: 14px; }
+.swal2-title { color: var(--pm-blue); font-weight: 600; }
+.swal2-confirm { background-color: var(--pm-blue) !important; border-color: var(--pm-blue) !important; color: #fff !important; }
+.swal2-cancel { background-color: #6c757d !important; border-color: #6c757d !important; color: #fff !important; }
+.swal2-styled:focus { box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25) !important; }
+
+/* FullCalendar responsiveness and event text control */
+#historico-calendario { width: 100%; }
+#historico-calendario .fc { font-size: 0.9rem; }
+#historico-calendario .fc-toolbar { flex-wrap: wrap; gap: 8px; }
+#historico-calendario .fc-toolbar-title { font-size: 1rem; }
+
+/* Avoid text overflow on events */
+#historico-calendario .fc-daygrid-event .fc-event-title { 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+}
+#historico-calendario .fc-timegrid-event .fc-event-main { 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+}
+
+/* Remove painting: show plain text for events */
+#historico-calendario .fc-event, 
+#historico-calendario .fc-daygrid-event, 
+#historico-calendario .fc-timegrid-event { 
+  background-color: transparent !important; 
+  border-color: transparent !important; 
+  color: #212529 !important; 
+}
+
+/* Chip de evento dentro da célula do dia */
+#historico-calendario .ve-event-chip {
+  display: block;
+  width: 100%;
+  padding: 2px 6px;
+  border: 1px solid transparent; /* texto sem borda por padrão */
+  border-radius: 6px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.85rem;
+}
+
+/* Borda no quadrado do dia quando houver evento */
+#historico-calendario .fc-daygrid-day.ve-day-has-event-today {
+  box-shadow: inset 0 0 0 2px #0d6efd;
+  border-radius: 8px;
+}
+#historico-calendario .fc-daygrid-day.ve-day-has-event-future {
+  box-shadow: inset 0 0 0 2px #dc3545;
+  border-radius: 8px;
+}
+
+@media (max-width: 576px) {
+  #historico-calendario .fc-toolbar { flex-direction: column; align-items: flex-start; }
+  #historico-calendario .fc-toolbar-title { margin-top: 4px; }
+}
+
+/* Highlight for current day (Today) */
+#historico-calendario .fc-day-today { 
+  background-color: rgba(13, 110, 253, 0.10) !important; 
+  outline: 2px solid #0d6efd; 
+  outline-offset: -2px; 
+}
 .modal-conflict {
   display: none;
   position: fixed;
@@ -329,3 +398,6 @@ body {
   background-color: #198754;
   color: #fff;
 }
+/* Exibir eventos específicos por visualização */
+#historico-calendario .fc-daygrid .ve-week-only { display: none !important; }
+#historico-calendario .fc-timegrid .ve-month-only { display: none !important; }

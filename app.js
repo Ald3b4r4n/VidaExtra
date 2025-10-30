@@ -5,6 +5,11 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
+  // Integração opcional com Luxon
+  const hasLuxon = typeof window !== 'undefined' && window.luxon && window.luxon.DateTime && window.luxon.Interval;
+  const { DateTime, Interval } = hasLuxon ? window.luxon : {};
+  // Integração opcional com FullCalendar
+  const hasFullCalendar = typeof window !== 'undefined' && window.FullCalendar && window.FullCalendar.Calendar;
   // =============================================
   // 1. SELEÇÃO DE ELEMENTOS DO DOM
   // =============================================
@@ -20,6 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const historicoVazio = document.getElementById('historico-vazio');
   const totalAcumulado = document.getElementById('total-acumulado');
   const totalPerdidoPensao = document.getElementById('total-perdido-pensao');
+  const calendarioEl = document.getElementById('historico-calendario');
 
   // =============================================
   // 2. ESTADO DA APLICAÇÃO
@@ -32,6 +38,176 @@ document.addEventListener('DOMContentLoaded', function() {
     totalPensao: 0,       // Total de descontos de pensão
     carregado: false      // Flag se os dados foram carregados
   };
+
+  // Estado do calendário
+  const calendarState = { calendar: null };
+
+  function initCalendar() {
+    if (!hasFullCalendar || !calendarioEl) return;
+    try {
+      calendarState.calendar = new FullCalendar.Calendar(calendarioEl, {
+        initialView: 'dayGridMonth',
+        height: 420,
+        locale: 'pt-br',
+        headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
+        buttonText: { today: 'hoje', month: 'mês', week: 'semana' },
+        // Mostrar apenas texto, sem pintar o evento
+        eventBackgroundColor: 'transparent',
+        eventBorderColor: 'transparent',
+        eventTextColor: '#212529',
+        eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+        dayMaxEventRows: 3,
+        views: {
+          dayGridMonth: { displayEventTime: false },
+          timeGridWeek: { displayEventTime: false }
+        },
+        datesSet: () => { markDaysWithEvents(); },
+        // Conteúdo customizado: período + anotação (sem borda, borda fica na célula do dia)
+        eventContent: (arg) => {
+          const periodo = arg.event.extendedProps?.periodo || '';
+          const anot = (arg.event.extendedProps?.anotacoes || '').trim();
+          const text = anot ? `${periodo}, ${anot}` : periodo;
+
+          const chip = document.createElement('div');
+          chip.className = 've-event-chip';
+          chip.textContent = text;
+          return { domNodes: [chip] };
+        }
+      });
+      calendarState.calendar.render();
+      markDaysWithEvents();
+    } catch (e) {
+      console.warn('Falha ao inicializar FullCalendar:', e);
+    }
+  }
+
+  function getDayKey(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth()+1).padStart(2,'0');
+    const d = String(date.getDate()).padStart(2,'0');
+    return `${y}-${m}-${d}`;
+  }
+
+  function markDaysWithEvents() {
+    if (!calendarState.calendar) return;
+    const events = calendarState.calendar.getEvents();
+    const daysWithEvents = new Set();
+    events.forEach(e => {
+      if (!e.start) return;
+      const startKey = getDayKey(e.start);
+      const endKey = e.end ? getDayKey(e.end) : startKey;
+      daysWithEvents.add(startKey);
+      daysWithEvents.add(endKey);
+    });
+
+    const todayKey = getDayKey(new Date());
+    const cells = document.querySelectorAll('#historico-calendario .fc-daygrid-day');
+    cells.forEach(cell => {
+      const dateKey = cell.getAttribute('data-date');
+      cell.classList.remove('ve-day-has-event-today','ve-day-has-event-future');
+      if (daysWithEvents.has(dateKey)) {
+        if (dateKey === todayKey) cell.classList.add('ve-day-has-event-today');
+        else if (dateKey > todayKey) cell.classList.add('ve-day-has-event-future');
+      }
+    });
+  }
+
+  function construirEventoWeek(item) {
+    const [dia, mes, ano] = item.data.split('/').map(Number);
+    const [horaInicio, , horaFim] = item.periodo.split(' ');
+    const [hiH, hiM] = horaInicio.split(':').map(Number);
+    const [hfH, hfM] = horaFim.split(':').map(Number);
+
+    let startISO, endISO;
+    if (hasLuxon) {
+      let dtStart = DateTime.fromObject({ year: ano, month: mes, day: dia, hour: hiH, minute: hiM });
+      let dtEnd = DateTime.fromObject({ year: ano, month: mes, day: dia, hour: hfH, minute: hfM });
+      if (dtEnd <= dtStart) dtEnd = dtEnd.plus({ days: 1 });
+      startISO = dtStart.toISO();
+      endISO = dtEnd.toISO();
+    } else {
+      const start = new Date(ano, mes - 1, dia, hiH, hiM);
+      let end = new Date(ano, mes - 1, dia, hfH, hfM);
+      if (end <= start) end = new Date(ano, mes - 1, dia + 1, hfH, hfM);
+      startISO = start.toISOString();
+      endISO = end.toISOString();
+    }
+
+    // Título padrão vazio; usamos eventContent para renderizar
+    const title = '';
+
+    return {
+      id: String(item.id) + '-w',
+      title: title,
+      start: startISO,
+      end: endISO,
+      classNames: ['ve-week-only'],
+      extendedProps: {
+        periodo: item.periodo,
+        horas: item.horasTotais,
+        pensao: item.percentualPensao,
+        anotacoes: item.anotacoes || ''
+      }
+    };
+  }
+
+  function construirEventoMonth(item) {
+    const [dia, mes, ano] = item.data.split('/').map(Number);
+    const [horaInicio] = item.periodo.split(' ');
+    const [hiH, hiM] = horaInicio.split(':').map(Number);
+
+    let startISO;
+    if (hasLuxon) {
+      startISO = DateTime.fromObject({ year: ano, month: mes, day: dia, hour: hiH, minute: hiM }).toISO();
+    } else {
+      startISO = new Date(ano, mes - 1, dia, hiH, hiM).toISOString();
+    }
+    const title = (item.anotacoes && item.anotacoes.trim())
+      ? `${item.periodo}, ${item.anotacoes.trim()}`
+      : `${item.periodo}`;
+    return {
+      id: String(item.id) + '-m',
+      title: title,
+      start: startISO,
+      classNames: ['ve-month-only'],
+      extendedProps: {
+        periodo: item.periodo,
+        horas: item.horasTotais,
+        pensao: item.percentualPensao,
+        anotacoes: item.anotacoes || ''
+      }
+    };
+  }
+
+  function calendarSyncAll() {
+    if (!calendarState.calendar) return;
+    calendarState.calendar.removeAllEvents();
+    appState.historico.forEach(item => {
+      try {
+        calendarState.calendar.addEvent(construirEventoMonth(item));
+        calendarState.calendar.addEvent(construirEventoWeek(item));
+      } catch {}
+    });
+    markDaysWithEvents();
+  }
+
+  function calendarAddItem(item) {
+    if (!calendarState.calendar) return;
+    try {
+      calendarState.calendar.addEvent(construirEventoMonth(item));
+      calendarState.calendar.addEvent(construirEventoWeek(item));
+    } catch {}
+    markDaysWithEvents();
+  }
+
+  function calendarRemoveItem(id) {
+    if (!calendarState.calendar) return;
+    const evM = calendarState.calendar.getEventById(String(id) + '-m');
+    if (evM) evM.remove();
+    const evW = calendarState.calendar.getEventById(String(id) + '-w');
+    if (evW) evW.remove();
+    markDaysWithEvents();
+  }
 
   // =============================================
   // 3. CARREGAMENTO DOS VALORES DO JSON
@@ -83,6 +259,36 @@ document.addEventListener('DOMContentLoaded', function() {
     calcularHoras();
   });
 
+  // Inicializa calendário
+  initCalendar();
+
+  // Garante render correto quando a aba Histórico ficar visível
+  const tabHistBtn = document.querySelector('[data-tab="hist"]');
+  if (tabHistBtn) {
+    tabHistBtn.addEventListener('click', () => {
+      setTimeout(() => {
+        if (calendarState.calendar) {
+          try { calendarState.calendar.updateSize(); } catch {}
+          try { calendarState.calendar.render(); } catch {}
+          markDaysWithEvents();
+        }
+      }, 60);
+    });
+  }
+  const tabHistEl = document.getElementById('tab-hist');
+  if (tabHistEl && window.MutationObserver) {
+    const obs = new MutationObserver(() => {
+      const hidden = tabHistEl.classList.contains('d-none');
+      if (!hidden && calendarState.calendar) {
+        setTimeout(() => {
+          try { calendarState.calendar.updateSize(); } catch {}
+          markDaysWithEvents();
+        }, 60);
+      }
+    });
+    obs.observe(tabHistEl, { attributes: true, attributeFilter: ['class'] });
+  }
+
   // =============================================
   // 5. FUNÇÃO PRINCIPAL DE CÁLCULO
   // =============================================
@@ -119,7 +325,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Processamento da data
     const [ano, mes, dia] = dataInput.split('-').map(Number);
     const dataObj = new Date(ano, mes - 1, dia);
-    const diaSemana = ['domingo','segunda','terca','quarta','quinta','sexta','sabado'][dataObj.getDay()];
+    const diaSemana = hasLuxon
+      ? ['domingo','segunda','terca','quarta','quinta','sexta','sabado'][DateTime.fromJSDate(dataObj).weekday % 7]
+      : ['domingo','segunda','terca','quarta','quinta','sexta','sabado'][dataObj.getDay()];
     
     // Formatação para busca no JSON
     const formatarParaBusca = (hora) => {
@@ -222,16 +430,22 @@ document.addEventListener('DOMContentLoaded', function() {
   function calcularDiferencaHoras(inicio, fim) {
     const [hIni, mIni] = inicio.split(':').map(Number);
     const [hFim, mFim] = fim.split(':').map(Number);
-    
+    if (hasLuxon) {
+      const today = DateTime.local().startOf('day');
+      const start = today.set({ hour: hIni, minute: mIni });
+      let end = today.set({ hour: hFim, minute: mFim });
+      if (end < start) end = end.plus({ days: 1 });
+      const interval = Interval.fromDateTimes(start, end);
+      return Number(interval.length('hours').toFixed(2));
+    }
+    // Fallback nativo
     let diffHoras = hFim - hIni;
     let diffMinutos = mFim - mIni;
-    
     if (diffMinutos < 0) {
       diffMinutos += 60;
       diffHoras--;
     }
     if (diffHoras < 0) diffHoras += 24;
-    
     return diffHoras + (diffMinutos / 60);
   }
 
@@ -330,6 +544,9 @@ document.addEventListener('DOMContentLoaded', function() {
       id: itemId,
       timestamp: new Date().getTime()
     });
+
+    // Adiciona ao calendário
+    calendarAddItem({ ...calculo, id: itemId });
   }
 
   // Remove um item específico do histórico
@@ -376,6 +593,9 @@ document.addEventListener('DOMContentLoaded', function() {
             timer: 1500,
             showConfirmButton: false
           });
+
+          // Remove do calendário
+          calendarRemoveItem(id);
         }
         
         // Mostra mensagem se o histórico estiver vazio
@@ -490,6 +710,7 @@ document.addEventListener('DOMContentLoaded', function() {
         historicoVazio.style.display = 'none';
         atualizarTotais();
         atualizarTotalPensao();
+        calendarSyncAll();
       }
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
@@ -626,6 +847,28 @@ document.addEventListener('DOMContentLoaded', function() {
         dataMillis: dataObj.getTime()
       };
       appState.historico[itemIndex] = atualizado;
+
+      // Atualiza evento no calendário
+      if (calendarState.calendar) {
+        const evM = calendarState.calendar.getEventById(String(id) + '-m');
+        const evW = calendarState.calendar.getEventById(String(id) + '-w');
+        const novoM = construirEventoMonth(atualizado);
+        const novoW = construirEventoWeek(atualizado);
+        if (evM) {
+          evM.setProp('title', novoM.title);
+          evM.setStart(novoM.start);
+        } else {
+          try { calendarState.calendar.addEvent(novoM); } catch {}
+        }
+        if (evW) {
+          evW.setProp('title', novoW.title);
+          evW.setStart(novoW.start);
+          evW.setEnd(novoW.end);
+        } else {
+          try { calendarState.calendar.addEvent(novoW); } catch {}
+        }
+        markDaysWithEvents();
+      }
 
       // Atualiza DOM do item
       const itemEl = document.querySelector(`.list-group-item[data-id="${id}"]`);
