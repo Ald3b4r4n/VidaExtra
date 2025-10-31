@@ -119,4 +119,30 @@ dist
 - Não inclua builds (`dist`) nos PRs, apenas fontes.
 
 ## Licença
-- Uso interno. Sem licença pública definida.
+ - Uso interno. Sem licença pública definida.
+
+## Bibliotecas e Ferramentas Utilizadas
+- `Bootstrap 5.3.0` (layout e componentes) – CDN.
+- `Bootstrap Icons 1.10.0` (ícones) – CDN.
+- `Tailwind CSS 4.x` (utilitários de estilo) – via `@tailwindcss/cli` e `postinstall` para gerar `dist/tailwind.css`.
+- `PostCSS 8` + `Autoprefixer` (pipeline CSS) – devDependencies.
+- `ESLint 9` (qualidade e padrões de código) – flat config em `eslint.config.cjs`.
+- `FullCalendar 6.1.10` (calendário de histórico com tooltips) – CDN.
+- `Luxon 3` (manipulação de datas) – CDN.
+- `SweetAlert2 11` (diálogos/modais) – CDN.
+- `html2pdf.js 0.10.1` (exportação do histórico em PDF) – CDN.
+- `serve 14` (servidor estático de desenvolvimento) – script `npm run serve`.
+
+### Scripts NPM
+- `build:css`: compila Tailwind `src/input.css` → `dist/tailwind.css` (minificado).
+- `dev:css`: compila Tailwind em modo watch.
+- `lint`: roda ESLint em todos os `.js` do projeto.
+- `serve`: sobe servidor estático na porta `5500`.
+- `start`: alias para `serve`.
+
+### Como subir e validar
+1. Instale dependências: `npm install`.
+2. Gere CSS (se necessário): `npm run build:css`.
+3. Suba o servidor local: `npm start`.
+4. Acesse `http://localhost:5500/`.
+5. Para checar qualidade: `npm run lint`.

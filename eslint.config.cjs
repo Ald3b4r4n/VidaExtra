@@ -15,7 +15,8 @@ module.exports = [
         Swal: "readonly",
         html2pdf: "readonly",
         FullCalendar: "readonly",
-        luxon: "readonly"
+        luxon: "readonly",
+        bootstrap: "readonly"
       }
     },
     rules: {
