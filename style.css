@@ -433,3 +433,36 @@ body {
 /* Exibir eventos específicos por visualização */
 #historico-calendario .fc-daygrid .ve-week-only { display: none !important; }
 #historico-calendario .fc-timegrid .ve-month-only { display: none !important; }
+
+/* Tooltip custom (Bootstrap) para calendário do Histórico */
+.tooltip.ve-tooltip-bs .tooltip-inner {
+  background: #111827; /* slate-900 */
+  color: #f8fafc; /* near-white */
+  border-radius: 10px;
+  padding: 10px 12px;
+  max-width: 280px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+  text-align: left;
+}
+.tooltip.ve-tooltip-bs .tooltip-arrow::before {
+  border-top-color: #111827 !important;
+}
+.ve-tip-wrapper { display: grid; gap: 8px; }
+.ve-tip-item { border-bottom: 1px dashed rgba(255,255,255,0.15); padding-bottom: 6px; }
+.ve-tip-item:last-child { border-bottom: none; padding-bottom: 0; }
+.ve-tip-periodo { font-weight: 600; }
+.ve-tip-meta { font-size: 0.9em; opacity: 0.9; }
+.ve-tip-notas { font-size: 0.9em; margin-top: 2px; }
+
+/* Legenda de uso (desktop vs mobile) */
+.hist-legend-hover, .hist-legend-tap { display: none; }
+@media (hover: hover) { .hist-legend-hover { display: inline; } }
+@media (hover: none) { .hist-legend-tap { display: inline; } }
+
+/* Espaçamento da legenda no bloco Calendário */
+.hist-legend-bar { gap: 8px; }
+.hist-legend { margin-left: 6px; }
+@media (max-width: 576px) {
+  .hist-legend-bar { flex-wrap: wrap; }
+  .hist-legend { margin-left: 0; margin-top: 6px; width: 100%; }
+}

@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
           dayGridMonth: { displayEventTime: false },
           timeGridWeek: { displayEventTime: false }
         },
-        datesSet: () => { markDaysWithEvents(); },
+        datesSet: () => { markDaysWithEvents(); bindDayCellTooltips(); },
         // Conteúdo customizado: período + anotação (sem borda, borda fica na célula do dia)
         eventContent: (arg) => {
           const periodo = arg.event.extendedProps?.periodo || '';
@@ -76,6 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       calendarState.calendar.render();
       markDaysWithEvents();
+      bindDayCellTooltips();
     } catch (e) {
       console.warn('Falha ao inicializar FullCalendar:', e);
     }
@@ -146,7 +147,9 @@ document.addEventListener('DOMContentLoaded', function() {
         periodo: item.periodo,
         horas: item.horasTotais,
         pensao: item.percentualPensao,
-        anotacoes: item.anotacoes || ''
+        anotacoes: item.anotacoes || '',
+        totalBruto: item.totalBruto,
+        totalLiquido: item.totalLiquido
       }
     };
   }
@@ -174,7 +177,9 @@ document.addEventListener('DOMContentLoaded', function() {
         periodo: item.periodo,
         horas: item.horasTotais,
         pensao: item.percentualPensao,
-        anotacoes: item.anotacoes || ''
+        anotacoes: item.anotacoes || '',
+        totalBruto: item.totalBruto,
+        totalLiquido: item.totalLiquido
       }
     };
   }
@@ -189,6 +194,78 @@ document.addEventListener('DOMContentLoaded', function() {
       } catch {}
     });
     markDaysWithEvents();
+    bindDayCellTooltips();
+  }
+
+  // ---------------------------------------------
+  // Tooltips (hover/click) no calendário Histórico
+  // ---------------------------------------------
+  function isHoverCapable() {
+    try { return window.matchMedia && window.matchMedia('(hover: hover)').matches; } catch { return true; }
+  }
+
+  function buildTooltipHtmlForDate(dateKey) {
+    if (!calendarState.calendar) return '';
+    const events = calendarState.calendar.getEvents().filter(e => {
+      if (!e.start) return false;
+      const key = getDayKey(e.start);
+      return key === dateKey;
+    });
+    const byId = new Map();
+    events.forEach(e => {
+      const baseId = String(e.id).replace(/-(m|w)$/,'');
+      if (!byId.has(baseId)) byId.set(baseId, e);
+    });
+    if (byId.size === 0) return '';
+    const parts = [];
+    byId.forEach(e => {
+      const p = e.extendedProps || {};
+      const periodo = p.periodo || '';
+      const horas = typeof p.horas === 'number' ? p.horas.toFixed(2) : (p.horas || '');
+      const liquido = typeof p.totalLiquido === 'number' ? formatarMoeda(p.totalLiquido) : (p.totalLiquido ? String(p.totalLiquido) : '');
+      const anot = (p.anotacoes || '').trim();
+      parts.push(
+        `<div class="ve-tip-item">
+           <div class="ve-tip-periodo"><strong>${escaparHTML(periodo)}</strong></div>
+           <div class="ve-tip-meta">Horas: ${escaparHTML(horas)}h ${liquido ? '• Valor: ' + escaparHTML(liquido) : ''}</div>
+           ${anot ? `<div class="ve-tip-notas">📝 ${escaparHTML(anot)}</div>` : ''}
+         </div>`
+      );
+    });
+    return `<div class="ve-tip-wrapper">${parts.join('')}</div>`;
+  }
+
+  function bindDayCellTooltips() {
+    if (!calendarState.calendar) return;
+    const viewType = (calendarState.calendar.view && calendarState.calendar.view.type) || '';
+    if (viewType !== 'dayGridMonth') return;
+    const cells = document.querySelectorAll('#historico-calendario .fc-daygrid-day');
+    cells.forEach(cell => {
+      const dateKey = cell.getAttribute('data-date');
+      if (!dateKey) return;
+      if (cell.dataset.veTooltipBound === 'true') return;
+      const content = buildTooltipHtmlForDate(dateKey);
+      if (!content) return;
+      cell.dataset.veTooltipBound = 'true';
+      try {
+        const opts = {
+          title: content,
+          html: true,
+          trigger: isHoverCapable() ? 'hover focus' : 'click',
+          placement: 'auto',
+          customClass: 've-tooltip-bs',
+          container: 'body'
+        };
+        const tip = new bootstrap.Tooltip(cell, opts);
+        cell._veTip = tip;
+        if (!isHoverCapable()) {
+          cell.addEventListener('click', function(ev) { ev.stopPropagation(); });
+          document.addEventListener('click', function() {
+            if (cell._veTip) { try { cell._veTip.hide(); } catch {} }
+          });
+        }
+      } catch {}
+    });
   }
 
   function calendarAddItem(item) {
