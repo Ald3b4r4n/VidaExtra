@@ -37,13 +37,21 @@ function updateUIWithUser(user) {
   // Adiciona foto e nome do usuário no header
   const userInfoEl = document.getElementById("user-info");
   if (userInfoEl) {
+    const photoHTML = user.photoURL
+      ? `<img 
+          src="${user.photoURL}" 
+          alt="${user.displayName || user.email}" 
+          class="rounded-circle" 
+          style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #0d6efd;"
+          onerror="this.style.display='none'"
+        >`
+      : `<div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 14px; font-weight: bold;">
+          ${(user.displayName || user.email || "U").charAt(0).toUpperCase()}
+        </div>`;
+
     userInfoEl.innerHTML = `
       <div class="d-flex align-items-center gap-2">
-        ${
-          user.photoURL
-            ? `<img src="${user.photoURL}" alt="${user.displayName}" class="rounded-circle" style="width: 32px; height: 32px;">`
-            : ""
-        }
+        ${photoHTML}
         <span class="text-muted small">${user.displayName || user.email}</span>
       </div>
     `;

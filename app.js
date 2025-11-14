@@ -609,6 +609,25 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .then((res) => {
               console.log("Evento criado no Google Calendar:", res);
+
+              // Salvar eventId no histórico para permitir sincronização
+              if (res?.event?.id && novoItem?.id) {
+                const historicoAtual = JSON.parse(
+                  localStorage.getItem("historico") || "[]"
+                );
+                const itemIndex = historicoAtual.findIndex(
+                  (item) => item.id === novoItem.id
+                );
+                if (itemIndex !== -1) {
+                  historicoAtual[itemIndex].eventId = res.event.id;
+                  historicoAtual[itemIndex].eventLink = res.event.htmlLink;
+                  localStorage.setItem(
+                    "historico",
+                    JSON.stringify(historicoAtual)
+                  );
+                  console.log("✅ Event ID salvo no histórico:", res.event.id);
+                }
+              }
             })
             .catch((err) => {
               console.warn(
@@ -1598,5 +1617,17 @@ document.addEventListener("DOMContentLoaded", function () {
   // =============================================
   // 8. INICIALIZAÇÃO DA APLICAÇÃO
   // =============================================
+
+  // Listener para recarregar histórico quando eventos forem sincronizados
+  window.addEventListener("historico-updated", () => {
+    console.log("📊 Histórico atualizado - recarregando...");
+
+    // Limpar lista atual
+    historicoLista.innerHTML = "";
+
+    // Recarregar dados
+    carregarDados();
+  });
+
   carregarDados();
 });

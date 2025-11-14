@@ -105,20 +105,37 @@
           });
 
           if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(
-              errorData.error || "Erro ao trocar código por tokens"
-            );
+            // Tentar ler como JSON, mas se falhar, ler como texto
+            let errorMessage;
+            try {
+              const errorData = await response.json();
+              errorMessage =
+                errorData.error ||
+                errorData.message ||
+                "Erro ao trocar código por tokens";
+            } catch (e) {
+              const errorText = await response.text();
+              errorMessage = `Erro ${response.status}: ${errorText.substring(
+                0,
+                200
+              )}`;
+            }
+            throw new Error(errorMessage);
           }
 
           const data = await response.json();
 
           statusEl.textContent = "Salvando credenciais...";
 
-          // Salvar access token no localStorage para uso imediato
+          // Salvar tokens no localStorage para uso imediato e persistência
           if (data.accessToken) {
             localStorage.setItem("googleAccessToken", data.accessToken);
           }
+          if (data.refreshToken) {
+            localStorage.setItem("googleRefreshToken", data.refreshToken);
+          }
+
+          console.log("✅ Tokens salvos no localStorage");
 
           statusEl.textContent = "✅ Autorização concluída!";
 

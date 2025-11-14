@@ -1,0 +1,94 @@
+/* Modal PIX Café - Estilos adicionais */
+
+#pixCafeModal .modal-content {
+  border-radius: 15px;
+  overflow: hidden;
+  border: 2px solid #ffc107;
+}
+
+#pixCafeModal .modal-header {
+  border-bottom: none;
+  padding: 1.5rem;
+}
+
+#pixCafeModal .modal-body {
+  padding: 1.5rem;
+}
+
+#pix-code {
+  background-color: #f8f9fa;
+  border: 2px dashed #ffc107;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  padding: 0.75rem;
+  transition: all 0.3s ease;
+  resize: none;
+}
+
+#pix-code:hover {
+  background-color: #fff;
+  border-color: #ff9800;
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.2);
+  cursor: pointer;
+}
+
+#pix-code:focus {
+  outline: none;
+  border-color: #ff9800;
+  box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+}
+
+#btn-copy-pix {
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+#btn-copy-pix:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
+}
+
+.footer-btn {
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.footer-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.footer-btn i {
+  margin-right: 0.25rem;
+}
+
+/* Animação do coração */
+@keyframes heartbeat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.1);
+  }
+  50% {
+    transform: scale(1);
+  }
+}
+
+#pixCafeModal .bi-heart-fill {
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+/* Responsividade */
+@media (max-width: 576px) {
+  #pix-code {
+    font-size: 0.65rem;
+  }
+
+  .footer-btn {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+  }
+}

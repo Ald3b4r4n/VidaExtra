@@ -81,10 +81,58 @@ export async function fetchUpcomingEvents() {
     }
 
     const data = await response.json();
-    return data.events || [];
+    const events = data.events || [];
+
+    // Sincronizar eventos deletados
+    await syncDeletedEvents(events);
+
+    return events;
   } catch (error) {
     console.error("Error fetching upcoming events:", error);
     return [];
+  }
+}
+
+/**
+ * Sincroniza eventos deletados do Google Calendar
+ * Remove do histórico local eventos que foram deletados no Google Calendar
+ */
+async function syncDeletedEvents(currentEvents) {
+  try {
+    // Buscar histórico local
+    const historico = JSON.parse(localStorage.getItem("historico") || "[]");
+
+    if (!historico || historico.length === 0) {
+      return; // Nada para sincronizar
+    }
+
+    // Criar mapa de event IDs que ainda existem no Google Calendar
+    const existingEventIds = new Set(
+      currentEvents.filter((event) => event.id).map((event) => event.id)
+    );
+
+    // Filtrar histórico removendo eventos que não existem mais no Google
+    const syncedHistorico = historico.filter((item) => {
+      // Se não tem eventId, manter (evento antigo ou sem ID)
+      if (!item.eventId) return true;
+
+      // Se o eventId ainda existe no Google Calendar, manter
+      return existingEventIds.has(item.eventId);
+    });
+
+    // Atualizar localStorage se houve mudanças
+    if (syncedHistorico.length !== historico.length) {
+      const removed = historico.length - syncedHistorico.length;
+      console.log(
+        `🗑️ Sincronização: ${removed} evento(s) deletado(s) do Google Calendar removidos do histórico local`
+      );
+      localStorage.setItem("historico", JSON.stringify(syncedHistorico));
+
+      // Disparar evento para atualizar UI do histórico se estiver aberto
+      window.dispatchEvent(new CustomEvent("historico-updated"));
+    }
+  } catch (error) {
+    console.error("Error syncing deleted events:", error);
   }
 }
 
@@ -95,7 +143,18 @@ export function renderReminders(events, containerId = "lembretes-lista") {
   const container = document.getElementById(containerId);
   if (!container) return;
 
-  if (!events || events.length === 0) {
+  // Filtrar apenas eventos válidos com data válida
+  const validEvents = (events || []).filter((event) => {
+    if (!event || !event.start) return false;
+    const dateStr =
+      typeof event.start === "object" && event.start.dateTime
+        ? event.start.dateTime
+        : event.start;
+    const date = new Date(dateStr);
+    return !isNaN(date.getTime()); // Só retorna eventos com data válida
+  });
+
+  if (validEvents.length === 0) {
     container.innerHTML = `
       <div class="text-center text-muted py-5">
         <i class="bi bi-calendar-x" style="font-size: 3rem;"></i>
@@ -106,7 +165,7 @@ export function renderReminders(events, containerId = "lembretes-lista") {
     return;
   }
 
-  const html = events
+  const html = validEvents
     .map((event) => {
       const reminderTypes = ["24h", "1h", "30m"];
       const reminderBadges = reminderTypes
