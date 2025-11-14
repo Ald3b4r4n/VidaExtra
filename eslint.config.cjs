@@ -58,6 +58,17 @@ module.exports = [
       },
     },
   },
+  // Vercel Serverless Functions (ESM)
+  {
+    files: ["api/**/*.js"],
+    languageOptions: {
+      ecmaVersion: 2021,
+      sourceType: "module",
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
   // Node test scripts (CommonJS)
   {
     files: ["test-*.js"],

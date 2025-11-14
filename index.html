@@ -70,6 +70,15 @@
             <div id="user-info"></div>
             <button
               type="button"
+              id="btn-connect-calendar"
+              class="btn btn-outline-primary px-3 py-2"
+              style="display: none"
+            >
+              <i class="bi bi-calendar-check"></i>
+              <span class="btn-text">Conectar Google Calendar</span>
+            </button>
+            <button
+              type="button"
               id="btn-exportar"
               class="btn btn-outline-success px-3 py-2"
             >
@@ -483,6 +492,30 @@
             })
             .catch((err) => console.error("Error logging out:", err));
         });
+
+        // Event listener para botão de conectar calendário
+        document
+          .getElementById("btn-connect-calendar")
+          ?.addEventListener("click", () => {
+            import("./src/calendar-auth.js")
+              .then((module) => {
+                module.connectGoogleCalendar();
+              })
+              .catch((err) => console.error("Error connecting calendar:", err));
+          });
+
+        // Verifica se o calendário já está conectado
+        import("./src/calendar-auth.js")
+          .then(async (module) => {
+            const isConnected = await module.isCalendarConnected();
+            const btn = document.getElementById("btn-connect-calendar");
+            if (btn && !isConnected) {
+              btn.style.display = "inline-block";
+            }
+          })
+          .catch((err) =>
+            console.error("Error checking calendar status:", err)
+          );
 
         // Event listener para atualizar lembretes
         document

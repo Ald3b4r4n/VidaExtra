@@ -20,6 +20,7 @@
 - [Início Rápido](#-início-rápido)
 - [Configuração](#-configuração)
 - [Integração Google Calendar](#-integração-google-calendar)
+- [Testes Locais](#-testes-locais)
 - [Como Usar](#-como-usar)
 - [Scripts Disponíveis](#-scripts-disponíveis)
 - [Estrutura do Projeto](#-estrutura-do-projeto)
@@ -619,6 +620,44 @@ graph LR
 - ✅ HTTPS obrigatório em produção
 
 Para documentação completa, consulte [CHANGELOG.md](./CHANGELOG.md).
+
+---
+
+## 🧪 Testes Locais
+
+Antes de fazer deploy, teste as funcionalidades localmente:
+
+📖 **[Guia Completo de Testes Locais](./TESTES_LOCAIS.md)**
+
+### Testes Disponíveis
+
+1. **E-mail de Lembrete** (template HTML completo):
+
+   ```powershell
+   node test-reminder-email.js
+   ```
+
+2. **Criação de Evento no Google Calendar**:
+
+   ```powershell
+   node test-calendar-event.js <USER_ID>
+   ```
+
+3. **Vercel Functions Localmente**:
+   ```powershell
+   vercel dev
+   ```
+
+**Pré-requisitos:**
+
+- Criar `.env.local` com credenciais reais
+- Configurar Firebase Service Account
+- Gerar senha de app do Gmail
+- Obter OAuth Client ID/Secret
+
+Consulte [TESTES_LOCAIS.md](./TESTES_LOCAIS.md) para instruções detalhadas.
+
+---
 
 ## 🆕 Novidades Recentes
 

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Autorizando Google Calendar...</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+      .container {
+        text-align: center;
+        padding: 2rem;
+      }
+      .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid white;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .error {
+        background: #f44336;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔐 Autorizando...</h1>
+      <div class="spinner"></div>
+      <p id="status">Processando autorização do Google Calendar...</p>
+      <div id="error" class="error" style="display: none"></div>
+    </div>
+
+    <script type="module">
+      import { auth } from "../src/firebase-config.js";
+      import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+      const statusEl = document.getElementById("status");
+      const errorEl = document.getElementById("error");
+
+      async function handleOAuthRedirect() {
+        try {
+          // Pegar o código OAuth da URL
+          const urlParams = new URLSearchParams(window.location.search);
+          const code = urlParams.get("code");
+          const error = urlParams.get("error");
+
+          if (error) {
+            throw new Error(`Erro OAuth: ${error}`);
+          }
+
+          if (!code) {
+            throw new Error("Código OAuth não encontrado na URL");
+          }
+
+          statusEl.textContent = "Aguardando login do Firebase...";
+
+          // Esperar usuário estar logado
+          const user = await new Promise((resolve) => {
+            onAuthStateChanged(auth, (user) => {
+              if (user) resolve(user);
+            });
+          });
+
+          if (!user) {
+            throw new Error("Usuário não está logado no Firebase");
+          }
+
+          statusEl.textContent = "Obtendo tokens do Google...";
+
+          // Trocar code por tokens usando o backend
+          const response = await fetch("/api/exchangeCodeForTokens", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              code: code,
+              userId: user.uid,
+              email: user.email,
+              displayName: user.displayName,
+              photoURL: user.photoURL,
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(
+              errorData.error || "Erro ao trocar código por tokens"
+            );
+          }
+
+          const data = await response.json();
+
+          statusEl.textContent = "Salvando credenciais...";
+
+          // Salvar access token no localStorage para uso imediato
+          if (data.accessToken) {
+            localStorage.setItem("googleAccessToken", data.accessToken);
+          }
+
+          statusEl.textContent = "✅ Autorização concluída!";
+
+          // Redirecionar de volta para o app
+          setTimeout(() => {
+            window.location.replace("/index.html");
+          }, 1500);
+        } catch (error) {
+          console.error("Erro no redirect OAuth:", error);
+          errorEl.textContent = `❌ Erro: ${error.message}`;
+          errorEl.style.display = "block";
+          statusEl.textContent = "Falha na autorização";
+
+          // Redirecionar mesmo com erro após 3 segundos
+          setTimeout(() => {
+            window.location.replace("/index.html");
+          }, 3000);
+        }
+      }
+
+      // Executar
+      handleOAuthRedirect();
+    </script>
+  </body>
+</html>
