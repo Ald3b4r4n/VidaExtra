@@ -17,17 +17,16 @@
 - [Sobre o Projeto](#-sobre-o-projeto)
 - [Recursos Principais](#-recursos-principais)
 - [Tecnologias Utilizadas](#-tecnologias-utilizadas)
-- [Pré-requisitos](#-pré-requisitos)
-- [Instalação](#-instalação)
+- [Início Rápido](#-início-rápido)
 - [Configuração](#-configuração)
+- [Integração Google Calendar](#-integração-google-calendar)
 - [Como Usar](#-como-usar)
 - [Scripts Disponíveis](#-scripts-disponíveis)
 - [Estrutura do Projeto](#-estrutura-do-projeto)
-- [Qualidade de Código](#-qualidade-de-código)
-- [Novidades Recentes](#-novidades-recentes)
+- [Deploy](#-deploy)
+- [Changelog](#-changelog)
 - [Contribuindo](#-contribuindo)
 - [Suporte](#-suporte)
-- [Créditos](#-créditos)
 
 ---
 
@@ -135,55 +134,34 @@ Simplificar e automatizar o cálculo de horas extras, permitindo aos usuários:
 
 ---
 
-## 📋 Pré-requisitos
+## � Início Rápido
 
-Antes de começar, certifique-se de ter instalado em sua máquina:
-
-- **Node.js** v16 ou superior ([Download](https://nodejs.org/))
-- **npm** v7 ou superior (incluído com Node.js)
-- **Git** (opcional, para versionamento) ([Download](https://git-scm.com/))
-- **Navegador moderno**: Chrome, Firefox, Edge ou Safari
-
-### Verificando as instalações
+### Instalação Local
 
 ```powershell
-node --version   # deve mostrar v16.x.x ou superior
-npm --version    # deve mostrar v7.x.x ou superior
-git --version    # deve mostrar git version x.x.x
-```
-
----
-
-## 🚀 Instalação
-
-### 1. Clone ou baixe o repositório
-
-```powershell
-# Via Git
+# 1. Clone o repositório
 git clone https://github.com/Ald3b4r4n/VidaExtra.git
 cd VidaExtra
 
-# Ou baixe e extraia o ZIP manualmente
-```
-
-### 2. Instale as dependências
-
-```powershell
+# 2. Instale as dependências
 npm install
+
+# 3. Inicie o servidor de desenvolvimento
+npm start
+
+# 4. Acesse http://localhost:5500
 ```
 
-Este comando irá:
-
-- Instalar todas as dependências listadas em `package.json`
-- Executar automaticamente `npm run build:css` via script `postinstall`
-- Gerar o arquivo `dist/tailwind.css` minificado
-
-### 3. Verifique a instalação
+### Deploy na Vercel (Recomendado)
 
 ```powershell
-# Deve existir a pasta node_modules e o arquivo dist/tailwind.css
-ls node_modules
-ls dist
+# 1. Instale a CLI da Vercel
+npm install -g vercel
+
+# 2. Faça o deploy
+vercel
+
+# 3. Configure as variáveis de ambiente no dashboard
 ```
 
 ---
@@ -548,309 +526,99 @@ npm run lint -- --fix
 
 ---
 
-## 📅 Integração Google Calendar e Notificações por E-mail
+## 📅 Integração Google Calendar
 
-### Visão Geral
+### 🎯 Visão Geral
 
-O VidaExtra agora oferece integração completa com o Google Calendar, permitindo sincronização automática de eventos e envio de lembretes por e-mail.
+O VidaExtra oferece integração completa com Google Calendar para:
 
-### 🔐 Configuração Inicial
+- ✅ Criar eventos automaticamente ao calcular AC-4
+- ✅ Sincronizar com Google Calendar nativo
+- ✅ Receber notificações por e-mail (24h, 1h, 30min antes)
+- ✅ Aproveitar o sistema de lembretes do Google
 
-#### 1. Google Cloud Console - OAuth2 Credentials
+### 🔐 Configuração Rápida
+
+#### 1. Google Cloud Console
 
 1. Acesse [Google Cloud Console](https://console.cloud.google.com/)
-2. Crie um novo projeto ou selecione um existente
-3. Habilite as APIs necessárias:
-
-   - **Google Calendar API**
-   - **Firebase Authentication**
-
+2. Crie/selecione projeto
+3. Habilite **Google Calendar API**
 4. Crie credenciais OAuth 2.0:
-   - Navegue para **APIs & Services > Credentials**
-   - Clique em **Create Credentials > OAuth client ID**
-   - Tipo de aplicativo: **Web application**
-   - Nome: `VidaExtra Web Client`
-   - Origens JavaScript autorizadas:
-     ```
-     http://localhost:5500
-     https://vidaextra-8db27.web.app
-     https://vidaextra-8db27.firebaseapp.com
-     ```
-   - URIs de redirecionamento autorizados:
-     ```
-     http://localhost:5500/oauth2callback
-     https://vidaextra-8db27.web.app/oauth2callback
-     ```
-   - Salve e copie o **Client ID** e **Client Secret**
+   - Tipo: Web application
+   - Origens autorizadas: `http://localhost:5500`, `https://seu-dominio.vercel.app`
+   - URIs de redirecionamento: `/oauth2callback`
 
-#### 2. Firebase Setup
+#### 2. Firebase/Vercel Setup
+
+**Se usar Firebase:**
 
 ```powershell
-# Instale o Firebase CLI
-npm install -g firebase-tools
-
-# Faça login no Firebase
-firebase login
-
-# Inicialize o projeto (se ainda não iniciou)
-firebase init
-
-# Selecione:
-# - Firestore
-# - Functions
-# - Hosting
+# Arquivo functions/.env
+OAUTH_CLIENT_ID=seu-client-id
+OAUTH_CLIENT_SECRET=seu-secret
+FIREBASE_PROJECT_ID=seu-projeto
 ```
 
-#### 3. Configurar Variáveis de Ambiente
+**Se usar Vercel:**
 
-**No diretório `functions/`, crie um arquivo `.env`:**
+```powershell
+# Configure no dashboard Vercel > Settings > Environment Variables
+OAUTH_CLIENT_ID=seu-client-id
+OAUTH_CLIENT_SECRET=seu-secret
+FIREBASE_PROJECT_ID=seu-projeto
+```
+
+### 📧 Sistema de Notificações
+
+#### E-mail (via Nodemailer)
+
+Configure SMTP no arquivo de ambiente:
 
 ```bash
-# Firebase
-FIREBASE_PROJECT_ID=vidaextra-8db27
-
-# Google OAuth2 (cole suas credenciais aqui)
-OAUTH_CLIENT_ID=seu-client-id.apps.googleusercontent.com
-OAUTH_CLIENT_SECRET=seu-client-secret
-
-# Gmail SMTP (já configurado)
 SMTP_SERVICE=gmail
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=465
 SMTP_SECURE=true
-SMTP_USER=rafasouzacruz@gmail.com
-SMTP_PASS=jepaepndtyejgurg
-
-# Application
-NODE_ENV=production
-APP_URL=https://vidaextra-8db27.web.app
+SMTP_USER=seu-email@gmail.com
+SMTP_PASS=sua-senha-de-app  # Gere em https://myaccount.google.com/apppasswords
 ```
 
-⚠️ **IMPORTANTE**: Nunca commit o arquivo `.env`! Ele já está no `.gitignore`.
+#### Lembretes Automáticos
 
-#### 4. Instalar Dependências das Functions
+O sistema envia notificações:
 
-```powershell
-cd functions
-npm install
-cd ..
-```
+- 📧 **24 horas** antes do evento
+- 📧 **1 hora** antes do evento
+- 🔔 **30 minutos** antes (popup no Google Calendar)
 
-#### 5. Deploy
+### �️ API Endpoints
 
-```powershell
-# Deploy completo (Hosting + Functions + Firestore Rules)
-firebase deploy
+| Endpoint                   | Método | Descrição                      |
+| -------------------------- | ------ | ------------------------------ |
+| `/api/createCalendarEvent` | POST   | Cria evento no Google Calendar |
+| `/api/getUpcomingEvents`   | GET    | Lista próximos eventos         |
+| `/api/registerCredentials` | POST   | Salva tokens OAuth             |
+| `/api/ping`                | GET    | Health check                   |
 
-# Ou deploy individual:
-firebase deploy --only functions
-firebase deploy --only hosting
-firebase deploy --only firestore:rules
-```
-
----
-
-### 🚀 Como Funciona
-
-#### Fluxo de Autenticação
-
-1. **Usuário acessa** `pages/login.html`
-2. **Clica em "Entrar com Google"**
-3. **Autoriza** acesso ao Google Calendar
-4. **Backend recebe** access token e troca por refresh token
-5. **Tokens são salvos** no Firestore (coleção `users`)
-6. **Usuário é redirecionado** para o app principal
-
-#### Sistema de Lembretes
+### 📊 Fluxo de Autenticação
 
 ```mermaid
 graph LR
-    A[Cloud Scheduler] -->|A cada 5min| B[checkReminders Function]
-    B --> C{Para cada usuário}
-    C --> D[Busca eventos do Calendar]
-    D --> E{Calcula lembretes}
-    E -->|24h antes| F[Envia E-mail]
-    E -->|1h antes| F
-    E -->|30min antes| F
-    F --> G[Marca como enviado]
+    A[Login Google] --> B[Autoriza Calendar]
+    B --> C[Backend recebe tokens]
+    C --> D[Salva no Firestore]
+    D --> E[Usuário pode criar eventos]
 ```
 
-#### Job Agendado
+### 🔒 Segurança
 
-A função `checkReminders` roda **a cada 5 minutos** e:
+- ✅ Tokens OAuth armazenados no Firestore
+- ✅ Firestore Rules: usuário acessa apenas seus dados
+- ✅ ID tokens Firebase validados em cada requisição
+- ✅ HTTPS obrigatório em produção
 
-1. Busca todos os usuários com `refreshToken`
-2. Para cada usuário:
-   - Atualiza o access token usando o refresh token
-   - Busca eventos das próximas 48 horas
-   - Calcula se deve enviar lembrete (24h, 1h ou 30min antes)
-   - Verifica se lembrete já foi enviado (evita duplicação)
-   - Envia e-mail via Nodemailer
-   - Registra envio em `users/{uid}/sentNotifications`
-
----
-
-### 📧 Template de E-mail
-
-Os e-mails enviados incluem:
-
-- **Logo do VidaExtra** (branding)
-- **Título do evento**
-- **Data e hora** formatadas
-- **Local** (se houver)
-- **Descrição** (se houver)
-- **Tipo de lembrete** (24h / 1h / 30min)
-- **Link** para abrir o app
-- **Opção de desativar** notificações
-
----
-
-### 🔧 Endpoints da API
-
-| Endpoint                | Método    | Descrição                             |
-| ----------------------- | --------- | ------------------------------------- |
-| `/registerCredentials`  | POST      | Registra tokens OAuth2 do usuário     |
-| `/updateNotifySettings` | POST      | Atualiza preferências de notificações |
-| `/getUpcomingEvents`    | GET       | Busca eventos futuros do Calendar     |
-| `/testReminders`        | GET       | Testa envio de lembretes manualmente  |
-| `/checkReminders`       | Scheduled | Job automático (a cada 5 minutos)     |
-
-### 📊 Estrutura do Firestore
-
-```
-users/
-  {userId}/
-    - uid: string
-    - email: string
-    - displayName: string
-    - photoURL: string
-    - refreshToken: string (criptografado em produção!)
-    - notifySettings: {
-        email: boolean
-        reminders: ['24h', '1h', '30m']
-      }
-    - createdAt: timestamp
-    - updatedAt: timestamp
-
-    sentNotifications/
-      {eventId}_{reminderType}/
-        - eventId: string
-        - reminderType: string
-        - sentAt: timestamp
-```
-
----
-
-### ⚙️ Configurações no App
-
-Na aba **Lembretes** do aplicativo, o usuário pode:
-
-- ✅ **Ativar/Desativar** notificações por e-mail
-- 📅 **Visualizar** próximos eventos do Google Calendar
-- 🔄 **Atualizar** manualmente a lista de eventos
-- 📊 **Ver** quais lembretes estão configurados (24h, 1h, 30min)
-
----
-
-### 🛡️ Segurança
-
-#### Boas Práticas Implementadas
-
-- ✅ **Firestore Rules**: Apenas o próprio usuário acessa seus dados
-- ✅ **Autenticação Firebase**: Verificação de ID token em todas as requisições
-- ✅ **HTTPS Only**: Comunicação criptografada
-- ✅ **Tokens no Backend**: Refresh tokens nunca expostos ao frontend
-- ⚠️ **TODO**: Criptografar refresh tokens com Cloud Secret Manager
-
-#### Regras de Segurança
-
-```javascript
-// firestore.rules
-match /users/{userId} {
-  allow read, write: if request.auth != null && request.auth.uid == userId;
-}
-```
-
----
-
-### 🧪 Testando Localmente
-
-#### 1. Emulador Firebase
-
-```powershell
-# Inicie os emuladores
-firebase emulators:start
-
-# Acesse o Emulator UI
-# http://localhost:4000
-```
-
-#### 2. Teste Manual de Lembretes
-
-```powershell
-# Com o app rodando e um usuário logado, chame:
-curl -X GET https://us-central1-vidaextra-8db27.cloudfunctions.net/testReminders \
-  -H "Authorization: Bearer SEU_FIREBASE_ID_TOKEN"
-```
-
-#### 3. Logs
-
-```powershell
-# Ver logs das functions
-firebase functions:log
-
-# Ver logs em tempo real
-firebase functions:log --only checkReminders
-```
-
----
-
-### ❓ Troubleshooting
-
-#### Problema: "OAuth credentials not configured"
-
-**Solução**: Verifique se `OAUTH_CLIENT_ID` e `OAUTH_CLIENT_SECRET` estão no arquivo `.env` das functions.
-
-#### Problema: "Failed to send email"
-
-**Solução**:
-
-- Verifique se `SMTP_PASS` está correto
-- Use uma [senha de app do Gmail](https://support.google.com/accounts/answer/185833)
-- Habilite "Acesso de apps menos seguros" (não recomendado)
-
-#### Problema: "Unauthorized domain"
-
-**Solução**: No Firebase Console, adicione seus domínios em **Authentication > Settings > Authorized domains**.
-
-#### Problema: Lembretes não sendo enviados
-
-**Solução**:
-
-- Verifique se o Cloud Scheduler está ativo
-- Confira os logs: `firebase functions:log`
-- Teste manualmente: endpoint `/testReminders`
-- Verifique se usuário tem `refreshToken` válido
-
----
-
-### 📝 Scripts Úteis
-
-```powershell
-# Deploy apenas das functions
-firebase deploy --only functions
-
-# Deploy com logs detalhados
-firebase deploy --only functions --debug
-
-# Deletar uma function
-firebase functions:delete nomeDaFunction
-
-# Ver configuração atual
-firebase functions:config:get
-```
-
----
+Para documentação completa, consulte [CHANGELOG.md](./CHANGELOG.md).
 
 ## 🆕 Novidades Recentes
 
