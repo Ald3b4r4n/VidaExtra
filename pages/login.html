@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Login VidaExtra - Calculadora AC-4" />
+    <title>Login - VidaExtra®</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+    />
+    <!-- Tailwind CSS -->
+    <link href="../dist/tailwind.css" rel="stylesheet" />
+    <!-- Custom Login CSS -->
+    <link href="../src/login.css" rel="stylesheet" />
+
+    <!-- Firebase SDK -->
+    <script type="module" src="../src/firebase-config.js"></script>
+  </head>
+  <body class="bg-gradient-to-br from-blue-600 to-blue-900">
+    <div class="container">
+      <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-md-6 col-lg-5">
+          <div class="card shadow-2xl login-card">
+            <div class="card-body p-5">
+              <!-- Logo -->
+              <div class="text-center mb-4">
+                <img
+                  src="../operador.jpg"
+                  alt="VidaExtra Logo"
+                  class="logo-login mb-3"
+                />
+                <h1 class="h3 fw-bold text-primary mb-2">VidaExtra®</h1>
+                <p class="text-muted">
+                  Calculadora AC-4 com Sincronização Google Calendar
+                </p>
+              </div>
+
+              <!-- Estado de carregamento -->
+              <div id="loading-state" class="text-center d-none">
+                <div class="spinner-border text-primary mb-3" role="status">
+                  <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p class="text-muted">Conectando com Google...</p>
+              </div>
+
+              <!-- Botão de Login -->
+              <div id="login-button-container" class="text-center">
+                <button
+                  id="google-signin-btn"
+                  class="btn btn-lg btn-outline-primary w-100 google-btn"
+                >
+                  <i class="bi bi-google me-2"></i>
+                  Entrar com Google
+                </button>
+
+                <div class="mt-4">
+                  <small class="text-muted">
+                    Ao fazer login, você autoriza o VidaExtra a acessar seu
+                    Google Calendar para sincronizar eventos e enviar lembretes.
+                  </small>
+                </div>
+              </div>
+
+              <!-- Mensagem de erro -->
+              <div
+                id="error-message"
+                class="alert alert-danger mt-3 d-none"
+                role="alert"
+              >
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <span id="error-text"></span>
+              </div>
+
+              <!-- Recursos -->
+              <div class="mt-5">
+                <h6 class="text-center text-muted mb-3">
+                  Recursos do VidaExtra
+                </h6>
+                <ul class="list-unstyled small text-muted">
+                  <li class="mb-2">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    Cálculo automático de horas extras AC-4
+                  </li>
+                  <li class="mb-2">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    Sincronização com Google Calendar
+                  </li>
+                  <li class="mb-2">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    Lembretes por e-mail (24h, 1h, 30min antes)
+                  </li>
+                  <li class="mb-2">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    Histórico e exportação em PDF
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="text-center mt-4">
+            <small class="text-white-50">
+              Desenvolvido por CB Antônio Rafael - 14ª CIPM
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Login Script -->
+    <script type="module" src="../src/login.js"></script>
+  </body>
+</html>
