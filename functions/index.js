@@ -3,25 +3,31 @@
  * Calendar Integration and Email Notifications
  */
 
-import { onRequest, onSchedule } from 'firebase-functions/v2/https';
-import { initializeApp } from 'firebase-admin/app';
-import { getFirestore, Timestamp } from 'firebase-admin/firestore';
-import { getAuth } from 'firebase-admin/auth';
-import * as dotenv from 'dotenv';
-import { 
-  exchangeCodeForTokens, 
-  refreshAccessToken, 
-  listCalendarEvents 
-} from './googleClient.js';
-import { sendReminderEmail, sendWelcomeEmail } from './mail.js';
+import { onRequest, onSchedule } from "firebase-functions/v2/https";
+import { initializeApp } from "firebase-admin/app";
+import { getFirestore, Timestamp } from "firebase-admin/firestore";
+import { getAuth } from "firebase-admin/auth";
+import * as dotenv from "dotenv";
+import {
+  exchangeCodeForTokens,
+  refreshAccessToken,
+  listCalendarEvents,
+  createCalendarEvent as gcalCreateEvent,
+} from "./googleClient.js";
+import { sendReminderEmail, sendWelcomeEmail } from "./mail.js";
 
-// Carrega variáveis de ambiente
-dotenv.config();
+// Carrega variáveis de ambiente de .env.local para evitar conflito com o carregamento automático do emulador
+dotenv.config({ path: ".env.local" });
 
 // Inicializa Firebase Admin
 initializeApp();
 const db = getFirestore();
 const auth = getAuth();
+
+// Health check endpoint (no auth) to detect emulator availability from the frontend
+export const ping = onRequest({ cors: true }, (req, res) => {
+  res.status(200).send("ok");
+});
 
 /**
  * Endpoint: Registrar credenciais OAuth2 do usuário
@@ -33,20 +39,20 @@ export const registerCredentials = onRequest(
   { cors: true },
   async (request, response) => {
     // Apenas método POST
-    if (request.method !== 'POST') {
-      response.status(405).json({ error: 'Method not allowed' });
+    if (request.method !== "POST") {
+      response.status(405).json({ error: "Method not allowed" });
       return;
     }
 
     try {
       // Verifica autenticação
       const authHeader = request.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        response.status(401).json({ error: 'Unauthorized' });
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        response.status(401).json({ error: "Unauthorized" });
         return;
       }
 
-      const idToken = authHeader.split('Bearer ')[1];
+      const idToken = authHeader.split("Bearer ")[1];
       const decodedToken = await auth.verifyIdToken(idToken);
       const { uid } = decodedToken;
 
@@ -54,29 +60,32 @@ export const registerCredentials = onRequest(
       const { email, displayName, photoURL, accessToken } = request.body;
 
       if (!email || !accessToken) {
-        response.status(400).json({ error: 'Missing required fields' });
+        response.status(400).json({ error: "Missing required fields" });
         return;
       }
 
       console.log(`Registering credentials for user: ${uid} (${email})`);
 
       // Salva dados do usuário no Firestore
-      const userRef = db.collection('users').doc(uid);
-      await userRef.set({
-        uid,
-        email,
-        displayName: displayName || email.split('@')[0],
-        photoURL: photoURL || null,
-        // IMPORTANTE: Em produção, use Cloud Secret Manager para tokens
-        // Por simplicidade, salvando direto (criptografar em produção!)
-        refreshToken: accessToken, // Temporário: deve ser trocado por refresh_token
-        notifySettings: {
-          email: true,
-          reminders: ['24h', '1h', '30m']
+      const userRef = db.collection("users").doc(uid);
+      await userRef.set(
+        {
+          uid,
+          email,
+          displayName: displayName || email.split("@")[0],
+          photoURL: photoURL || null,
+          // IMPORTANTE: Em produção, use Cloud Secret Manager para tokens
+          // Por simplicidade, salvando direto (criptografar em produção!)
+          refreshToken: accessToken, // Temporário: deve ser trocado por refresh_token
+          notifySettings: {
+            email: true,
+            reminders: ["24h", "1h", "30m"],
+          },
+          createdAt: Timestamp.now(),
+          updatedAt: Timestamp.now(),
         },
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now()
-      }, { merge: true });
+        { merge: true }
+      );
 
       console.log(`User ${uid} credentials saved successfully`);
 
@@ -84,20 +93,19 @@ export const registerCredentials = onRequest(
       try {
         await sendWelcomeEmail({ to: email, userName: displayName });
       } catch (emailError) {
-        console.warn('Failed to send welcome email:', emailError);
+        console.warn("Failed to send welcome email:", emailError);
       }
 
       response.status(200).json({
         success: true,
-        message: 'Credentials registered successfully',
-        uid
+        message: "Credentials registered successfully",
+        uid,
       });
-
     } catch (error) {
-      console.error('Error in registerCredentials:', error);
+      console.error("Error in registerCredentials:", error);
       response.status(500).json({
-        error: 'Internal server error',
-        message: error.message
+        error: "Internal server error",
+        message: error.message,
       });
     }
   }
@@ -111,38 +119,37 @@ export const registerCredentials = onRequest(
 export const updateNotifySettings = onRequest(
   { cors: true },
   async (request, response) => {
-    if (request.method !== 'POST') {
-      response.status(405).json({ error: 'Method not allowed' });
+    if (request.method !== "POST") {
+      response.status(405).json({ error: "Method not allowed" });
       return;
     }
 
     try {
       const authHeader = request.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        response.status(401).json({ error: 'Unauthorized' });
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        response.status(401).json({ error: "Unauthorized" });
         return;
       }
 
-      const idToken = authHeader.split('Bearer ')[1];
+      const idToken = authHeader.split("Bearer ")[1];
       const decodedToken = await auth.verifyIdToken(idToken);
       const { uid } = decodedToken;
 
       const { emailNotifications, reminderTypes } = request.body;
 
-      const userRef = db.collection('users').doc(uid);
+      const userRef = db.collection("users").doc(uid);
       await userRef.update({
-        'notifySettings.email': emailNotifications !== false,
-        'notifySettings.reminders': reminderTypes || ['24h', '1h', '30m'],
-        updatedAt: Timestamp.now()
+        "notifySettings.email": emailNotifications !== false,
+        "notifySettings.reminders": reminderTypes || ["24h", "1h", "30m"],
+        updatedAt: Timestamp.now(),
       });
 
       response.status(200).json({
         success: true,
-        message: 'Notification settings updated'
+        message: "Notification settings updated",
       });
-
     } catch (error) {
-      console.error('Error updating notify settings:', error);
+      console.error("Error updating notify settings:", error);
       response.status(500).json({ error: error.message });
     }
   }
@@ -156,26 +163,26 @@ export const updateNotifySettings = onRequest(
 export const getUpcomingEvents = onRequest(
   { cors: true },
   async (request, response) => {
-    if (request.method !== 'GET') {
-      response.status(405).json({ error: 'Method not allowed' });
+    if (request.method !== "GET") {
+      response.status(405).json({ error: "Method not allowed" });
       return;
     }
 
     try {
       const authHeader = request.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        response.status(401).json({ error: 'Unauthorized' });
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        response.status(401).json({ error: "Unauthorized" });
         return;
       }
 
-      const idToken = authHeader.split('Bearer ')[1];
+      const idToken = authHeader.split("Bearer ")[1];
       const decodedToken = await auth.verifyIdToken(idToken);
       const { uid } = decodedToken;
 
       // Busca dados do usuário
-      const userDoc = await db.collection('users').doc(uid).get();
+      const userDoc = await db.collection("users").doc(uid).get();
       if (!userDoc.exists) {
-        response.status(404).json({ error: 'User not found' });
+        response.status(404).json({ error: "User not found" });
         return;
       }
 
@@ -183,7 +190,7 @@ export const getUpcomingEvents = onRequest(
       const { refreshToken } = userData;
 
       if (!refreshToken) {
-        response.status(400).json({ error: 'No refresh token found' });
+        response.status(400).json({ error: "No refresh token found" });
         return;
       }
 
@@ -197,24 +204,110 @@ export const getUpcomingEvents = onRequest(
       const events = await listCalendarEvents(accessToken, {
         timeMin: now.toISOString(),
         timeMax: futureTime.toISOString(),
-        maxResults: 20
+        maxResults: 20,
       });
 
       response.status(200).json({
         success: true,
-        events: events.map(event => ({
+        events: events.map((event) => ({
           id: event.id,
           summary: event.summary,
           description: event.description,
           location: event.location,
           start: event.start?.dateTime || event.start?.date,
-          end: event.end?.dateTime || event.end?.date
-        }))
+          end: event.end?.dateTime || event.end?.date,
+        })),
       });
-
     } catch (error) {
-      console.error('Error in getUpcomingEvents:', error);
+      console.error("Error in getUpcomingEvents:", error);
       response.status(500).json({ error: error.message });
+    }
+  }
+);
+
+/**
+ * Endpoint: Criar evento no Google Calendar do usuário
+ * POST /createCalendarEvent
+ * Headers: Authorization: Bearer <firebase-id-token>
+ * Body: { summary, description, location, startISO, endISO, reminders }
+ */
+export const createCalendarEvent = onRequest(
+  { cors: true },
+  async (request, response) => {
+    if (request.method !== "POST") {
+      response.status(405).json({ error: "Method not allowed" });
+      return;
+    }
+
+    try {
+      const authHeader = request.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        response.status(401).json({ error: "Unauthorized" });
+        return;
+      }
+
+      const idToken = authHeader.split("Bearer ")[1];
+      const decodedToken = await auth.verifyIdToken(idToken);
+      const { uid } = decodedToken;
+
+      // Busca refresh token salvo
+      const userDoc = await db.collection("users").doc(uid).get();
+      if (!userDoc.exists) {
+        response.status(404).json({ error: "User not found" });
+        return;
+      }
+      const userData = userDoc.data();
+      const { refreshToken } = userData;
+      // Atualiza access token; se não houver refresh token salvo, tenta usar access token direto do body como fallback
+      let accessToken;
+      if (refreshToken) {
+        accessToken = await refreshAccessToken(refreshToken);
+      }
+
+      // Monta requestBody do evento
+      const {
+        summary,
+        description,
+        location,
+        startISO,
+        endISO,
+        reminders,
+        googleAccessToken,
+      } = request.body || {};
+      if (!startISO || !endISO) {
+        response.status(400).json({ error: "Missing startISO or endISO" });
+        return;
+      }
+
+      // Se não foi possível obter novo access token via refresh, use o enviado pelo cliente como último recurso
+      if (!accessToken && googleAccessToken) {
+        accessToken = googleAccessToken;
+      }
+      if (!accessToken) {
+        response.status(400).json({ error: "No access token available" });
+        return;
+      }
+
+      const event = {
+        summary: summary || "AC-4",
+        description: description || undefined,
+        location: location || undefined,
+        start: { dateTime: new Date(startISO).toISOString() },
+        end: { dateTime: new Date(endISO).toISOString() },
+        reminders: reminders || { useDefault: true },
+      };
+
+      const created = await gcalCreateEvent(accessToken, event);
+
+      response.status(200).json({
+        success: true,
+        id: created.id,
+        htmlLink: created.htmlLink,
+        status: created.status,
+      });
+    } catch (error) {
+      console.error("Error creating calendar event:", error);
+      response.status(500).json({ error: error.message || "Internal error" });
     }
   }
 );
@@ -227,11 +320,11 @@ export const getUpcomingEvents = onRequest(
  */
 function calculateReminderTime(eventStart, reminderType) {
   const eventTime = new Date(eventStart).getTime();
-  
+
   const offsets = {
-    '24h': 24 * 60 * 60 * 1000,  // 24 horas
-    '1h': 60 * 60 * 1000,        // 1 hora
-    '30m': 30 * 60 * 1000        // 30 minutos
+    "24h": 24 * 60 * 60 * 1000, // 24 horas
+    "1h": 60 * 60 * 1000, // 1 hora
+    "30m": 30 * 60 * 1000, // 30 minutos
   };
 
   return eventTime - (offsets[reminderType] || 0);
@@ -246,9 +339,9 @@ function calculateReminderTime(eventStart, reminderType) {
  */
 async function wasReminderSent(userId, eventId, reminderType) {
   const sentRef = db
-    .collection('users')
+    .collection("users")
     .doc(userId)
-    .collection('sentNotifications')
+    .collection("sentNotifications")
     .doc(`${eventId}_${reminderType}`);
 
   const doc = await sentRef.get();
@@ -263,15 +356,15 @@ async function wasReminderSent(userId, eventId, reminderType) {
  */
 async function markReminderAsSent(userId, eventId, reminderType) {
   const sentRef = db
-    .collection('users')
+    .collection("users")
     .doc(userId)
-    .collection('sentNotifications')
+    .collection("sentNotifications")
     .doc(`${eventId}_${reminderType}`);
 
   await sentRef.set({
     eventId,
     reminderType,
-    sentAt: Timestamp.now()
+    sentAt: Timestamp.now(),
   });
 }
 
@@ -306,12 +399,12 @@ async function processUserReminders(userData, userId) {
     const events = await listCalendarEvents(accessToken, {
       timeMin: now.toISOString(),
       timeMax: futureTime.toISOString(),
-      maxResults: 20
+      maxResults: 20,
     });
 
     console.log(`Found ${events.length} events for user ${userId}`);
 
-    const reminderTypes = notifySettings.reminders || ['24h', '1h', '30m'];
+    const reminderTypes = notifySettings.reminders || ["24h", "1h", "30m"];
     const currentTime = Date.now();
 
     // Processa cada evento
@@ -324,18 +417,24 @@ async function processUserReminders(userData, userId) {
       // Verifica cada tipo de lembrete
       for (const reminderType of reminderTypes) {
         const reminderTime = calculateReminderTime(eventStart, reminderType);
-        
+
         // Janela de 5 minutos para enviar (evita perder lembretes)
         const timeDiff = currentTime - reminderTime;
         const shouldSend = timeDiff >= 0 && timeDiff < 5 * 60 * 1000;
 
         if (shouldSend) {
           // Verifica se já foi enviado
-          const alreadySent = await wasReminderSent(userId, eventId, reminderType);
-          
+          const alreadySent = await wasReminderSent(
+            userId,
+            eventId,
+            reminderType
+          );
+
           if (!alreadySent) {
-            console.log(`Sending ${reminderType} reminder for event ${eventId} to ${email}`);
-            
+            console.log(
+              `Sending ${reminderType} reminder for event ${eventId} to ${email}`
+            );
+
             try {
               await sendReminderEmail({
                 to: email,
@@ -344,13 +443,15 @@ async function processUserReminders(userData, userId) {
                   summary: event.summary,
                   start: event.start.dateTime,
                   location: event.location,
-                  description: event.description
+                  description: event.description,
                 },
-                reminderType
+                reminderType,
               });
 
               await markReminderAsSent(userId, eventId, reminderType);
-              console.log(`Reminder sent successfully: ${eventId}_${reminderType}`);
+              console.log(
+                `Reminder sent successfully: ${eventId}_${reminderType}`
+              );
             } catch (emailError) {
               console.error(`Failed to send reminder email:`, emailError);
             }
@@ -358,7 +459,6 @@ async function processUserReminders(userData, userId) {
         }
       }
     }
-
   } catch (error) {
     console.error(`Error processing reminders for user ${userId}:`, error);
   }
@@ -366,40 +466,39 @@ async function processUserReminders(userData, userId) {
 
 /**
  * Job agendado: Verifica lembretes a cada 5 minutos
- * Cron: */5 * * * * (a cada 5 minutos)
+ * Cron: every 5 minutes (equivalente ao padrão cron: a cada 5 minutos)
  */
 export const checkReminders = onSchedule(
   {
-    schedule: 'every 5 minutes',
-    timeZone: 'America/Sao_Paulo',
-    memory: '256MiB'
+    schedule: "every 5 minutes",
+    timeZone: "America/Sao_Paulo",
+    memory: "256MiB",
   },
   async (event) => {
-    console.log('Starting scheduled reminder check...');
+    console.log("Starting scheduled reminder check...");
 
     try {
       // Busca todos os usuários
-      const usersSnapshot = await db.collection('users').get();
-      
+      const usersSnapshot = await db.collection("users").get();
+
       console.log(`Processing ${usersSnapshot.size} users`);
 
       // Processa cada usuário
       const promises = [];
-      usersSnapshot.forEach(doc => {
+      usersSnapshot.forEach((doc) => {
         const userData = doc.data();
         const userId = doc.id;
-        
+
         if (userData.refreshToken) {
           promises.push(processUserReminders(userData, userId));
         }
       });
 
       await Promise.allSettled(promises);
-      
-      console.log('Reminder check completed successfully');
 
+      console.log("Reminder check completed successfully");
     } catch (error) {
-      console.error('Error in checkReminders job:', error);
+      console.error("Error in checkReminders job:", error);
     }
   }
 );
@@ -413,18 +512,18 @@ export const testReminders = onRequest(
   async (request, response) => {
     try {
       const authHeader = request.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        response.status(401).json({ error: 'Unauthorized' });
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        response.status(401).json({ error: "Unauthorized" });
         return;
       }
 
-      const idToken = authHeader.split('Bearer ')[1];
+      const idToken = authHeader.split("Bearer ")[1];
       const decodedToken = await auth.verifyIdToken(idToken);
       const { uid } = decodedToken;
 
-      const userDoc = await db.collection('users').doc(uid).get();
+      const userDoc = await db.collection("users").doc(uid).get();
       if (!userDoc.exists) {
-        response.status(404).json({ error: 'User not found' });
+        response.status(404).json({ error: "User not found" });
         return;
       }
 
@@ -432,11 +531,10 @@ export const testReminders = onRequest(
 
       response.status(200).json({
         success: true,
-        message: 'Reminders checked manually'
+        message: "Reminders checked manually",
       });
-
     } catch (error) {
-      console.error('Error in testReminders:', error);
+      console.error("Error in testReminders:", error);
       response.status(500).json({ error: error.message });
     }
   }

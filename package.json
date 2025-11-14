@@ -7,8 +7,9 @@
     "build:css": "tailwindcss -i ./src/input.css -o ./dist/tailwind.css --minify",
     "dev:css": "tailwindcss -i ./src/input.css -o ./dist/tailwind.css --watch",
     "lint": "eslint . --ext .js",
-    "serve": "serve -s -l 5500",
-    "start": "npm run serve",
+    "serve": "serve -l 5500 .",
+    "dev": "node dev-server.js",
+    "start": "npm run dev",
     "postinstall": "npm run build:css",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -28,7 +29,15 @@
     "autoprefixer": "^10.4.21",
     "eslint": "^9.38.0",
     "postcss": "^8.5.6",
+    "http-proxy-middleware": "^3.0.0",
+    "express": "^4.21.1",
     "serve": "^14.2.5",
     "tailwindcss": "^4.1.16"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "firebase-admin": "^13.6.0",
+    "googleapis": "^166.0.0",
+    "nodemailer": "^7.0.10"
   }
 }

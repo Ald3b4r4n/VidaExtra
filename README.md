@@ -38,6 +38,7 @@
 ### 🎯 Objetivo
 
 Simplificar e automatizar o cálculo de horas extras, permitindo aos usuários:
+
 - Registrar operações com data, horários e anotações
 - Visualizar histórico completo em lista e calendário
 - Aplicar descontos de pensão alimentícia automaticamente
@@ -49,26 +50,30 @@ Simplificar e automatizar o cálculo de horas extras, permitindo aos usuários:
 ## ✨ Recursos Principais
 
 ### 📝 Formulário Inteligente
+
 - **Seleção de Data**: Escolha a data do serviço com calendário visual
 - **Horários Flexíveis**: Entrada de hora inicial e final (suporte a plantões noturnos)
 - **Anotações Personalizadas**: Campo de texto para observações importantes
 - **Desconto de Pensão**: Cálculo automático com percentual configurável
 
 ### 📊 Cálculos Automáticos
+
 - **Valores por Dia da Semana**: Tabela diferenciada (segunda a domingo)
 - **Cálculo de Horas**: Automatizado com suporte a períodos que atravessam meia-noite
 - **Descontos**: Aplicação automática de percentual de pensão alimentícia
 - **Totalizadores**: Acompanhamento de horas acumuladas e valores (bruto/líquido)
 
 ### 📅 Calendário Visual
+
 - **FullCalendar Integrado**: Visualização mensal e semanal dos registros
-- **Indicadores Visuais**: 
+- **Indicadores Visuais**:
   - Borda azul para eventos de hoje
   - Borda vermelha para eventos futuros
 - **Tooltips Informativos**: Hover/toque para ver detalhes sem abrir o registro
 - **Responsivo**: Ajuste automático ao alternar entre abas
 
 ### 📋 Histórico Completo
+
 - **Lista Ordenada**: Registros organizados por data crescente
 - **Edição em Linha**: Modifique data, horários, pensão e anotações
 - **Remoção Seletiva**: Delete registros individuais com confirmação
@@ -76,17 +81,20 @@ Simplificar e automatizar o cálculo de horas extras, permitindo aos usuários:
 - **Persistência Local**: Dados salvos no navegador (localStorage)
 
 ### 📄 Exportação PDF
+
 - **Layout Profissional**: Tabela formatada com cabeçalho e rodapé
 - **Informações Completas**: Data, período, anotações, horas e valores
 - **Totalizadores**: Horas acumuladas, valores bruto/líquido e descontos
 - **Nome Automático**: Arquivo gerado com data no formato `historico_ac4_YYYY-MM-DD.pdf`
 
 ### 🎵 Feedback Sonoro
+
 - **Som de Confirmação**: Bip agradável ao adicionar registro
 - **Som de Limpeza**: Efeito decrescente ao limpar todos os dados
 - **Som de Exclusão**: Bip curto ao remover item individual
 
 ### 📱 PWA (Progressive Web App)
+
 - **Instalável**: Adicione à tela inicial do smartphone ou desktop
 - **Offline**: Funciona sem internet após primeira carga
 - **Service Worker**: Cache inteligente de recursos estáticos
@@ -98,32 +106,32 @@ Simplificar e automatizar o cálculo de horas extras, permitindo aos usuários:
 
 ### Frontend
 
-| Tecnologia | Versão | Descrição |
-|------------|--------|-----------|
-| **Bootstrap** | 5.3.0 | Framework CSS para layout responsivo e componentes |
-| **Bootstrap Icons** | 1.10.0 | Biblioteca de ícones para interface |
-| **Tailwind CSS** | 4.1.16 | Utilitários CSS modernos para estilização |
-| **FullCalendar** | 6.1.10 | Calendário interativo com eventos |
-| **Luxon** | 3.x | Manipulação e formatação de datas |
-| **SweetAlert2** | 11.x | Modais e diálogos elegantes |
-| **html2pdf.js** | 0.10.1 | Geração de PDF a partir de HTML |
+| Tecnologia          | Versão | Descrição                                          |
+| ------------------- | ------ | -------------------------------------------------- |
+| **Bootstrap**       | 5.3.0  | Framework CSS para layout responsivo e componentes |
+| **Bootstrap Icons** | 1.10.0 | Biblioteca de ícones para interface                |
+| **Tailwind CSS**    | 4.1.16 | Utilitários CSS modernos para estilização          |
+| **FullCalendar**    | 6.1.10 | Calendário interativo com eventos                  |
+| **Luxon**           | 3.x    | Manipulação e formatação de datas                  |
+| **SweetAlert2**     | 11.x   | Modais e diálogos elegantes                        |
+| **html2pdf.js**     | 0.10.1 | Geração de PDF a partir de HTML                    |
 
 ### Build & Qualidade
 
-| Ferramenta | Versão | Descrição |
-|------------|--------|-----------|
-| **ESLint** | 9.38.0 | Linter para qualidade e padrões de código JavaScript |
-| **PostCSS** | 8.5.6 | Processador CSS para otimizações |
-| **Autoprefixer** | 10.4.21 | Adiciona prefixos vendor automaticamente |
-| **Serve** | 14.2.5 | Servidor HTTP estático para desenvolvimento |
+| Ferramenta       | Versão  | Descrição                                            |
+| ---------------- | ------- | ---------------------------------------------------- |
+| **ESLint**       | 9.38.0  | Linter para qualidade e padrões de código JavaScript |
+| **PostCSS**      | 8.5.6   | Processador CSS para otimizações                     |
+| **Autoprefixer** | 10.4.21 | Adiciona prefixos vendor automaticamente             |
+| **Serve**        | 14.2.5  | Servidor HTTP estático para desenvolvimento          |
 
 ### PWA
 
-| Recurso | Descrição |
-|---------|-----------|
+| Recurso            | Descrição                              |
+| ------------------ | -------------------------------------- |
 | **Service Worker** | Cache offline e estratégia cache-first |
-| **Web Manifest** | Configuração de instalação e aparência |
-| **LocalStorage** | Persistência de dados no navegador |
+| **Web Manifest**   | Configuração de instalação e aparência |
+| **LocalStorage**   | Persistência de dados no navegador     |
 
 ---
 
@@ -165,6 +173,7 @@ npm install
 ```
 
 Este comando irá:
+
 - Instalar todas as dependências listadas em `package.json`
 - Executar automaticamente `npm run build:css` via script `postinstall`
 - Gerar o arquivo `dist/tailwind.css` minificado
@@ -186,34 +195,43 @@ ls dist
 O projeto usa Tailwind CSS v4 com compilação via CLI. Os arquivos de configuração são:
 
 #### `tailwind.config.js`
+
 ```javascript
 module.exports = {
-  content: ['./index.html', './app.js', './dashboard-preview.html', './dashboard-alt-preview.html', './dashboard-a-preview.html'],
+  content: [
+    "./index.html",
+    "./app.js",
+    "./dashboard-preview.html",
+    "./dashboard-alt-preview.html",
+    "./dashboard-a-preview.html",
+  ],
   theme: {
     extend: {
       colors: {
-        'primary': '#0d6efd',
-        'success': '#198754',
-        'danger': '#dc3545',
-        'warning': '#ffc107',
-      }
-    }
+        primary: "#0d6efd",
+        success: "#198754",
+        danger: "#dc3545",
+        warning: "#ffc107",
+      },
+    },
   },
   plugins: [],
 };
 ```
 
 #### `postcss.config.js`
+
 ```javascript
 module.exports = {
   plugins: {
     tailwindcss: {},
     autoprefixer: {},
-  }
-}
+  },
+};
 ```
 
 #### `src/input.css`
+
 ```css
 @tailwind base;
 @tailwind components;
@@ -227,34 +245,36 @@ module.exports = {
 O projeto usa ESLint 9 com flat config:
 
 #### `eslint.config.cjs`
+
 ```javascript
 module.exports = [
   {
-    files: ['**/*.js'],
+    files: ["**/*.js"],
     languageOptions: {
       ecmaVersion: 2021,
-      sourceType: 'script',
+      sourceType: "script",
       globals: {
-        window: 'readonly',
-        document: 'readonly',
-        console: 'readonly',
-        localStorage: 'readonly',
-        Swal: 'readonly',
-        html2pdf: 'readonly',
-        bootstrap: 'readonly'
-      }
+        window: "readonly",
+        document: "readonly",
+        console: "readonly",
+        localStorage: "readonly",
+        Swal: "readonly",
+        html2pdf: "readonly",
+        bootstrap: "readonly",
+      },
     },
     rules: {
-      'no-unused-vars': ['warn', { 'args': 'none' }],
-      'no-console': 'off',
-      'semi': ['error', 'always'],
-      'quotes': ['warn', 'single']
-    }
-  }
+      "no-unused-vars": ["warn", { args: "none" }],
+      "no-console": "off",
+      semi: ["error", "always"],
+      quotes: ["warn", "single"],
+    },
+  },
 ];
 ```
 
 #### `.eslintignore`
+
 ```
 node_modules/
 dist/
@@ -271,20 +291,21 @@ Os valores por dia da semana são configurados em `valores-ac4.json`:
     {
       "horario": "18h as 00h (6h)",
       "horas": 6,
-      "segunda": 279.40,
-      "terca": 279.40,
-      "quarta": 279.40,
-      "quinta": 279.40,
-      "sexta": 279.40,
-      "sabado": 344.90,
+      "segunda": 279.4,
+      "terca": 279.4,
+      "quarta": 279.4,
+      "quinta": 279.4,
+      "sexta": 279.4,
+      "sabado": 344.9,
       "domingo": 417.07
-    },
+    }
     // ... mais horários
   ]
 }
 ```
 
 **Campos:**
+
 - `horario`: Formato de exibição (aceita `_` ou espaços)
 - `horas`: Total de horas do período
 - `segunda` a `domingo`: Valores monetários por dia da semana
@@ -329,8 +350,8 @@ graph LR
 1. Selecione a **data** do serviço
 2. Informe a **hora inicial** (ex: 18:00)
 3. Informe a **hora final** (ex: 00:00)
-4. *(Opcional)* Marque "Pensão Alimentícia" e informe o percentual
-5. *(Opcional)* Adicione anotações (local, tipo de operação, etc.)
+4. _(Opcional)_ Marque "Pensão Alimentícia" e informe o percentual
+5. _(Opcional)_ Adicione anotações (local, tipo de operação, etc.)
 6. Clique em **"Calcular"**
 7. Visualize o resultado na aba "Resultado"
 8. O registro é adicionado automaticamente ao histórico
@@ -452,14 +473,18 @@ VidaExtra/
 ### Arquivos Principais
 
 #### `index.html`
+
 Página principal da aplicação com:
+
 - Importação de bibliotecas via CDN (Bootstrap, FullCalendar, etc.)
 - Estrutura HTML semântica
 - Sistema de abas (Cálculo, Resultado, Histórico)
 - Links para folhas de estilo
 
 #### `app.js`
+
 Código principal com:
+
 - Carregamento de valores do JSON
 - Funções de cálculo de horas extras
 - Gerenciamento de histórico (adicionar, editar, remover)
@@ -469,13 +494,17 @@ Código principal com:
 - Feedback sonoro
 
 #### `valores-ac4.json`
+
 Tabela de valores configurável:
+
 - Horários pré-definidos
 - Valores diferenciados por dia da semana
 - Total de horas por período
 
 #### `sw.js` (Service Worker)
+
 Estratégia de cache:
+
 - Cache-first para recursos estáticos
 - Atualização em background
 - Suporte offline
@@ -519,11 +548,316 @@ npm run lint -- --fix
 
 ---
 
+## 📅 Integração Google Calendar e Notificações por E-mail
+
+### Visão Geral
+
+O VidaExtra agora oferece integração completa com o Google Calendar, permitindo sincronização automática de eventos e envio de lembretes por e-mail.
+
+### 🔐 Configuração Inicial
+
+#### 1. Google Cloud Console - OAuth2 Credentials
+
+1. Acesse [Google Cloud Console](https://console.cloud.google.com/)
+2. Crie um novo projeto ou selecione um existente
+3. Habilite as APIs necessárias:
+
+   - **Google Calendar API**
+   - **Firebase Authentication**
+
+4. Crie credenciais OAuth 2.0:
+   - Navegue para **APIs & Services > Credentials**
+   - Clique em **Create Credentials > OAuth client ID**
+   - Tipo de aplicativo: **Web application**
+   - Nome: `VidaExtra Web Client`
+   - Origens JavaScript autorizadas:
+     ```
+     http://localhost:5500
+     https://vidaextra-8db27.web.app
+     https://vidaextra-8db27.firebaseapp.com
+     ```
+   - URIs de redirecionamento autorizados:
+     ```
+     http://localhost:5500/oauth2callback
+     https://vidaextra-8db27.web.app/oauth2callback
+     ```
+   - Salve e copie o **Client ID** e **Client Secret**
+
+#### 2. Firebase Setup
+
+```powershell
+# Instale o Firebase CLI
+npm install -g firebase-tools
+
+# Faça login no Firebase
+firebase login
+
+# Inicialize o projeto (se ainda não iniciou)
+firebase init
+
+# Selecione:
+# - Firestore
+# - Functions
+# - Hosting
+```
+
+#### 3. Configurar Variáveis de Ambiente
+
+**No diretório `functions/`, crie um arquivo `.env`:**
+
+```bash
+# Firebase
+FIREBASE_PROJECT_ID=vidaextra-8db27
+
+# Google OAuth2 (cole suas credenciais aqui)
+OAUTH_CLIENT_ID=seu-client-id.apps.googleusercontent.com
+OAUTH_CLIENT_SECRET=seu-client-secret
+
+# Gmail SMTP (já configurado)
+SMTP_SERVICE=gmail
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=rafasouzacruz@gmail.com
+SMTP_PASS=jepaepndtyejgurg
+
+# Application
+NODE_ENV=production
+APP_URL=https://vidaextra-8db27.web.app
+```
+
+⚠️ **IMPORTANTE**: Nunca commit o arquivo `.env`! Ele já está no `.gitignore`.
+
+#### 4. Instalar Dependências das Functions
+
+```powershell
+cd functions
+npm install
+cd ..
+```
+
+#### 5. Deploy
+
+```powershell
+# Deploy completo (Hosting + Functions + Firestore Rules)
+firebase deploy
+
+# Ou deploy individual:
+firebase deploy --only functions
+firebase deploy --only hosting
+firebase deploy --only firestore:rules
+```
+
+---
+
+### 🚀 Como Funciona
+
+#### Fluxo de Autenticação
+
+1. **Usuário acessa** `pages/login.html`
+2. **Clica em "Entrar com Google"**
+3. **Autoriza** acesso ao Google Calendar
+4. **Backend recebe** access token e troca por refresh token
+5. **Tokens são salvos** no Firestore (coleção `users`)
+6. **Usuário é redirecionado** para o app principal
+
+#### Sistema de Lembretes
+
+```mermaid
+graph LR
+    A[Cloud Scheduler] -->|A cada 5min| B[checkReminders Function]
+    B --> C{Para cada usuário}
+    C --> D[Busca eventos do Calendar]
+    D --> E{Calcula lembretes}
+    E -->|24h antes| F[Envia E-mail]
+    E -->|1h antes| F
+    E -->|30min antes| F
+    F --> G[Marca como enviado]
+```
+
+#### Job Agendado
+
+A função `checkReminders` roda **a cada 5 minutos** e:
+
+1. Busca todos os usuários com `refreshToken`
+2. Para cada usuário:
+   - Atualiza o access token usando o refresh token
+   - Busca eventos das próximas 48 horas
+   - Calcula se deve enviar lembrete (24h, 1h ou 30min antes)
+   - Verifica se lembrete já foi enviado (evita duplicação)
+   - Envia e-mail via Nodemailer
+   - Registra envio em `users/{uid}/sentNotifications`
+
+---
+
+### 📧 Template de E-mail
+
+Os e-mails enviados incluem:
+
+- **Logo do VidaExtra** (branding)
+- **Título do evento**
+- **Data e hora** formatadas
+- **Local** (se houver)
+- **Descrição** (se houver)
+- **Tipo de lembrete** (24h / 1h / 30min)
+- **Link** para abrir o app
+- **Opção de desativar** notificações
+
+---
+
+### 🔧 Endpoints da API
+
+| Endpoint                | Método    | Descrição                             |
+| ----------------------- | --------- | ------------------------------------- |
+| `/registerCredentials`  | POST      | Registra tokens OAuth2 do usuário     |
+| `/updateNotifySettings` | POST      | Atualiza preferências de notificações |
+| `/getUpcomingEvents`    | GET       | Busca eventos futuros do Calendar     |
+| `/testReminders`        | GET       | Testa envio de lembretes manualmente  |
+| `/checkReminders`       | Scheduled | Job automático (a cada 5 minutos)     |
+
+### 📊 Estrutura do Firestore
+
+```
+users/
+  {userId}/
+    - uid: string
+    - email: string
+    - displayName: string
+    - photoURL: string
+    - refreshToken: string (criptografado em produção!)
+    - notifySettings: {
+        email: boolean
+        reminders: ['24h', '1h', '30m']
+      }
+    - createdAt: timestamp
+    - updatedAt: timestamp
+
+    sentNotifications/
+      {eventId}_{reminderType}/
+        - eventId: string
+        - reminderType: string
+        - sentAt: timestamp
+```
+
+---
+
+### ⚙️ Configurações no App
+
+Na aba **Lembretes** do aplicativo, o usuário pode:
+
+- ✅ **Ativar/Desativar** notificações por e-mail
+- 📅 **Visualizar** próximos eventos do Google Calendar
+- 🔄 **Atualizar** manualmente a lista de eventos
+- 📊 **Ver** quais lembretes estão configurados (24h, 1h, 30min)
+
+---
+
+### 🛡️ Segurança
+
+#### Boas Práticas Implementadas
+
+- ✅ **Firestore Rules**: Apenas o próprio usuário acessa seus dados
+- ✅ **Autenticação Firebase**: Verificação de ID token em todas as requisições
+- ✅ **HTTPS Only**: Comunicação criptografada
+- ✅ **Tokens no Backend**: Refresh tokens nunca expostos ao frontend
+- ⚠️ **TODO**: Criptografar refresh tokens com Cloud Secret Manager
+
+#### Regras de Segurança
+
+```javascript
+// firestore.rules
+match /users/{userId} {
+  allow read, write: if request.auth != null && request.auth.uid == userId;
+}
+```
+
+---
+
+### 🧪 Testando Localmente
+
+#### 1. Emulador Firebase
+
+```powershell
+# Inicie os emuladores
+firebase emulators:start
+
+# Acesse o Emulator UI
+# http://localhost:4000
+```
+
+#### 2. Teste Manual de Lembretes
+
+```powershell
+# Com o app rodando e um usuário logado, chame:
+curl -X GET https://us-central1-vidaextra-8db27.cloudfunctions.net/testReminders \
+  -H "Authorization: Bearer SEU_FIREBASE_ID_TOKEN"
+```
+
+#### 3. Logs
+
+```powershell
+# Ver logs das functions
+firebase functions:log
+
+# Ver logs em tempo real
+firebase functions:log --only checkReminders
+```
+
+---
+
+### ❓ Troubleshooting
+
+#### Problema: "OAuth credentials not configured"
+
+**Solução**: Verifique se `OAUTH_CLIENT_ID` e `OAUTH_CLIENT_SECRET` estão no arquivo `.env` das functions.
+
+#### Problema: "Failed to send email"
+
+**Solução**:
+
+- Verifique se `SMTP_PASS` está correto
+- Use uma [senha de app do Gmail](https://support.google.com/accounts/answer/185833)
+- Habilite "Acesso de apps menos seguros" (não recomendado)
+
+#### Problema: "Unauthorized domain"
+
+**Solução**: No Firebase Console, adicione seus domínios em **Authentication > Settings > Authorized domains**.
+
+#### Problema: Lembretes não sendo enviados
+
+**Solução**:
+
+- Verifique se o Cloud Scheduler está ativo
+- Confira os logs: `firebase functions:log`
+- Teste manualmente: endpoint `/testReminders`
+- Verifique se usuário tem `refreshToken` válido
+
+---
+
+### 📝 Scripts Úteis
+
+```powershell
+# Deploy apenas das functions
+firebase deploy --only functions
+
+# Deploy com logs detalhados
+firebase deploy --only functions --debug
+
+# Deletar uma function
+firebase functions:delete nomeDaFunction
+
+# Ver configuração atual
+firebase functions:config:get
+```
+
+---
+
 ## 🆕 Novidades Recentes
 
 ### Versão 1.0.0 (Novembro 2024)
 
 #### 🎨 Melhorias no Calendário
+
 - ✨ Eventos no mês aparecem como **texto simples** por dia (sem barras atravessando)
 - 🎨 **Borda visual** nos dias com eventos:
   - **Azul** para eventos de hoje
@@ -532,16 +866,19 @@ npm run lint -- --fix
 - 🔧 Correção de renderização ao alternar para aba Histórico (recalcula tamanho)
 
 #### 📝 Funcionalidade de Edição
+
 - ✏️ **Edição completa** de registros do histórico
 - 🔄 Recálculo automático de totais após edição
 - 💾 Atualização em tempo real no calendário e lista
 
 #### 🎵 Feedback Sonoro
+
 - 🔔 Som de confirmação ao adicionar cálculo
 - 🧹 Som de limpeza ao resetar dados
 - 🗑️ Som de exclusão ao remover item
 
 #### 🐛 Correções
+
 - 🔧 Overflow de texto nos quadrados do calendário
 - 🔧 Sincronização entre lista e calendário
 - 🔧 Persistência de dados após edição
@@ -554,22 +891,26 @@ npm run lint -- --fix
 Contribuições são bem-vindas! Para contribuir:
 
 ### 1. Fork o repositório
+
 ```powershell
 # No GitHub, clique em "Fork"
 ```
 
 ### 2. Clone seu fork
+
 ```powershell
 git clone https://github.com/SEU-USUARIO/VidaExtra.git
 cd VidaExtra
 ```
 
 ### 3. Crie uma branch para sua feature
+
 ```powershell
 git checkout -b feature/minha-nova-feature
 ```
 
 ### 4. Faça suas alterações
+
 ```powershell
 # Edite os arquivos
 npm run lint          # Verifique a qualidade
@@ -577,6 +918,7 @@ npm run build:css     # Compile o CSS se necessário
 ```
 
 ### 5. Commit e Push
+
 ```powershell
 git add .
 git commit -m "feat: adiciona nova funcionalidade X"
@@ -584,6 +926,7 @@ git push origin feature/minha-nova-feature
 ```
 
 ### 6. Abra um Pull Request
+
 - No GitHub, vá até seu fork
 - Clique em "New Pull Request"
 - Descreva suas alterações detalhadamente
@@ -604,18 +947,23 @@ git push origin feature/minha-nova-feature
 ### Problemas Comuns
 
 #### ❓ "Horário não encontrado"
+
 **Solução**: Verifique se o horário existe em `valores-ac4.json`. O formato deve ser exato (ex: `18h as 00h`).
 
 #### ❓ "Valores não carregados"
+
 **Solução**: Certifique-se de que o arquivo `valores-ac4.json` está na raiz do projeto e é um JSON válido.
 
 #### ❓ Tailwind CSS não aplica estilos
+
 **Solução**: Execute `npm run build:css` para gerar o arquivo `dist/tailwind.css`.
 
 #### ❓ Erros de ESLint
+
 **Solução**: Execute `npm run lint -- --fix` para corrigir automaticamente.
 
 #### ❓ PWA não instala
+
 **Solução**: Certifique-se de estar acessando via HTTPS ou localhost. Verifique o console do navegador.
 
 ### Contato
@@ -629,6 +977,7 @@ git push origin feature/minha-nova-feature
 ## 🏆 Créditos
 
 ### Desenvolvedor Principal
+
 - **CB Antônio Rafael** - Desenvolvedor Full Stack
 - Lotação: 14ª CIPM
 
@@ -659,7 +1008,7 @@ Este projeto utiliza as seguintes bibliotecas open-source:
 
 **Uso Interno** - Sem licença pública definida.
 
-Este projeto é desenvolvido para uso interno da instituição. 
+Este projeto é desenvolvido para uso interno da instituição.
 Todos os direitos reservados © 2024 VidaExtra®
 
 ---

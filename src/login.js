@@ -4,6 +4,7 @@
  */
 
 import { auth } from "./firebase-config.js";
+import { apiFetch } from "./api.js";
 import {
   GoogleAuthProvider,
   signInWithPopup,
@@ -17,11 +18,7 @@ const loginButtonContainer = document.getElementById("login-button-container");
 const errorMessage = document.getElementById("error-message");
 const errorText = document.getElementById("error-text");
 
-// Backend API URL (ajuste conforme seu deploy)
-const API_URL =
-  window.location.hostname === "localhost"
-    ? "http://localhost:5001/vidaextra-8db27/us-central1"
-    : "https://us-central1-vidaextra-8db27.cloudfunctions.net";
+// Backend API calls will use apiFetch, which auto-detects local emulator or production
 
 /**
  * Configura o Google Auth Provider com escopos do Calendar
@@ -74,7 +71,7 @@ async function registerCredentials(user, credential) {
   try {
     const idToken = await user.getIdToken();
 
-    const response = await fetch(`${API_URL}/registerCredentials`, {
+    const response = await apiFetch(`/registerCredentials`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -127,7 +124,7 @@ function saveUserToLocalStorage(user, credential) {
 function redirectToApp() {
   // Pequeno delay para dar feedback visual
   setTimeout(() => {
-    window.location.href = "../index.html";
+    window.location.href = "/index.html";
   }, 1000);
 }
 
@@ -193,36 +190,35 @@ async function handleGoogleSignIn() {
  * Verifica se já existe usuário logado
  */
 function checkExistingUser() {
-  const userData = localStorage.getItem("vidaextra-user");
+  // Verifica o estado do Firebase Auth primeiro
+  return new Promise((resolve) => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      unsubscribe(); // Desinscreve após primeira verificação
 
-  if (userData) {
-    try {
-      const user = JSON.parse(userData);
-      const loginAge = Date.now() - (user.loginTimestamp || 0);
-
-      // Se o login tem menos de 24 horas, redireciona automaticamente
-      if (loginAge < 24 * 60 * 60 * 1000) {
-        console.log("Usuário já logado, redirecionando...");
+      if (user) {
+        // Usuário autenticado no Firebase
+        console.log("Usuário já logado no Firebase, redirecionando...");
+        showLoading();
         redirectToApp();
-        return true;
+        resolve(true);
+      } else {
+        // Limpa localStorage se não estiver autenticado
+        localStorage.removeItem("vidaextra-user");
+        resolve(false);
       }
-    } catch (e) {
-      console.error("Erro ao verificar usuário existente:", e);
-      localStorage.removeItem("vidaextra-user");
-    }
-  }
-
-  return false;
+    });
+  });
 }
 
 /**
  * Inicialização
  */
-document.addEventListener("DOMContentLoaded", () => {
-  // Verifica se já está logado
-  if (checkExistingUser()) {
-    showLoading();
-    return;
+document.addEventListener("DOMContentLoaded", async () => {
+  // Verifica se já está logado (assíncrono)
+  const isLoggedIn = await checkExistingUser();
+
+  if (isLoggedIn) {
+    return; // Já está redirecionando
   }
 
   // Adiciona event listener ao botão

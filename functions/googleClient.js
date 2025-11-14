@@ -92,6 +92,30 @@ export async function listCalendarEvents(accessToken, options = {}) {
 }
 
 /**
+ * Cria um evento no calendário do usuário
+ * @param {string} accessToken - Access token válido
+ * @param {Object} event - Objeto de evento do Calendar API (requestBody)
+ * @returns {Promise<Object>} Dados do evento criado
+ */
+export async function createCalendarEvent(accessToken, event) {
+  const oauth2Client = createOAuth2Client();
+  oauth2Client.setCredentials({ access_token: accessToken });
+
+  const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+
+  try {
+    const response = await calendar.events.insert({
+      calendarId: "primary",
+      requestBody: event,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error creating calendar event:", error);
+    throw new Error("Failed to create calendar event");
+  }
+}
+
+/**
  * Obtém detalhes de um evento específico
  * @param {string} accessToken - Access token válido
  * @param {string} eventId - ID do evento
@@ -136,5 +160,6 @@ export default {
   refreshAccessToken,
   listCalendarEvents,
   getCalendarEvent,
+  createCalendarEvent,
   validateRefreshToken,
 };

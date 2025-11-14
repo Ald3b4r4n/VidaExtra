@@ -17,5 +17,14 @@
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
+  },
+  "emulators": {
+    "functions": {
+      "host": "127.0.0.1",
+      "port": 5999
+    },
+    "ui": {
+      "enabled": false
+    }
   }
 }

@@ -46,11 +46,13 @@ functions/.env
 ### Desenvolvimento Local
 
 1. **Copie o template:**
+
    ```powershell
    copy .env.example functions/.env
    ```
 
 2. **Edite `functions/.env` com valores reais:**
+
    ```bash
    SMTP_USER=rafasouzacruz@gmail.com
    SMTP_PASS=jepaepndtyejgurg
@@ -82,6 +84,7 @@ firebase functions:config:set smtp.pass="jepaepndtyejgurg"
 ### Ação Imediata:
 
 1. **REVOGAR as credenciais imediatamente!**
+
    - Gmail: Gere uma nova senha de app
    - OAuth: Regenere Client Secret no Google Cloud Console
    - Firebase: Regenere service account keys
@@ -93,7 +96,7 @@ firebase functions:config:set smtp.pass="jepaepndtyejgurg"
    git filter-branch --force --index-filter \
      "git rm --cached --ignore-unmatch functions/.env" \
      --prune-empty --tag-name-filter cat -- --all
-   
+
    # Force push (avise o time antes!)
    git push origin --force --all
    ```

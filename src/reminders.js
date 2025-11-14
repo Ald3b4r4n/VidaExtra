@@ -4,18 +4,25 @@
  */
 
 import { getIdToken } from "./auth.js";
-
-// Backend API URL
-const API_URL =
-  window.location.hostname === "localhost"
-    ? "http://localhost:5001/vidaextra-8db27/us-central1"
-    : "https://us-central1-vidaextra-8db27.cloudfunctions.net";
+import { apiFetch } from "./api.js";
 
 /**
  * Formata data para exibição
  */
 function formatDate(dateString) {
-  const date = new Date(dateString);
+  // Se é um objeto com dateTime, extraia a string
+  const dateStr =
+    typeof dateString === "object" && dateString.dateTime
+      ? dateString.dateTime
+      : dateString;
+
+  const date = new Date(dateStr);
+
+  // Verifica se a data é válida
+  if (isNaN(date.getTime())) {
+    return "Data inválida";
+  }
+
   const day = String(date.getDate()).padStart(2, "0");
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const year = date.getFullYear();
@@ -29,8 +36,20 @@ function formatDate(dateString) {
  * Calcula tempo restante até o evento
  */
 function getTimeUntil(dateString) {
+  // Se é um objeto com dateTime, extraia a string
+  const dateStr =
+    typeof dateString === "object" && dateString.dateTime
+      ? dateString.dateTime
+      : dateString;
+
   const now = new Date();
-  const eventDate = new Date(dateString);
+  const eventDate = new Date(dateStr);
+
+  // Verifica se a data é válida
+  if (isNaN(eventDate.getTime())) {
+    return "Data inválida";
+  }
+
   const diff = eventDate - now;
 
   if (diff < 0) return "Evento passado";
@@ -51,7 +70,7 @@ export async function fetchUpcomingEvents() {
   try {
     const idToken = await getIdToken();
 
-    const response = await fetch(`${API_URL}/getUpcomingEvents`, {
+    const response = await apiFetch(`/getUpcomingEvents`, {
       headers: {
         Authorization: `Bearer ${idToken}`,
       },
@@ -144,7 +163,7 @@ export async function updateNotificationSettings(settings) {
   try {
     const idToken = await getIdToken();
 
-    const response = await fetch(`${API_URL}/updateNotifySettings`, {
+    const response = await apiFetch(`/updateNotifySettings`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -176,9 +195,57 @@ export async function initReminders() {
   }
 }
 
+/**
+ * Utilitário: cria um evento no Google Calendar via backend
+ * Mantém a responsabilidade de token/refresh no servidor.
+ */
+export async function createCalendarEvent({
+  summary,
+  description,
+  location,
+  startISO,
+  endISO,
+  reminders,
+}) {
+  const idToken = await (await import("./auth.js")).getIdToken();
+  // Fallback: envia o accessToken do Google obtido no login para o backend usar caso não haja refresh_token salvo ainda
+  let googleAccessToken;
+  try {
+    const ls = localStorage.getItem("vidaextra-user");
+    if (ls) {
+      const parsed = JSON.parse(ls);
+      googleAccessToken = parsed?.accessToken;
+    }
+  } catch {}
+  const response = await (
+    await import("./api.js")
+  ).apiFetch("/createCalendarEvent", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${idToken}`,
+    },
+    body: JSON.stringify({
+      summary,
+      description,
+      location,
+      startISO,
+      endISO,
+      reminders,
+      googleAccessToken,
+    }),
+  });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || "Failed to create calendar event");
+  }
+  return await response.json();
+}
+
 export default {
   fetchUpcomingEvents,
   renderReminders,
   updateNotificationSettings,
   initReminders,
+  createCalendarEvent,
 };

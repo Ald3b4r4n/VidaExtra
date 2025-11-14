@@ -6,6 +6,9 @@
     <meta name="description" content="Login VidaExtra - Calculadora AC-4" />
     <title>Login - VidaExtra®</title>
 
+    <!-- Remove Service Workers em desenvolvimento -->
+    <script src="/src/unregister-sw.js"></script>
+
     <!-- Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
@@ -17,12 +20,12 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
     />
     <!-- Tailwind CSS -->
-    <link href="../dist/tailwind.css" rel="stylesheet" />
+    <link href="/dist/tailwind.css" rel="stylesheet" />
     <!-- Custom Login CSS -->
-    <link href="../src/login.css" rel="stylesheet" />
+    <link href="/src/login.css" rel="stylesheet" />
 
     <!-- Firebase SDK -->
-    <script type="module" src="../src/firebase-config.js"></script>
+    <script type="module" src="/src/firebase-config.js"></script>
   </head>
   <body class="bg-gradient-to-br from-blue-600 to-blue-900">
     <div class="container">
@@ -33,7 +36,7 @@
               <!-- Logo -->
               <div class="text-center mb-4">
                 <img
-                  src="../operador.jpg"
+                  src="/operador.jpg"
                   alt="VidaExtra Logo"
                   class="logo-login mb-3"
                 />
@@ -119,6 +122,6 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Login Script -->
-    <script type="module" src="../src/login.js"></script>
+    <script type="module" src="/src/login.js"></script>
   </body>
 </html>

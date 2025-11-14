@@ -18,6 +18,9 @@
     <meta name="apple-mobile-web-app-title" content="VidaExtra" />
     <link rel="manifest" href="manifest.json" />
 
+    <!-- Remove Service Workers em desenvolvimento -->
+    <script src="/src/unregister-sw.js"></script>
+
     <!-- Favicon e Ícones -->
     <link rel="icon" href="./operador.jpg" type="image/jpeg" />
     <link rel="apple-touch-icon" href="operador.jpg" />
@@ -553,8 +556,8 @@
         document.querySelector("footer").before(installButton);
       });
 
-      // Service Worker Registration
-      if ("serviceWorker" in navigator) {
+      // Service Worker Registration - DESABILITADO EM DEV
+      if (false && "serviceWorker" in navigator) {
         window.addEventListener("load", () => {
           navigator.serviceWorker
             .register("./sw.js")

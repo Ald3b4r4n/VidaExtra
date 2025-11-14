@@ -23,7 +23,7 @@ export function checkAuth() {
       } else {
         // Não está logado - redireciona para login
         console.log("User not authenticated, redirecting to login");
-        window.location.href = "pages/login.html";
+        window.location.replace("/pages/login.html");
         resolve(null);
       }
     });
@@ -55,15 +55,24 @@ function updateUIWithUser(user) {
  */
 export async function handleLogout() {
   try {
-    await signOut(auth);
+    // Limpar localStorage ANTES do signOut
     localStorage.removeItem("vidaextra-user");
     localStorage.removeItem("ac4-historico");
     localStorage.removeItem("ac4-totais");
+
+    // Fazer logout do Firebase
+    await signOut(auth);
+
     console.log("User logged out successfully");
-    window.location.href = "pages/login.html";
+
+    // Redirecionar para login usando replace para evitar download
+    window.location.replace("/pages/login.html");
   } catch (error) {
     console.error("Error logging out:", error);
-    alert("Erro ao fazer logout. Tente novamente.");
+
+    // Mesmo com erro, tenta limpar e redirecionar
+    localStorage.clear();
+    window.location.replace("/pages/login.html");
   }
 }
 
