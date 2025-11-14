@@ -1,307 +1,602 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>VidaExtra® - Calculadora AC-4</title>
-  
-  <!-- Meta Tags PWA -->
-  <meta name="theme-color" content="#0d6efd">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="VidaExtra">
-  <link rel="manifest" href="manifest.json">
-  
-  <!-- Favicon e Ícones -->
-  <link rel="icon" href="./operador.jpg" type="image/jpeg">
-  <link rel="apple-touch-icon" href="operador.jpg">
-  
-  <!-- CSS Externo -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-  <link rel="stylesheet" href="dist/tailwind.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css">
-  
-  <!-- CSS Local -->
-  <link rel="stylesheet" href="style.css">
-</head>
-<body class="d-flex flex-column min-vh-100">
-  <div class="max-w-5xl mx-auto px-4 py-6 flex-grow-1">
-    <header class="bg-white border rounded-xl shadow-sm mb-6">
-      <div class="px-4 py-4 d-flex align-items-center justify-content-between gap-4 flex-wrap header-bar">
-        <div class="d-flex align-items-center gap-4">
-          <img src="./operador.jpg" alt="Operador" class="img-topo mb-0 rounded-circle">
-          <div>
-            <h1 class="fw-semibold mb-0 text-primary"><i class="bi bi-shield-lock text-primary"></i> VidaExtra<sup>®</sup></h1>
-            <p class="text-muted mb-0 app-subtitle">Calculadora de horas extras - AC-4</p>
-          </div>
-        </div>
-        <div class="d-flex align-items-center gap-3 header-actions">
-          <button type="button" id="btn-exportar" class="btn btn-outline-success px-3 py-2">
-            <i class="bi bi-file-earmark-pdf"></i> <span class="btn-text">Exportar PDF</span>
-          </button>
-          <button type="button" id="btn-limpar" class="btn btn-outline-danger px-3 py-2">
-            <i class="bi bi-trash"></i> <span class="btn-text">Limpar Tudo</span>
-          </button>
-        </div>
-      </div>
-    </header>
-    
-    <!-- Abas de navegação (Opção B) -->
-    <div class="d-flex gap-2 mt-2 mb-4">
-      <button type="button" class="btn btn-primary" data-tab="calc"><i class="bi bi-calculator"></i> Calcular</button>
-      <button type="button" class="btn btn-outline-primary" data-tab="hist"><i class="bi bi-clock-history"></i> Histórico</button>
-    </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>VidaExtra® - Calculadora AC-4</title>
 
-    <!-- Aba: Calcular -->
-    <section id="tab-calc">
-      <div class="row g-4 align-items-stretch">
-        <!-- Formulário -->
-        <div class="col-lg-6">
-          <div class="card shadow-sm border rounded-xl h-100">
-            <div class="card-header bg-white">
-              <i class="bi bi-calculator"></i> Dados do Serviço
-            </div>
-            <div class="card-body">
-              <form id="form-calculo">
-                <div class="mb-3">
-                  <label class="form-label fw-bold">Data</label>
-                  <input type="date" id="data-servico" class="form-control" required>
-                </div>
-                
-                <div class="row g-2 mb-3">
-                  <div class="col-md-6">
-                    <label class="form-label fw-bold">Hora Inicial</label>
-                    <input type="time" id="hora-inicio" class="form-control" required>
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label fw-bold">Hora Final</label>
-                    <input type="time" id="hora-fim" class="form-control" required>
-                  </div>
-                </div>
+    <!-- Meta Tags PWA -->
+    <meta name="theme-color" content="#0d6efd" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="VidaExtra" />
+    <link rel="manifest" href="manifest.json" />
 
-                <div class="form-check mb-3">
-                  <input class="form-check-input" type="checkbox" id="pensao-alimenticia">
-                  <label class="form-check-label fw-bold" for="pensao-alimenticia">
-                    <i class="bi bi-exclamation-triangle text-warning"></i> Desconto de Pensão Alimentícia
-                  </label>
-                </div>
+    <!-- Favicon e Ícones -->
+    <link rel="icon" href="./operador.jpg" type="image/jpeg" />
+    <link rel="apple-touch-icon" href="operador.jpg" />
 
-                <div id="pensao-container" class="mb-3 p-3 bg-light rounded" style="display: none;">
-                  <label class="form-label fw-bold">Percentual de Desconto (%)</label>
-                  <input type="number" id="percentual-pensao" class="form-control" min="1" max="100" value="18">
-                </div>
+    <!-- CSS Externo -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+    />
+    <link rel="stylesheet" href="dist/tailwind.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css"
+    />
 
-                <div class="mb-3">
-                  <label class="form-label fw-bold" for="anotacoes">Anotações</label>
-                  <textarea id="anotacoes" class="form-control" rows="2" placeholder="Observações do serviço (opcional)"></textarea>
-                </div>
-
-                <div class="d-grid gap-2">
-                  <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-calculator"></i> Calcular
-                  </button>
-                </div>
-              </form>
+    <!-- CSS Local -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="d-flex flex-column min-vh-100">
+    <div class="max-w-5xl mx-auto px-4 py-6 flex-grow-1">
+      <header class="bg-white border rounded-xl shadow-sm mb-6">
+        <div
+          class="px-4 py-4 d-flex align-items-center justify-content-between gap-4 flex-wrap header-bar"
+        >
+          <div class="d-flex align-items-center gap-4">
+            <img
+              src="./operador.jpg"
+              alt="Operador"
+              class="img-topo mb-0 rounded-circle"
+            />
+            <div>
+              <h1 class="fw-semibold mb-0 text-primary">
+                <i class="bi bi-shield-lock text-primary"></i> VidaExtra<sup
+                  >®</sup
+                >
+              </h1>
+              <p class="text-muted mb-0 app-subtitle">
+                Calculadora de horas extras - AC-4
+              </p>
             </div>
           </div>
-        </div>
-
-        <!-- Resultado -->
-        <div class="col-lg-6">
-          <div class="card shadow-sm border rounded-xl h-100">
-            <div class="card-header bg-white">
-              <i class="bi bi-cash-stack"></i> Resultado
-            </div>
-            <div class="card-body">
-              <div id="resultado-container" style="display: none;">
-                <div class="alert alert-info" id="resumo-periodo"></div>
-                <div id="resumo-anotacoes" class="text-muted" style="display:none;"></div>
-                
-                <div class="table-responsive">
-                  <table class="table table-sm">
-                    <thead class="table-light">
-                      <tr>
-                        <th>Horas</th>
-                        <th>Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td id="horas-diurnas">0</td>
-                        <td id="total-diurno" class="fw-bold">R$ 0,00</td>
-                      </tr>
-                      <tr class="table-secondary">
-                        <td class="fw-bold">TOTAL BRUTO</td>
-                        <td id="total-bruto" class="fw-bold">R$ 0,00</td>
-                      </tr>
-                      <tr id="linha-pensao" style="display: none;">
-                        <td>Desconto Pensão</td>
-                        <td id="desconto-pensao" class="text-danger fw-bold">- R$ 0,00</td>
-                      </tr>
-                      <tr class="table-success">
-                        <td class="fw-bold">TOTAL LÍQUIDO</td>
-                        <td id="total-liquido" class="fw-bold">R$ 0,00</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div id="resultado-vazio" class="text-center py-5 text-muted">
-                <i class="bi bi-calculator display-6"></i>
-                <p class="mt-3">Preencha os dados para calcular</p>
-              </div>
-            </div>
+          <div class="d-flex align-items-center gap-3 header-actions flex-wrap">
+            <div id="user-info"></div>
+            <button
+              type="button"
+              id="btn-exportar"
+              class="btn btn-outline-success px-3 py-2"
+            >
+              <i class="bi bi-file-earmark-pdf"></i>
+              <span class="btn-text">Exportar PDF</span>
+            </button>
+            <button
+              type="button"
+              id="btn-limpar"
+              class="btn btn-outline-danger px-3 py-2"
+            >
+              <i class="bi bi-trash"></i>
+              <span class="btn-text">Limpar Tudo</span>
+            </button>
+            <button
+              type="button"
+              id="btn-logout"
+              class="btn btn-outline-secondary px-3 py-2"
+            >
+              <i class="bi bi-box-arrow-right"></i>
+              <span class="btn-text">Sair</span>
+            </button>
           </div>
         </div>
-      </div>
-    </section>
+      </header>
 
-    <!-- Aba: Histórico -->
-    <section id="tab-hist" class="d-none">
-      <div class="card shadow-sm border rounded-xl mt-3">
-        <div class="card-header bg-white">
+      <!-- Abas de navegação -->
+      <div class="d-flex gap-2 mt-2 mb-4 flex-wrap">
+        <button type="button" class="btn btn-primary" data-tab="calc">
+          <i class="bi bi-calculator"></i> Calcular
+        </button>
+        <button type="button" class="btn btn-outline-primary" data-tab="hist">
           <i class="bi bi-clock-history"></i> Histórico
-        </div>
-        <div class="card-body">
-          <div class="mb-3">
-            <div class="alert alert-light border d-flex align-items-center justify-content-between hist-legend-bar">
-              <div class="d-flex align-items-center gap-2">
-                <i class="bi bi-calendar3 text-primary"></i>
-                <strong>Calendário</strong>
+        </button>
+        <button
+          type="button"
+          class="btn btn-outline-primary"
+          data-tab="lembretes"
+        >
+          <i class="bi bi-bell"></i> Lembretes
+        </button>
+      </div>
+
+      <!-- Aba: Calcular -->
+      <section id="tab-calc">
+        <div class="row g-4 align-items-stretch">
+          <!-- Formulário -->
+          <div class="col-lg-6">
+            <div class="card shadow-sm border rounded-xl h-100">
+              <div class="card-header bg-white">
+                <i class="bi bi-calculator"></i> Dados do Serviço
               </div>
-              <div class="text-muted hist-legend">
-                <small class="hist-legend-hover">Passe o mouse sobre o dia para ver a informação completa.</small>
-                <small class="hist-legend-tap">Toque no dia/data para mais informações.</small>
+              <div class="card-body">
+                <form id="form-calculo">
+                  <div class="mb-3">
+                    <label class="form-label fw-bold">Data</label>
+                    <input
+                      type="date"
+                      id="data-servico"
+                      class="form-control"
+                      required
+                    />
+                  </div>
+
+                  <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">Hora Inicial</label>
+                      <input
+                        type="time"
+                        id="hora-inicio"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">Hora Final</label>
+                      <input
+                        type="time"
+                        id="hora-fim"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div class="form-check mb-3">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="pensao-alimenticia"
+                    />
+                    <label
+                      class="form-check-label fw-bold"
+                      for="pensao-alimenticia"
+                    >
+                      <i class="bi bi-exclamation-triangle text-warning"></i>
+                      Desconto de Pensão Alimentícia
+                    </label>
+                  </div>
+
+                  <div
+                    id="pensao-container"
+                    class="mb-3 p-3 bg-light rounded"
+                    style="display: none"
+                  >
+                    <label class="form-label fw-bold"
+                      >Percentual de Desconto (%)</label
+                    >
+                    <input
+                      type="number"
+                      id="percentual-pensao"
+                      class="form-control"
+                      min="1"
+                      max="100"
+                      value="18"
+                    />
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label fw-bold" for="anotacoes"
+                      >Anotações</label
+                    >
+                    <textarea
+                      id="anotacoes"
+                      class="form-control"
+                      rows="2"
+                      placeholder="Observações do serviço (opcional)"
+                    ></textarea>
+                  </div>
+
+                  <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">
+                      <i class="bi bi-calculator"></i> Calcular
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
-            <div id="historico-calendario"></div>
           </div>
-          <div id="historico-lista" class="list-group"></div>
-          <div id="historico-vazio" class="text-center py-3 text-muted">
-            Nenhum cálculo registrado ainda
-          </div>
-          
-          <div id="total-acumulado" class="alert alert-success mt-3" style="display: none;">
-            <strong>Total Acumulado:</strong> <span id="total-horas-valor">0h</span> | <span id="total-valor-acumulado">R$ 0,00</span>
-          </div>
-          
-          <div id="total-perdido-pensao" class="alert alert-danger mt-2" style="display: none;">
-            <strong>Total Perdido para Pensão:</strong> <span id="total-perdido-valor">R$ 0,00</span>
+
+          <!-- Resultado -->
+          <div class="col-lg-6">
+            <div class="card shadow-sm border rounded-xl h-100">
+              <div class="card-header bg-white">
+                <i class="bi bi-cash-stack"></i> Resultado
+              </div>
+              <div class="card-body">
+                <div id="resultado-container" style="display: none">
+                  <div class="alert alert-info" id="resumo-periodo"></div>
+                  <div
+                    id="resumo-anotacoes"
+                    class="text-muted"
+                    style="display: none"
+                  ></div>
+
+                  <div class="table-responsive">
+                    <table class="table table-sm">
+                      <thead class="table-light">
+                        <tr>
+                          <th>Horas</th>
+                          <th>Total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td id="horas-diurnas">0</td>
+                          <td id="total-diurno" class="fw-bold">R$ 0,00</td>
+                        </tr>
+                        <tr class="table-secondary">
+                          <td class="fw-bold">TOTAL BRUTO</td>
+                          <td id="total-bruto" class="fw-bold">R$ 0,00</td>
+                        </tr>
+                        <tr id="linha-pensao" style="display: none">
+                          <td>Desconto Pensão</td>
+                          <td id="desconto-pensao" class="text-danger fw-bold">
+                            - R$ 0,00
+                          </td>
+                        </tr>
+                        <tr class="table-success">
+                          <td class="fw-bold">TOTAL LÍQUIDO</td>
+                          <td id="total-liquido" class="fw-bold">R$ 0,00</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div id="resultado-vazio" class="text-center py-5 text-muted">
+                  <i class="bi bi-calculator display-6"></i>
+                  <p class="mt-3">Preencha os dados para calcular</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Botão Exportar movido para o header -->
-  </div>
+      <!-- Aba: Histórico -->
+      <section id="tab-hist" class="d-none">
+        <div class="card shadow-sm border rounded-xl mt-3">
+          <div class="card-header bg-white">
+            <i class="bi bi-clock-history"></i> Histórico
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <div
+                class="alert alert-light border d-flex align-items-center justify-content-between hist-legend-bar"
+              >
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-calendar3 text-primary"></i>
+                  <strong>Calendário</strong>
+                </div>
+                <div class="text-muted hist-legend">
+                  <small class="hist-legend-hover"
+                    >Passe o mouse sobre o dia para ver a informação
+                    completa.</small
+                  >
+                  <small class="hist-legend-tap"
+                    >Toque no dia/data para mais informações.</small
+                  >
+                </div>
+              </div>
+              <div id="historico-calendario"></div>
+            </div>
+            <div id="historico-lista" class="list-group"></div>
+            <div id="historico-vazio" class="text-center py-3 text-muted">
+              Nenhum cálculo registrado ainda
+            </div>
 
-  <footer class="bg-dark text-white text-center py-3 mt-4">
-    <div class="container">
-      <p class="mb-0">
-        Desenvolvido por <strong>CB Antônio Rafael</strong> - 14ª CIPM
-      </p>
-      <div class="mt-2 d-flex justify-content-center gap-2 flex-wrap">
-        <a class="btn btn-success footer-btn" href="https://wa.me/5561982887294" target="_blank" rel="noopener noreferrer">
-          <i class="bi bi-whatsapp"></i> Entre em contato
-        </a>
-        <a class="btn btn-outline-primary footer-btn" href="https://www.antoniorafael.com.br/" target="_blank" rel="noopener noreferrer">
-          <i class="bi bi-person-badge"></i> Meu portfólio
-        </a>
-      </div>
+            <div
+              id="total-acumulado"
+              class="alert alert-success mt-3"
+              style="display: none"
+            >
+              <strong>Total Acumulado:</strong>
+              <span id="total-horas-valor">0h</span> |
+              <span id="total-valor-acumulado">R$ 0,00</span>
+            </div>
+
+            <div
+              id="total-perdido-pensao"
+              class="alert alert-danger mt-2"
+              style="display: none"
+            >
+              <strong>Total Perdido para Pensão:</strong>
+              <span id="total-perdido-valor">R$ 0,00</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Aba: Lembretes -->
+      <section id="tab-lembretes" class="d-none">
+        <div class="card shadow-sm border rounded-xl mt-3">
+          <div
+            class="card-header bg-white d-flex justify-content-between align-items-center"
+          >
+            <div><i class="bi bi-bell"></i> Lembretes e Notificações</div>
+            <button
+              type="button"
+              id="btn-refresh-lembretes"
+              class="btn btn-sm btn-outline-primary"
+            >
+              <i class="bi bi-arrow-clockwise"></i> Atualizar
+            </button>
+          </div>
+          <div class="card-body">
+            <!-- Configurações de Notificações -->
+            <div class="alert alert-info">
+              <div class="form-check form-switch">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="toggle-email-notifications"
+                  checked
+                />
+                <label
+                  class="form-check-label fw-bold"
+                  for="toggle-email-notifications"
+                >
+                  <i class="bi bi-envelope"></i> Receber lembretes por e-mail
+                </label>
+              </div>
+              <small class="text-muted d-block mt-2">
+                Você receberá e-mails 24 horas, 1 hora e 30 minutos antes de
+                cada evento do seu Google Calendar.
+              </small>
+            </div>
+
+            <!-- Próximos Eventos -->
+            <h6 class="fw-bold mb-3 mt-4">
+              <i class="bi bi-calendar-event"></i> Próximos Eventos
+            </h6>
+            <div id="lembretes-lista" class="list-group">
+              <div class="text-center text-muted py-5">
+                <div class="spinner-border text-primary mb-3" role="status">
+                  <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p>Carregando eventos...</p>
+              </div>
+            </div>
+
+            <!-- Informações -->
+            <div class="alert alert-light border mt-4">
+              <h6 class="fw-bold">
+                <i class="bi bi-info-circle"></i> Como funciona
+              </h6>
+              <ul class="small mb-0">
+                <li>
+                  Os eventos são sincronizados automaticamente do seu Google
+                  Calendar
+                </li>
+                <li>
+                  Lembretes são enviados por e-mail em 3 momentos: 24h, 1h e
+                  30min antes
+                </li>
+                <li>Você pode desativar as notificações a qualquer momento</li>
+                <li>
+                  Apenas eventos futuros (próximos 7 dias) são exibidos aqui
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Botão Exportar movido para o header -->
     </div>
-  </footer>
 
-  <!-- Scripts Externos -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  
-  <!-- Script Local -->
-  <script>
-    // Alternância de abas (Opção B)
-    document.addEventListener('DOMContentLoaded', () => {
-      function showTab(tab) {
-        document.getElementById('tab-calc').classList.toggle('d-none', tab !== 'calc');
-        document.getElementById('tab-hist').classList.toggle('d-none', tab !== 'hist');
-        document.querySelectorAll('[data-tab]').forEach(btn => {
-          const active = btn.getAttribute('data-tab') === tab;
-          btn.classList.toggle('btn-primary', active);
-          btn.classList.toggle('btn-outline-primary', !active);
+    <footer class="bg-dark text-white text-center py-3 mt-4">
+      <div class="container">
+        <p class="mb-0">
+          Desenvolvido por <strong>CB Antônio Rafael</strong> - 14ª CIPM
+        </p>
+        <div class="mt-2 d-flex justify-content-center gap-2 flex-wrap">
+          <a
+            class="btn btn-success footer-btn"
+            href="https://wa.me/5561982887294"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="bi bi-whatsapp"></i> Entre em contato
+          </a>
+          <a
+            class="btn btn-outline-primary footer-btn"
+            href="https://www.antoniorafael.com.br/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="bi bi-person-badge"></i> Meu portfólio
+          </a>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Scripts Externos -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <!-- Firebase and Authentication -->
+    <script type="module" src="./src/firebase-config.js"></script>
+    <script type="module" src="./src/auth.js"></script>
+    <script type="module" src="./src/reminders.js"></script>
+
+    <!-- Script Local -->
+    <script>
+      // Alternância de abas
+      document.addEventListener("DOMContentLoaded", () => {
+        function showTab(tab) {
+          document
+            .getElementById("tab-calc")
+            .classList.toggle("d-none", tab !== "calc");
+          document
+            .getElementById("tab-hist")
+            .classList.toggle("d-none", tab !== "hist");
+          document
+            .getElementById("tab-lembretes")
+            .classList.toggle("d-none", tab !== "lembretes");
+          document.querySelectorAll("[data-tab]").forEach((btn) => {
+            const active = btn.getAttribute("data-tab") === tab;
+            btn.classList.toggle("btn-primary", active);
+            btn.classList.toggle("btn-outline-primary", !active);
+          });
+
+          // Carrega lembretes quando a aba é aberta
+          if (tab === "lembretes") {
+            import("./src/reminders.js")
+              .then((module) => {
+                module.initReminders();
+              })
+              .catch((err) => console.error("Error loading reminders:", err));
+          }
+        }
+        document.querySelectorAll("[data-tab]").forEach((btn) => {
+          btn.addEventListener("click", () =>
+            showTab(btn.getAttribute("data-tab"))
+          );
+        });
+        showTab("calc");
+
+        // Event listener para botão de logout
+        document.getElementById("btn-logout")?.addEventListener("click", () => {
+          import("./src/auth.js")
+            .then((module) => {
+              if (confirm("Deseja realmente sair?")) {
+                module.handleLogout();
+              }
+            })
+            .catch((err) => console.error("Error logging out:", err));
+        });
+
+        // Event listener para atualizar lembretes
+        document
+          .getElementById("btn-refresh-lembretes")
+          ?.addEventListener("click", () => {
+            import("./src/reminders.js")
+              .then((module) => {
+                module.initReminders();
+              })
+              .catch((err) =>
+                console.error("Error refreshing reminders:", err)
+              );
+          });
+
+        // Event listener para toggle de notificações por e-mail
+        document
+          .getElementById("toggle-email-notifications")
+          ?.addEventListener("change", (e) => {
+            import("./src/reminders.js").then((module) => {
+              module
+                .updateNotificationSettings({
+                  emailNotifications: e.target.checked,
+                  reminderTypes: ["24h", "1h", "30m"],
+                })
+                .then(() => {
+                  alert(
+                    e.target.checked
+                      ? "Notificações ativadas!"
+                      : "Notificações desativadas!"
+                  );
+                })
+                .catch((err) => {
+                  console.error("Error updating settings:", err);
+                  alert("Erro ao atualizar configurações");
+                  e.target.checked = !e.target.checked;
+                });
+            });
+          });
+
+        // Verifica autenticação ao carregar a página
+        import("./src/auth.js")
+          .then((module) => {
+            module.checkAuth();
+          })
+          .catch((err) => console.error("Error checking auth:", err));
+      });
+    </script>
+    <script src="./app.js"></script>
+
+    <!-- PWA Installation Handler -->
+    <script>
+      let deferredPrompt;
+
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+
+        // Mostra botão de instalação (opcional)
+        const installButton = document.createElement("button");
+        installButton.className = "btn btn-primary d-block mx-auto mt-3";
+        installButton.innerHTML = '<i class="bi bi-download"></i> Instalar App';
+        installButton.addEventListener("click", () => {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === "accepted") {
+              console.log("Usuário aceitou instalação");
+            }
+            deferredPrompt = null;
+          });
+        });
+        document.querySelector("footer").before(installButton);
+      });
+
+      // Service Worker Registration
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("./sw.js")
+            .then((registration) => {
+              console.log(
+                "Service Worker registrado com escopo:",
+                registration.scope
+              );
+
+              // Verifica atualizações a cada acesso
+              registration.update();
+
+              // Monitora atualizações
+              registration.addEventListener("updatefound", () => {
+                const newWorker = registration.installing;
+                newWorker.addEventListener("statechange", () => {
+                  if (
+                    newWorker.state === "installed" &&
+                    navigator.serviceWorker.controller
+                  ) {
+                    Swal.fire({
+                      title: "Nova versão disponível!",
+                      text: "Atualize para a versão mais recente",
+                      icon: "info",
+                      confirmButtonText: "Atualizar",
+                    }).then(() => {
+                      window.location.reload();
+                    });
+                  }
+                });
+              });
+            })
+            .catch((err) => {
+              console.error("Falha no registro do Service Worker:", err);
+            });
+        });
+
+        // Força recarregamento quando novo Service Worker assumir controle
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          window.location.reload();
         });
       }
-      document.querySelectorAll('[data-tab]').forEach(btn => {
-        btn.addEventListener('click', () => showTab(btn.getAttribute('data-tab')));
-      });
-      showTab('calc');
-    });
-  </script>
-  <script src="./app.js"></script>
-  
-  <!-- PWA Installation Handler -->
-  <script>
-    let deferredPrompt;
-    
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      
-      // Mostra botão de instalação (opcional)
-      const installButton = document.createElement('button');
-      installButton.className = 'btn btn-primary d-block mx-auto mt-3';
-      installButton.innerHTML = '<i class="bi bi-download"></i> Instalar App';
-      installButton.addEventListener('click', () => {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('Usuário aceitou instalação');
-          }
-          deferredPrompt = null;
-        });
-      });
-      document.querySelector('footer').before(installButton);
-    });
-
-    // Service Worker Registration
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(registration => {
-            console.log('Service Worker registrado com escopo:', registration.scope);
-            
-            // Verifica atualizações a cada acesso
-            registration.update();
-            
-            // Monitora atualizações
-            registration.addEventListener('updatefound', () => {
-              const newWorker = registration.installing;
-              newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  Swal.fire({
-                    title: 'Nova versão disponível!',
-                    text: 'Atualize para a versão mais recente',
-                    icon: 'info',
-                    confirmButtonText: 'Atualizar'
-                  }).then(() => {
-                    window.location.reload();
-                  });
-                }
-              });
-            });
-          })
-          .catch(err => {
-            console.error('Falha no registro do Service Worker:', err);
-          });
-      });
-
-      // Força recarregamento quando novo Service Worker assumir controle
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        window.location.reload();
-      });
-    }
-  </script>
-</body>
+    </script>
+  </body>
 </html>
