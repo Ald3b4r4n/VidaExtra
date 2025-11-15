@@ -12,8 +12,23 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 
 // Buscar configuração do endpoint seguro
-const response = await fetch("/api/firebase-config");
-const firebaseConfig = await response.json();
+let firebaseConfig;
+try {
+  const response = await fetch("/api/firebase-config");
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  firebaseConfig = await response.json();
+  console.log("Firebase config carregado via API");
+} catch (error) {
+  console.error("Erro ao buscar config da API, tentando variáveis de ambiente:", error);
+  // Fallback: tentar window.ENV se disponível
+  if (window.ENV) {
+    firebaseConfig = window.ENV;
+  } else {
+    throw new Error("Firebase config não disponível");
+  }
+}
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
