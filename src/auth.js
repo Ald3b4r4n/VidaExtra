@@ -3,7 +3,7 @@
  * Verifies user login and redirects if necessary
  */
 
-import { auth } from "./firebase-config.js";
+import { auth, firebasePromise } from "./firebase-config.js";
 import {
   onAuthStateChanged,
   signOut,
@@ -13,7 +13,17 @@ import {
  * Verifica se usuário está autenticado
  */
 export function checkAuth() {
-  return new Promise((resolve) => {
+  return new Promise(async (resolve) => {
+    // Aguarda o Firebase estar totalmente inicializado antes de escutar o estado
+    try {
+      await firebasePromise;
+    } catch (e) {
+      console.error("Falha ao inicializar Firebase antes de checkAuth:", e);
+      // Em caso de falha crítica, force retorno ao login
+      window.location.replace("/pages/login.html");
+      return resolve(null);
+    }
+
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         // Usuário está logado
