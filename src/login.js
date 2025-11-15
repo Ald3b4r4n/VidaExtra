@@ -8,8 +8,6 @@ import { apiFetch } from "./api.js";
 import {
   GoogleAuthProvider,
   signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
   getAdditionalUserInfo,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
@@ -141,27 +139,7 @@ async function handleGoogleSignIn() {
 
   try {
     const provider = setupGoogleProvider();
-    console.log("Provider configurado, escolhendo método de login..."); // DEBUG
-
-    // Ambiente de produção (Vercel) detectado
-    const isProdHost = /vercel\.app$/.test(window.location.hostname) ||
-      window.location.hostname === "vidaextra-calculadora-ac4.vercel.app" ||
-      window.location.hostname === "vida-extra.vercel.app";
-    const redirectFlagKey = "vidaextra-login-redirect-tried";
-    const redirectAttempted = localStorage.getItem(redirectFlagKey) === "true";
-
-    // Em produção, tenta primeiro redirect UMA vez.
-    // Se já tentou e falhou (getRedirectResult não retornou), faz fallback para popup.
-    if (isProdHost && !redirectAttempted) {
-      console.log("Usando signInWithRedirect (primeira tentativa em produção)...");
-      localStorage.setItem(redirectFlagKey, "true");
-      await signInWithRedirect(auth, provider);
-      return; // Fluxo continua após retorno do redirect
-    }
-
-    // Em desenvolvimento, tentar popup primeiro
-    // Em produção, se redirect já falhou, também usa popup como fallback
-    console.log("Usando signInWithPopup (fallback/dev)...");
+    console.log("Provider configurado, usando somente pop-up..."); // DEBUG
     const result = await signInWithPopup(auth, provider);
 
     // Extrai credenciais
@@ -190,8 +168,6 @@ async function handleGoogleSignIn() {
 
     // Redireciona para o app
     redirectToApp();
-    // Limpa flag de tentativa de redirect (login concluído)
-    localStorage.removeItem(redirectFlagKey);
   } catch (error) {
     console.error("Erro no login:", error);
 
@@ -207,16 +183,11 @@ async function handleGoogleSignIn() {
       error.code === "auth/cancelled-popup-request";
 
     if (coopRelated) {
-      console.warn(
-        "Popup bloqueado/COOP em vigor. Alternando para signInWithRedirect..."
+      console.warn("Pop-up bloqueado/COOP em vigor. Solicite habilitar pop-ups.");
+      showError(
+        "Pop-up bloqueado pelo navegador. Habilite pop-ups para este site e tente novamente."
       );
-      try {
-        const provider = setupGoogleProvider();
-        await signInWithRedirect(auth, provider);
-        return; // A navegação será realizada pelo Firebase
-      } catch (redirectErr) {
-        console.error("Falha no redirect:", redirectErr);
-      }
+      return;
     }
 
     if (error.code === "auth/popup-closed-by-user") {
@@ -274,59 +245,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  // Trata resultado de signInWithRedirect (quando usado como fallback)
-  try {
-    const redirectResult = await getRedirectResult(auth);
-    if (redirectResult) {
-      console.log("Login via redirect detectado. Prosseguindo...");
-      const credential = GoogleAuthProvider.credentialFromResult(
-        redirectResult
-      );
-      const user = redirectResult.user;
-      const additionalInfo = getAdditionalUserInfo(redirectResult);
-
-      console.log("Login bem-sucedido (redirect):", {
-        user: user.email,
-        isNewUser: additionalInfo?.isNewUser,
-      });
-
-      saveUserToLocalStorage(user, credential);
-      try {
-        await registerCredentials(user, credential);
-      } catch (backendError) {
-        console.warn(
-          "Erro ao registrar no backend após redirect, seguindo login:",
-          backendError
-        );
-      }
-      redirectToApp();
-      return; // encerra inicialização, já vai redirecionar
-    }
-  } catch (redirectCheckErr) {
-    console.warn(
-      "Sem resultado de redirect ou erro ao verificar:",
-      redirectCheckErr
-    );
-    if (redirectCheckErr && redirectCheckErr.code === "auth/unauthorized-domain") {
-      showError(
-        "Domínio não autorizado no Firebase. Adicione o domínio do seu site em Authentication → Settings → Authorized domains."
-      );
-      return;
-    }
-  }
-
-  // Se voltamos de um redirect mas não houve resultado, orientar fallback
-  try {
-    const redirectFlagKey = "vidaextra-login-redirect-tried";
-    const redirectAttempted = localStorage.getItem(redirectFlagKey) === "true";
-    if (redirectAttempted) {
-      // Limpa flag para próxima tentativa
-      localStorage.removeItem(redirectFlagKey);
-      showError(
-        "Falha na autorização via redirect. Clique novamente em 'Entrar com Google' para tentar via pop-up."
-      );
-    }
-  } catch {}
+  // Fluxo sem redirect: segue diretamente para verificar usuário logado
 
   // Verifica se já está logado (assíncrono)
   const isLoggedIn = await checkExistingUser();
