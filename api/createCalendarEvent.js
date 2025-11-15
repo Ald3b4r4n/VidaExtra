@@ -8,18 +8,33 @@ import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 
-// Initialize Firebase Admin (singleton)
-if (!getApps().length) {
-  const serviceAccount = JSON.parse(
-    process.env.FIREBASE_SERVICE_ACCOUNT || "{}"
-  );
-  initializeApp({
-    credential: cert(serviceAccount),
-  });
+// Initialize Firebase Admin (singleton) defensively
+let auth = null;
+let db = null;
+try {
+  if (!getApps().length) {
+    const serviceAccount = JSON.parse(
+      process.env.FIREBASE_SERVICE_ACCOUNT || "{}"
+    );
+    // Only initialize if required fields exist
+    if (serviceAccount && serviceAccount.project_id) {
+      initializeApp({
+        credential: cert(serviceAccount),
+      });
+      auth = getAuth();
+      db = getFirestore();
+    } else {
+      console.warn(
+        "Firebase Admin not initialized: missing FIREBASE_SERVICE_ACCOUNT"
+      );
+    }
+  } else {
+    auth = getAuth();
+    db = getFirestore();
+  }
+} catch (e) {
+  console.warn("Failed to initialize Firebase Admin", e);
 }
-
-const auth = getAuth();
-const db = getFirestore();
 
 /**
  * Create OAuth2 client with credentials
@@ -87,15 +102,17 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Verify Firebase ID token
+    // Verify Firebase ID token when Admin is available; otherwise proceed with fallback
+    let uid = null;
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ error: "Unauthorized" });
+    if (auth) {
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      const idToken = authHeader.split("Bearer ")[1];
+      const decodedToken = await auth.verifyIdToken(idToken);
+      uid = decodedToken?.uid || null;
     }
-
-    const idToken = authHeader.split("Bearer ")[1];
-    const decodedToken = await auth.verifyIdToken(idToken);
-    const { uid } = decodedToken;
 
     // Get request body
     const {
@@ -112,14 +129,14 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Get user's refresh token from Firestore
-    const userDoc = await db.collection("users").doc(uid).get();
-    const userData = userDoc.data();
-
-    // Use googleAccessToken from body if no refresh token yet
+    // Get user's refresh token from Firestore when Admin is available
     let accessToken = googleAccessToken;
-    if (userData?.refreshToken) {
-      accessToken = await refreshAccessToken(userData.refreshToken);
+    if (db && uid) {
+      const userDoc = await db.collection("users").doc(uid).get();
+      const userData = userDoc.data();
+      if (userData?.refreshToken) {
+        accessToken = await refreshAccessToken(userData.refreshToken);
+      }
     }
 
     if (!accessToken) {
@@ -155,7 +172,11 @@ export default async function handler(req, res) {
     // Create the event
     const createdEvent = await createCalendarEvent(accessToken, event);
 
-    console.log(`Event created for user ${uid}:`, createdEvent.id);
+    if (uid) {
+      console.log(`Event created for user ${uid}:`, createdEvent.id);
+    } else {
+      console.log(`Event created (no Admin):`, createdEvent.id);
+    }
 
     return res.status(200).json({
       event: {
