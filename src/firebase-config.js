@@ -7,7 +7,11 @@
  */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+  getAuth,
+  setPersistence,
+  browserLocalPersistence,
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 
@@ -28,9 +32,39 @@ const firebasePromise = (async () => {
     const firebaseConfig = await response.json();
     console.log("Firebase config carregado via API"); // DEBUG
 
+    // Sanitiza authDomain caso tenha sido configurado com protocolo/ barras
+    function sanitizeAuthDomain(value) {
+      if (!value) return value;
+      try {
+        let v = String(value).trim();
+        if (v.startsWith("http://") || v.startsWith("https://")) {
+          const url = new URL(v);
+          v = url.hostname; // remove protocolo e path
+        }
+        // remove possíveis barras finais
+        v = v.replace(/^https?:\/\//i, "").replace(/\/+$/, "");
+        return v;
+      } catch (e) {
+        console.warn("authDomain inválido, usando valor original:", value);
+        return value;
+      }
+    }
+
+    const cleanedAuthDomain = sanitizeAuthDomain(firebaseConfig.authDomain);
+    if (cleanedAuthDomain !== firebaseConfig.authDomain) {
+      console.warn("FIREBASE_AUTH_DOMAIN sanitizado", {
+        original: firebaseConfig.authDomain,
+        cleaned: cleanedAuthDomain,
+      });
+    }
+
+    const cleanConfig = { ...firebaseConfig, authDomain: cleanedAuthDomain };
+
     // Initialize Firebase
-    app = initializeApp(firebaseConfig);
+    app = initializeApp(cleanConfig);
     auth = getAuth(app);
+    // Garante persistência estável em ambientes com restrições de cookies
+    await setPersistence(auth, browserLocalPersistence);
     db = getFirestore(app);
     analytics = getAnalytics(app);
     isInitialized = true;

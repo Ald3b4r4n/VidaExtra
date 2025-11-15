@@ -1,5 +1,9 @@
 // Força remoção de Service Workers durante desenvolvimento
 (async function () {
+  // Executa APENAS em desenvolvimento (localhost)
+  if (!/^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)) {
+    return; // não interfere em produção
+  }
   if ("serviceWorker" in navigator) {
     try {
       const registrations = await navigator.serviceWorker.getRegistrations();

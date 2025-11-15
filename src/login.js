@@ -253,6 +253,7 @@ function checkExistingUser() {
  */
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("DOM loaded, inicializando..."); // DEBUG
+  console.log("Hostname atual:", window.location.hostname); // DEBUG
 
   // Aguarda Firebase inicializar
   try {
@@ -293,7 +294,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       return; // encerra inicialização, já vai redirecionar
     }
   } catch (redirectCheckErr) {
-    console.warn("Sem resultado de redirect ou erro ao verificar:", redirectCheckErr);
+    console.warn(
+      "Sem resultado de redirect ou erro ao verificar:",
+      redirectCheckErr
+    );
+    if (redirectCheckErr && redirectCheckErr.code === "auth/unauthorized-domain") {
+      showError(
+        "Domínio não autorizado no Firebase. Adicione o domínio do seu site em Authentication → Settings → Authorized domains."
+      );
+      return;
+    }
   }
 
   // Verifica se já está logado (assíncrono)
