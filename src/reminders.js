@@ -69,10 +69,20 @@ function getTimeUntil(dateString) {
 export async function fetchUpcomingEvents() {
   try {
     const idToken = await getIdToken();
+    // Fallback: envia o accessToken do Google obtido no login para o backend usar caso não haja refresh_token salvo ainda
+    let googleAccessToken;
+    try {
+      const ls = localStorage.getItem("vidaextra-user");
+      if (ls) {
+        const parsed = JSON.parse(ls);
+        googleAccessToken = parsed?.accessToken;
+      }
+    } catch {}
 
     const response = await apiFetch(`/getUpcomingEvents`, {
       headers: {
         Authorization: `Bearer ${idToken}`,
+        ...(googleAccessToken ? { "X-Google-Access-Token": googleAccessToken } : {}),
       },
     });
 

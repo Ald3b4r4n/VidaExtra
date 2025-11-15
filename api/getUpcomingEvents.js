@@ -8,18 +8,32 @@ import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 
-// Initialize Firebase Admin (singleton)
-if (!getApps().length) {
-  const serviceAccount = JSON.parse(
-    process.env.FIREBASE_SERVICE_ACCOUNT || "{}"
-  );
-  initializeApp({
-    credential: cert(serviceAccount),
-  });
+// Initialize Firebase Admin (singleton) defensively
+let auth = null;
+let db = null;
+try {
+  if (!getApps().length) {
+    const serviceAccount = JSON.parse(
+      process.env.FIREBASE_SERVICE_ACCOUNT || "{}"
+    );
+    if (serviceAccount && serviceAccount.project_id) {
+      initializeApp({
+        credential: cert(serviceAccount),
+      });
+      auth = getAuth();
+      db = getFirestore();
+    } else {
+      console.warn(
+        "Firebase Admin not initialized: missing FIREBASE_SERVICE_ACCOUNT"
+      );
+    }
+  } else {
+    auth = getAuth();
+    db = getFirestore();
+  }
+} catch (e) {
+  console.warn("Failed to initialize Firebase Admin", e);
 }
-
-const auth = getAuth();
-const db = getFirestore();
 
 /**
  * Create OAuth2 client with credentials
@@ -78,7 +92,10 @@ export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Authorization,Content-Type");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Authorization,Content-Type,X-Google-Access-Token"
+  );
 
   // Handle preflight
   if (req.method === "OPTIONS") {
@@ -91,28 +108,41 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Verify Firebase ID token
+    // Verify Firebase ID token when Admin is available; otherwise use fallback token header
+    let uid = null;
+    let accessToken = null;
+
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ error: "Unauthorized" });
+    const googleAccessHeader = req.headers["x-google-access-token"];
+
+    if (auth) {
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      const idToken = authHeader.split("Bearer ")[1];
+      const decodedToken = await auth.verifyIdToken(idToken);
+      uid = decodedToken?.uid || null;
     }
 
-    const idToken = authHeader.split("Bearer ")[1];
-    const decodedToken = await auth.verifyIdToken(idToken);
-    const { uid } = decodedToken;
+    // If Admin available, try to use refreshToken from Firestore
+    if (db && uid) {
+      const userDoc = await db.collection("users").doc(uid).get();
+      const userData = userDoc.data();
+      if (userData?.refreshToken) {
+        accessToken = await refreshAccessToken(userData.refreshToken);
+      }
+    }
 
-    // Get user's refresh token from Firestore
-    const userDoc = await db.collection("users").doc(uid).get();
-    const userData = userDoc.data();
+    // Fallback: use access token provided via header
+    if (!accessToken && googleAccessHeader) {
+      accessToken = googleAccessHeader;
+    }
 
-    if (!userData?.refreshToken) {
+    if (!accessToken) {
       return res.status(400).json({
-        error: "No refresh token available. Please login again.",
+        error: "No access token available. Please login again.",
       });
     }
-
-    // Refresh access token
-    const accessToken = await refreshAccessToken(userData.refreshToken);
 
     // Get events from next 7 days
     const timeMin = new Date().toISOString();
@@ -122,7 +152,11 @@ export default async function handler(req, res) {
 
     const events = await listCalendarEvents(accessToken, timeMin, timeMax);
 
-    console.log(`Retrieved ${events.length} events for user ${uid}`);
+    if (uid) {
+      console.log(`Retrieved ${events.length} events for user ${uid}`);
+    } else {
+      console.log(`Retrieved ${events.length} events (no Admin)`);
+    }
 
     return res.status(200).json({ events });
   } catch (error) {
