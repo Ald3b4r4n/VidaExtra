@@ -527,16 +527,328 @@ npm run lint -- --fix
 
 ---
 
-## 📅 Integração Google Calendar
+## 📅 Integração Google Calendar & Sistema de Emails
 
 ### 🎯 Visão Geral
 
-O VidaExtra oferece integração completa com Google Calendar para:
+O VidaExtra oferece integração completa com **Google Calendar** e **sistema de emails automáticos**:
 
 - ✅ Criar eventos automaticamente ao calcular AC-4
-- ✅ Sincronizar com Google Calendar nativo
-- ✅ Receber notificações por e-mail (24h, 1h, 30min antes)
-- ✅ Aproveitar o sistema de lembretes do Google
+- ✅ Sincronizar com Google Calendar nativo em tempo real
+- ✅ Receber lembretes por email (Google Calendar: 24h, 1h) e popup (30min, 15min)
+- ✅ Emails personalizados (boas-vindas, confirmação, relatório mensal)
+- ✅ Relatórios mensais automáticos com estatísticas
+- ✅ Sistema de doações PIX integrado
+
+### 🔐 Configuração OAuth (Obrigatória)
+
+#### 1. Google Cloud Console - Redirect URI
+
+⚠️ **IMPORTANTE:** Configure o Redirect URI ou receberá erro `redirect_uri_mismatch`
+
+1. Acesse [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+2. Selecione/crie projeto → Habilite **Google Calendar API**
+3. Crie credenciais **OAuth 2.0** (Web application)
+4. **Adicione URIs de redirecionamento autorizados:**
+   - **Desenvolvimento:** `http://localhost:5500/pages/oauth2callback.html`
+   - **Produção:** `https://seu-app.vercel.app/pages/oauth2callback.html`
+5. Salve e aguarde 1-2 minutos para propagar
+
+#### 2. Variáveis de Ambiente
+
+Configure no `.env.local` (desenvolvimento) ou no Dashboard Vercel (produção):
+
+```bash
+# OAuth Google Calendar
+OAUTH_CLIENT_ID=286306256976-hg93orc4eg18phng4gs68fcsrpmun2c4.apps.googleusercontent.com
+OAUTH_CLIENT_SECRET=seu-client-secret
+
+# Firebase Admin SDK
+FIREBASE_SERVICE_ACCOUNT_KEY={"type":"service_account","project_id":"..."}
+FIREBASE_PROJECT_ID=vidaextra-ac4
+
+# SMTP (Nodemailer para emails customizados)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=seu-email@gmail.com
+SMTP_PASS=sua-senha-de-app  # https://myaccount.google.com/apppasswords
+
+# App URL
+APP_URL=https://vidaextra-calculadora-ac4.vercel.app
+
+# Cron Security (opcional - protege relatórios mensais)
+CRON_SECRET=sua-chave-secreta-aleatoria
+```
+
+### 📧 Sistema de Emails Híbrido
+
+O VidaExtra usa **dois sistemas** de email trabalhando em conjunto:
+
+#### 1️⃣ Google Calendar API (Lembretes Agendados)
+
+**Gerenciado 100% pelo Google** - Zero manutenção!
+
+**Como funciona:**
+
+1. VidaExtra cria evento no Google Calendar com lembretes pré-configurados
+2. Google Calendar **armazena nos servidores** deles (24/7)
+3. Google **envia emails automaticamente** nos horários programados:
+   - 📧 **24 horas antes** do evento (email)
+   - 📧 **1 hora antes** do evento (email)
+   - 🔔 **30 minutos antes** (popup no celular/navegador)
+   - 🔔 **15 minutos antes** (popup no celular/navegador)
+4. **Funciona mesmo com app fechado** (gerenciado pelo Google)
+
+✅ **Benefícios:**
+
+- Confiabilidade 99.9%
+- Sem custo de infraestrutura
+- Sincroniza em todos os dispositivos
+- Backup automático na nuvem
+
+#### 2️⃣ Nodemailer (Emails Imediatos Personalizados)
+
+**Vercel Serverless Functions** - Emails customizados com design VidaExtra®
+
+##### 📧 Email de Boas-Vindas (`/api/sendWelcomeEmail`)
+
+- **Quando:** Primeiro login do usuário
+- **Disparo:** Automático via `src/auth.js` (detecta `localStorage`)
+- **Conteúdo:**
+  - Mensagem personalizada de boas-vindas
+  - Lista de funcionalidades do app
+  - Dicas para começar
+  - Botão "Começar Agora"
+  - **Botão PIX** para doações ☕
+
+##### ✅ Email de Confirmação (`/api/sendEventConfirmation`)
+
+- **Quando:** Imediatamente após criar evento no Calendar
+- **Disparo:** Automático via `app.js` (após `createCalendarEvent`)
+- **Conteúdo:**
+  - Badge verde de confirmação ✅
+  - Detalhes completos do evento (data, hora, descrição)
+  - Lista de lembretes configurados
+  - Botão "Abrir no Google Calendar"
+  - **Botão PIX** para doações ☕
+
+##### 📊 Relatório Mensal (`/api/sendMonthlyReport`)
+
+- **Quando:** **Todo dia 1 de cada mês às 00:00 UTC**
+- **Disparo:** **Vercel Cron Job** automático (via `vercel.json`)
+- **Conteúdo:**
+  - Cards visuais com estatísticas do mês anterior
+  - Total de eventos, horas trabalhadas
+  - Valores bruto e líquido acumulados
+  - Tabela detalhada de todos os eventos
+  - Botão "Ver Histórico Completo"
+  - **Botão PIX** para doações ☕
+
+**Design dos emails:**
+
+- ✨ Gradientes VidaExtra® (roxo, verde, azul)
+- 📱 Layout responsivo (mobile + desktop)
+- 💜 Botão PIX em todos os emails
+- 🎨 Profissional e consistente
+
+### 🛠️ API Endpoints
+
+| Endpoint                     | Método | Descrição                      | Uso                          |
+| ---------------------------- | ------ | ------------------------------ | ---------------------------- |
+| `/api/createCalendarEvent`   | POST   | Cria evento no Google Calendar | app.js → Cálculo AC-4        |
+| `/api/getUpcomingEvents`     | GET    | Lista próximos eventos         | reminders.js → Aba Lembretes |
+| `/api/exchangeCodeForTokens` | POST   | Troca código OAuth por tokens  | oauth2callback.html → Login  |
+| `/api/sendWelcomeEmail`      | POST   | Envia boas-vindas              | auth.js → Primeiro login     |
+| `/api/sendEventConfirmation` | POST   | Confirma evento criado         | app.js → Após criar evento   |
+| `/api/sendMonthlyReport`     | POST   | Gera relatório mensal          | Vercel Cron → Dia 1          |
+| `/api/ping`                  | GET    | Health check                   | Monitoramento                |
+
+### 📊 Fluxo OAuth Completo
+
+```
+1. Login Firebase Auth (Google)
+   ↓
+2. Usuário autenticado no app
+   ↓
+3. Clicar "Conectar Google Calendar"
+   ↓
+4. Redireciona para Google OAuth (tela de consentimento)
+   ↓
+5. Autoriza acesso ao Calendar
+   ↓
+6. Google redireciona para /pages/oauth2callback.html
+   ↓
+7. Troca código por tokens (POST /api/exchangeCodeForTokens)
+   ↓
+8. Salva no Firestore: accessToken + refreshToken
+   ↓
+9. Salva no localStorage: accessToken (uso imediato)
+   ↓
+10. Usuário pode criar eventos! ✅
+```
+
+**Tokens:**
+
+- `accessToken`: Válido por **1 hora** (renova automaticamente)
+- `refreshToken`: **Permanente** até revogação
+- Armazenamento: **Firestore** (persistente) + **localStorage** (cache)
+
+### ☕ Sistema de Doações PIX
+
+#### Página Dedicada: `/pages/pix-cafe.html`
+
+Design profissional para doações:
+
+- 🎨 Gradiente roxo VidaExtra®
+- 📋 Código PIX Copia e Cola visível
+- 🖱️ Botão copiar com feedback visual
+- 📱 Responsivo (mobile + desktop)
+- 💳 Instruções passo a passo
+
+**Código PIX:**
+
+```
+00020126580014BR.GOV.BCB.PIX0136b5baaa1b-8488-46ea-b22e-65a3c4b2e8925204000053039865802BR5925Antonio Rafael Souza Cruz6009SAO PAULO62140510tKFbsrxeJm6304B33A
+```
+
+**Titular:** Antonio Rafael Souza Cruz  
+**Chave:** b5baaa1b-8488-46ea-b22e-65a3c4b2e892
+
+#### Integração nos Emails
+
+Todos os 3 tipos de email (boas-vindas, confirmação, relatório) incluem:
+
+- 💜 **Botão verde**: "Pague-me um Café via PIX"
+- 🔗 **Link**: Direciona para `/pages/pix-cafe.html`
+- 🎯 **Call to action** emocional (coração animado)
+
+### 🔒 Segurança
+
+- ✅ **Tokens OAuth** criptografados no Firestore
+- ✅ **Firestore Rules**: Cada usuário acessa apenas seus dados
+- ✅ **Firebase ID tokens** validados em cada requisição
+- ✅ **HTTPS obrigatório** em produção (Vercel)
+- ✅ **Cron Jobs** protegidos com `CRON_SECRET`
+- ✅ **Refresh automático** de access tokens (sem re-autenticação)
+- ✅ **Senhas de app Gmail** (não senha real)
+
+**Firestore Security Rules:**
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+```
+
+### 🗓️ Vercel Cron Jobs
+
+Configuração em `vercel.json`:
+
+```json
+{
+  "crons": [
+    {
+      "path": "/api/sendMonthlyReport",
+      "schedule": "0 0 1 * *" // Todo dia 1 às 00:00 UTC
+    }
+  ]
+}
+```
+
+**Funcionamento:**
+
+1. Vercel executa função automaticamente
+2. Busca todos os usuários do Firestore
+3. Para cada usuário:
+   - Busca eventos do mês anterior em `users/{uid}/history`
+   - Calcula totais (horas, valores bruto/líquido)
+   - Gera email com estatísticas + tabela
+   - Envia via Nodemailer (SMTP)
+4. Retorna log: `{ reportsSent: 10, errors: [] }`
+
+⚠️ **Nota:** Para relatórios funcionarem, implemente salvamento de eventos no Firestore (atualmente só localStorage).
+
+### 📱 Acesso Multiplataforma
+
+Seus eventos AC-4 sincronizam automaticamente em:
+
+- 🌐 **Web**: https://calendar.google.com
+- 📱 **Android**: App Google Calendar
+- 🍎 **iOS**: App Google Calendar
+- 💻 **Desktop**: Thunderbird, Outlook (sincronize conta Google)
+- ⌚ **Smartwatch**: Wear OS, Apple Watch
+
+### 🧪 Testes Locais
+
+#### Scripts de teste disponíveis:
+
+```powershell
+# Email de boas-vindas
+node test-welcome-email.js
+
+# Email de confirmação de evento
+node test-confirmation-email.js
+
+# Relatório mensal
+node test-monthly-report-email.js
+
+# Criar evento no Calendar (requer User ID)
+node test-calendar-event.js OtYUUQtqXDMLirjUHz9cZR87ays2
+
+# Versão simplificada (usa token direto)
+node test-calendar-simple.js
+```
+
+#### Servidor de desenvolvimento:
+
+```powershell
+# Inicia dev-server.js na porta 5500
+npm start
+
+# ou diretamente
+node dev-server.js
+```
+
+**Endpoints locais disponíveis:**
+
+- `http://localhost:5500/api/exchangeCodeForTokens`
+- `http://localhost:5500/api/createCalendarEvent`
+- `http://localhost:5500/api/getUpcomingEvents`
+
+### ❓ Troubleshooting
+
+#### "redirect_uri_mismatch"
+
+**Solução:** Adicione `http://localhost:5500/pages/oauth2callback.html` no Google Cloud Console
+
+#### "Tokens não salvam no Firestore"
+
+**Solução:**
+
+1. Certifique-se de criar banco Firestore no Firebase Console
+2. Configure Security Rules para permitir escrita
+
+#### "Email não chegou"
+
+**Solução:**
+
+1. Verifique pasta Spam/Lixo Eletrônico
+2. Confirme SMTP_USER e SMTP_PASS corretos
+3. Verifique logs do terminal/Vercel
+
+#### "Relatório mensal não disparou"
+
+**Solução:**
+
+1. Aguarde até dia 1 do mês (00:00 UTC)
+2. Verifique logs no Vercel Dashboard → Functions → Logs
+3. Confirme `CRON_SECRET` configurado (se estiver usando)
 
 ### 🔐 Configuração Rápida
 
