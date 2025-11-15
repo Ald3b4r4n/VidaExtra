@@ -112,20 +112,21 @@
           });
 
           if (!response.ok) {
-            // Tentar ler como JSON, mas se falhar, ler como texto
-            let errorMessage;
+            // Tentar ler como JSON; se falhar, ler como texto usando clones
+            let errorMessage = `Erro ${response.status}`;
             try {
-              const errorData = await response.json();
+              const errorData = await response.clone().json();
               errorMessage =
                 errorData.error ||
                 errorData.message ||
                 "Erro ao trocar código por tokens";
             } catch (e) {
-              const errorText = await response.text();
-              errorMessage = `Erro ${response.status}: ${errorText.substring(
-                0,
-                200
-              )}`;
+              try {
+                const errorText = await response.clone().text();
+                errorMessage = `${errorMessage}: ${errorText.substring(0, 200)}`;
+              } catch (_) {
+                // Ignorar
+              }
             }
             throw new Error(errorMessage);
           }

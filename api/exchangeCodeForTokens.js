@@ -6,15 +6,25 @@
 const admin = require("firebase-admin");
 const { google } = require("googleapis");
 
-// Initialize Firebase Admin (singleton pattern)
-if (!admin.apps.length) {
-  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
+// Initialize Firebase Admin (singleton pattern) de forma resiliente
+let db = null;
+try {
+  if (!admin.apps.length) {
+    const serviceAccount = JSON.parse(
+      process.env.FIREBASE_SERVICE_ACCOUNT || "{}"
+    );
+    if (serviceAccount && serviceAccount.project_id) {
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+      });
+      db = admin.firestore();
+    }
+  } else {
+    db = admin.firestore();
+  }
+} catch (e) {
+  console.warn("Firebase Admin não inicializado (service account ausente)", e);
 }
-
-const db = admin.firestore();
 
 /**
  * Exchange authorization code for tokens
@@ -43,11 +53,13 @@ module.exports = async (req, res) => {
     }
 
     // Configure OAuth2 client
+    const APP_URL = process.env.APP_URL || "https://vidaextra-calculadora-ac4.vercel.app";
+    const redirectUri =
+      process.env.OAUTH_REDIRECT_URI || `${APP_URL}/pages/oauth2callback.html`;
     const oauth2Client = new google.auth.OAuth2(
       process.env.OAUTH_CLIENT_ID,
       process.env.OAUTH_CLIENT_SECRET,
-      process.env.OAUTH_REDIRECT_URI ||
-        "http://localhost:5500/pages/oauth2callback.html"
+      redirectUri
     );
 
     // Exchange code for tokens
@@ -59,30 +71,37 @@ module.exports = async (req, res) => {
         .json({ error: "Failed to obtain tokens from Google" });
     }
 
-    // Save user data and tokens to Firestore
-    await db
-      .collection("users")
-      .doc(userId)
-      .set(
-        {
-          email: email,
-          displayName: displayName || "",
-          photoURL: photoURL || "",
-          accessToken: tokens.access_token,
-          refreshToken: tokens.refresh_token,
-          tokenExpiry: tokens.expiry_date || null,
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        },
-        { merge: true }
+    // Save user data and tokens to Firestore se Admin estiver disponível
+    if (db) {
+      await db
+        .collection("users")
+        .doc(userId)
+        .set(
+          {
+            email: email,
+            displayName: displayName || "",
+            photoURL: photoURL || "",
+            accessToken: tokens.access_token,
+            refreshToken: tokens.refresh_token,
+            tokenExpiry: tokens.expiry_date || null,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          },
+          { merge: true }
+        );
+    } else {
+      console.warn(
+        "Pulando persistência em Firestore: service account não configurado"
       );
+    }
 
     console.log(`✅ Tokens saved for user: ${email}`);
 
-    // Return success with access token
+    // Return success with tokens
     return res.status(200).json({
       success: true,
       accessToken: tokens.access_token,
+      refreshToken: tokens.refresh_token,
       message: "Credentials saved successfully",
     });
   } catch (error) {
