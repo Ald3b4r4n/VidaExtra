@@ -21,7 +21,10 @@ try {
   firebaseConfig = await response.json();
   console.log("Firebase config carregado via API");
 } catch (error) {
-  console.error("Erro ao buscar config da API, tentando variáveis de ambiente:", error);
+  console.error(
+    "Erro ao buscar config da API, tentando variáveis de ambiente:",
+    error
+  );
   // Fallback: tentar window.ENV se disponível
   if (window.ENV) {
     firebaseConfig = window.ENV;

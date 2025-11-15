@@ -132,10 +132,12 @@ function redirectToApp() {
  * Manipula o login com Google
  */
 async function handleGoogleSignIn() {
+  console.log("handleGoogleSignIn chamado!"); // DEBUG
   showLoading();
 
   try {
     const provider = setupGoogleProvider();
+    console.log("Provider configurado, abrindo popup..."); // DEBUG
 
     // Popup de autenticação
     const result = await signInWithPopup(auth, provider);
@@ -214,17 +216,31 @@ function checkExistingUser() {
  * Inicialização
  */
 document.addEventListener("DOMContentLoaded", async () => {
+  console.log("DOM loaded, inicializando..."); // DEBUG
+  
   // Verifica se já está logado (assíncrono)
   const isLoggedIn = await checkExistingUser();
 
   if (isLoggedIn) {
+    console.log("Usuário já logado, redirecionando..."); // DEBUG
     return; // Já está redirecionando
   }
 
-  // Adiciona event listener ao botão
-  googleSignInBtn.addEventListener("click", handleGoogleSignIn);
+  console.log("Adicionando event listener ao botão..."); // DEBUG
+  
+  // Verifica se o botão existe
+  if (!googleSignInBtn) {
+    console.error("ERRO: Botão google-signin-btn não encontrado!");
+    return;
+  }
 
-  console.log("Login page initialized");
+  // Adiciona event listener ao botão
+  googleSignInBtn.addEventListener("click", () => {
+    console.log("Botão clicado!"); // DEBUG
+    handleGoogleSignIn();
+  });
+
+  console.log("Login page initialized - Event listener adicionado!");
 });
 
 // Export para uso em outros módulos
