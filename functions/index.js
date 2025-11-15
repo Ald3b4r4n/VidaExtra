@@ -32,6 +32,8 @@ export const ping = onRequest({ cors: true }, (req, res) => {
 // Explicit CORS handling to allow Authorization header and preflight
 const ALLOWED_ORIGINS = [
   "https://vida-extra.vercel.app",
+  "https://www.vidaextra.xyz",
+  "https://vidaextra.xyz",
   "http://localhost:5500",
   "http://127.0.0.1:5500",
 ];
