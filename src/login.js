@@ -217,7 +217,7 @@ function checkExistingUser() {
  */
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("DOM loaded, inicializando..."); // DEBUG
-  
+
   // Verifica se já está logado (assíncrono)
   const isLoggedIn = await checkExistingUser();
 
@@ -227,7 +227,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   console.log("Adicionando event listener ao botão..."); // DEBUG
-  
+
   // Verifica se o botão existe
   if (!googleSignInBtn) {
     console.error("ERRO: Botão google-signin-btn não encontrado!");
