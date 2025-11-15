@@ -29,6 +29,32 @@ export const ping = onRequest({ cors: true }, (req, res) => {
   res.status(200).send("ok");
 });
 
+// Explicit CORS handling to allow Authorization header and preflight
+const ALLOWED_ORIGINS = [
+  "https://vida-extra.vercel.app",
+  "http://localhost:5500",
+  "http://127.0.0.1:5500",
+];
+
+function applyCors(req, res) {
+  const origin = req.headers.origin;
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin)
+    ? origin
+    : ALLOWED_ORIGINS[0];
+  res.setHeader("Access-Control-Allow-Origin", allowedOrigin);
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Authorization, Content-Type"
+  );
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  if (req.method === "OPTIONS") {
+    res.status(204).send("");
+    return true;
+  }
+  return false;
+}
+
 /**
  * Endpoint: Registrar credenciais OAuth2 do usuário
  * POST /registerCredentials
@@ -163,6 +189,8 @@ export const updateNotifySettings = onRequest(
 export const getUpcomingEvents = onRequest(
   { cors: true },
   async (request, response) => {
+    // CORS preflight and headers
+    if (applyCors(request, response)) return;
     if (request.method !== "GET") {
       response.status(405).json({ error: "Method not allowed" });
       return;
@@ -234,6 +262,8 @@ export const getUpcomingEvents = onRequest(
 export const createCalendarEvent = onRequest(
   { cors: true },
   async (request, response) => {
+    // CORS preflight and headers
+    if (applyCors(request, response)) return;
     if (request.method !== "POST") {
       response.status(405).json({ error: "Method not allowed" });
       return;

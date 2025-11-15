@@ -7,7 +7,8 @@ const LOCAL_BASES = [
   "http://localhost:5999/vidaextra-8db27/us-central1",
   "http://127.0.0.1:5999/vidaextra-8db27/us-central1",
 ];
-const PROD_BASE = "https://us-central1-vidaextra-8db27.cloudfunctions.net";
+// In production, use same-origin Vercel Functions to avoid CORS issues
+const PROD_BASE = "/api";
 
 let cachedBase = null;
 
@@ -48,6 +49,7 @@ export async function getApiBase() {
       cachedBase = "/api";
     }
   } else {
+    // On production, prefer same-origin /api to Vercel Functions
     cachedBase = PROD_BASE;
   }
   return cachedBase || PROD_BASE;

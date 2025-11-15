@@ -158,12 +158,14 @@ export default async function handler(req, res) {
     console.log(`Event created for user ${uid}:`, createdEvent.id);
 
     return res.status(200).json({
-      id: createdEvent.id,
-      htmlLink: createdEvent.htmlLink,
-      status: createdEvent.status,
-      summary: createdEvent.summary,
-      start: createdEvent.start,
-      end: createdEvent.end,
+      event: {
+        id: createdEvent.id,
+        htmlLink: createdEvent.htmlLink,
+        status: createdEvent.status,
+        summary: createdEvent.summary,
+        start: createdEvent.start,
+        end: createdEvent.end,
+      },
     });
   } catch (error) {
     console.error("Error in createCalendarEvent:", error);
