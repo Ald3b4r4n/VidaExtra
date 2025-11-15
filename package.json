@@ -28,9 +28,9 @@
     "@tailwindcss/cli": "^4.1.16",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.38.0",
-    "postcss": "^8.5.6",
-    "http-proxy-middleware": "^3.0.0",
     "express": "^4.21.1",
+    "http-proxy-middleware": "^3.0.0",
+    "postcss": "^8.5.6",
     "serve": "^14.2.5",
     "tailwindcss": "^4.1.16"
   },
@@ -38,6 +38,7 @@
     "dotenv": "^17.2.3",
     "firebase-admin": "^13.6.0",
     "googleapis": "^166.0.0",
+    "luxon": "^3.7.2",
     "nodemailer": "^7.0.10"
   }
 }

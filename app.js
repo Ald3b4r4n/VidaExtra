@@ -593,6 +593,7 @@ document.addEventListener("DOMContentLoaded", function () {
           { method: "email", minutes: 24 * 60 },
           { method: "email", minutes: 60 },
           { method: "popup", minutes: 30 },
+          { method: "popup", minutes: 15 },
         ],
       };
 
@@ -628,6 +629,24 @@ document.addEventListener("DOMContentLoaded", function () {
                   console.log("✅ Event ID salvo no histórico:", res.event.id);
                 }
               }
+
+              // Send confirmation email
+              import("./src/auth.js").then((authModule) => {
+                const user = authModule.getCurrentUser();
+                if (user && res?.event) {
+                  fetch("/api/sendEventConfirmation", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      userName: user.displayName,
+                      userEmail: user.email,
+                      event: res.event,
+                    }),
+                  }).catch((err) => {
+                    console.error("Error sending confirmation email:", err);
+                  });
+                }
+              });
             })
             .catch((err) => {
               console.warn(

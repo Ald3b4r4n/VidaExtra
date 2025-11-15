@@ -147,6 +147,7 @@ export default async function handler(req, res) {
           { method: "email", minutes: 24 * 60 }, // 24h
           { method: "email", minutes: 60 }, // 1h
           { method: "popup", minutes: 30 }, // 30min
+          { method: "popup", minutes: 15 }, // 15min
         ],
       },
     };

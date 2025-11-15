@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>☕ Pague-me um Café - VidaExtra®</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      .pix-container {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        padding: 40px;
+        max-width: 500px;
+        width: 90%;
+        text-align: center;
+      }
+      .pix-title {
+        color: #333;
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 20px;
+      }
+      .pix-subtitle {
+        color: #666;
+        font-size: 16px;
+        margin-bottom: 30px;
+        line-height: 1.6;
+      }
+      .pix-code-container {
+        background: #f9f9f9;
+        border: 2px dashed #ffc107;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      .pix-code {
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        color: #333;
+        word-break: break-all;
+        margin-bottom: 15px;
+        max-height: 150px;
+        overflow-y: auto;
+      }
+      .btn-copy {
+        background: linear-gradient(135deg, #32bcad 0%, #28a188 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+      .btn-copy:hover {
+        transform: scale(1.05);
+      }
+      .heart {
+        color: #e74c3c;
+        font-size: 24px;
+        animation: heartbeat 1.5s infinite;
+      }
+      @keyframes heartbeat {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        25% {
+          transform: scale(1.1);
+        }
+      }
+      .footer-text {
+        color: #999;
+        font-size: 12px;
+        margin-top: 30px;
+      }
+      .success-message {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+        border-radius: 6px;
+        padding: 10px;
+        margin-top: 15px;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="pix-container">
+      <div class="pix-title">☕ Pague-me um Café</div>
+
+      <div class="pix-subtitle">
+        Obrigado por usar o <strong>VidaExtra®</strong>!
+        <span class="heart">❤️</span><br />
+        Seu apoio mantém o projeto gratuito e sempre melhorando.
+      </div>
+
+      <div class="pix-code-container">
+        <div class="pix-code" id="pixCode">
+          00020126580014BR.GOV.BCB.PIX0136b5baaa1b-8488-46ea-b22e-65a3c4b2e8925204000053039865802BR5925Antonio
+          Rafael Souza Cruz6009SAO PAULO62140510tKFbsrxeJm6304B33A
+        </div>
+        <button class="btn-copy" onclick="copyPixCode()">
+          📋 Copiar Código PIX
+        </button>
+        <div class="success-message" id="successMessage">
+          ✅ Código copiado! Cole no app do seu banco.
+        </div>
+      </div>
+
+      <div class="pix-subtitle" style="font-size: 14px">
+        <strong>Como pagar:</strong><br />
+        1. Copie o código acima<br />
+        2. Abra o app do seu banco<br />
+        3. Vá em PIX → Pix Copia e Cola<br />
+        4. Cole o código e confirme
+      </div>
+
+      <div class="footer-text">
+        Desenvolvido por <strong>CB Antônio Rafael</strong> - 14ª CIPM<br />
+        VidaExtra® - Calculadora AC-4 para Policiais Militares
+      </div>
+    </div>
+
+    <script>
+      function copyPixCode() {
+        const pixCode = document.getElementById("pixCode").textContent;
+        navigator.clipboard
+          .writeText(pixCode)
+          .then(() => {
+            const successMsg = document.getElementById("successMessage");
+            successMsg.style.display = "block";
+
+            setTimeout(() => {
+              successMsg.style.display = "none";
+            }, 3000);
+          })
+          .catch((err) => {
+            alert("Erro ao copiar. Por favor, copie manualmente.");
+          });
+      }
+    </script>
+  </body>
+</html>

@@ -14,11 +14,37 @@ import {
  */
 export function checkAuth() {
   return new Promise((resolve) => {
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
         // Usuário está logado
         console.log("User authenticated:", user.email);
         updateUIWithUser(user);
+
+        // Check if this is a new user (first login)
+        const isNewUser =
+          localStorage.getItem("vidaextra-welcome-sent") !== "true";
+
+        if (isNewUser) {
+          // Send welcome email
+          try {
+            const response = await fetch("/api/sendWelcomeEmail", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                userName: user.displayName,
+                userEmail: user.email,
+              }),
+            });
+
+            if (response.ok) {
+              console.log("Welcome email sent");
+              localStorage.setItem("vidaextra-welcome-sent", "true");
+            }
+          } catch (error) {
+            console.error("Error sending welcome email:", error);
+          }
+        }
+
         resolve(user);
       } else {
         // Não está logado - redireciona para login

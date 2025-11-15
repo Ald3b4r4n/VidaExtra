@@ -197,6 +197,7 @@ app.post("/api/createCalendarEvent", async (req, res) => {
           { method: "email", minutes: 24 * 60 },
           { method: "email", minutes: 60 },
           { method: "popup", minutes: 30 },
+          { method: "popup", minutes: 15 },
         ],
       },
     };
@@ -249,11 +250,9 @@ app.get("/api/getUpcomingEvents", async (req, res) => {
     const userData = userDoc.data();
 
     if (!userData?.refreshToken) {
-      return res
-        .status(400)
-        .json({
-          error: "No refresh token available. Please connect Google Calendar.",
-        });
+      return res.status(400).json({
+        error: "No refresh token available. Please connect Google Calendar.",
+      });
     }
 
     // Refresh access token
