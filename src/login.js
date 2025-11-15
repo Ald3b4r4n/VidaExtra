@@ -8,6 +8,8 @@ import { apiFetch } from "./api.js";
 import {
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   getAdditionalUserInfo,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
@@ -176,6 +178,27 @@ async function handleGoogleSignIn() {
     // Mensagens de erro amigáveis
     let errorMsg = "Erro ao fazer login. Tente novamente.";
 
+    // Fallback: se popup foi bloqueado ou COOP impedir acesso, usar redirect
+    const coopRelated =
+      (typeof error.message === "string" &&
+        (error.message.includes("Cross-Origin-Opener-Policy") ||
+          error.message.includes("window.closed"))) ||
+      error.code === "auth/popup-blocked" ||
+      error.code === "auth/cancelled-popup-request";
+
+    if (coopRelated) {
+      console.warn(
+        "Popup bloqueado/COOP em vigor. Alternando para signInWithRedirect..."
+      );
+      try {
+        const provider = setupGoogleProvider();
+        await signInWithRedirect(auth, provider);
+        return; // A navegação será realizada pelo Firebase
+      } catch (redirectErr) {
+        console.error("Falha no redirect:", redirectErr);
+      }
+    }
+
     if (error.code === "auth/popup-closed-by-user") {
       errorMsg = "Login cancelado. Tente novamente.";
     } else if (error.code === "auth/network-request-failed") {
@@ -228,6 +251,38 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Erro ao inicializar Firebase:", error);
     showError("Erro ao conectar com o servidor. Recarregue a página.");
     return;
+  }
+
+  // Trata resultado de signInWithRedirect (quando usado como fallback)
+  try {
+    const redirectResult = await getRedirectResult(auth);
+    if (redirectResult) {
+      console.log("Login via redirect detectado. Prosseguindo...");
+      const credential = GoogleAuthProvider.credentialFromResult(
+        redirectResult
+      );
+      const user = redirectResult.user;
+      const additionalInfo = getAdditionalUserInfo(redirectResult);
+
+      console.log("Login bem-sucedido (redirect):", {
+        user: user.email,
+        isNewUser: additionalInfo?.isNewUser,
+      });
+
+      saveUserToLocalStorage(user, credential);
+      try {
+        await registerCredentials(user, credential);
+      } catch (backendError) {
+        console.warn(
+          "Erro ao registrar no backend após redirect, seguindo login:",
+          backendError
+        );
+      }
+      redirectToApp();
+      return; // encerra inicialização, já vai redirecionar
+    }
+  } catch (redirectCheckErr) {
+    console.warn("Sem resultado de redirect ou erro ao verificar:", redirectCheckErr);
   }
 
   // Verifica se já está logado (assíncrono)

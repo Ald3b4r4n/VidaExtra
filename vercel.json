@@ -9,6 +9,24 @@
   ],
   "headers": [
     {
+      "source": "/pages/login.html",
+      "headers": [
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin-allow-popups"
+        }
+      ]
+    },
+    {
+      "source": "/pages/oauth2callback.html",
+      "headers": [
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin-allow-popups"
+        }
+      ]
+    },
+    {
       "source": "/dist/(.*)",
       "headers": [
         {
