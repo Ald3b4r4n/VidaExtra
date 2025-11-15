@@ -62,6 +62,9 @@ COMO_FUNCIONAM_EMAILS.md
 *.backup.*
 *.bak
 
+# Environment variable lists (NEVER COMMIT!)
+VERCEL_ENV_VARS.txt
+
 # Test scripts
 test-*.js
 

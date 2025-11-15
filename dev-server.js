@@ -30,6 +30,28 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 const auth = admin.auth();
 
+// Local endpoint for Firebase Config (retorna variáveis de ambiente)
+app.get("/api/firebase-config", (req, res) => {
+  console.log("[LOCAL] firebase-config called");
+  res.json({
+    apiKey: process.env.FIREBASE_API_KEY,
+    authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.FIREBASE_APP_ID,
+    measurementId: process.env.FIREBASE_MEASUREMENT_ID,
+  });
+});
+
+// Local endpoint for OAuth Client ID
+app.get("/api/oauth-client-id", (req, res) => {
+  console.log("[LOCAL] oauth-client-id called");
+  res.json({
+    clientId: process.env.OAUTH_CLIENT_ID,
+  });
+});
+
 // Local endpoint for exchangeCodeForTokens (não está deployado em Cloud Functions)
 app.post("/api/exchangeCodeForTokens", async (req, res) => {
   try {

@@ -6,13 +6,16 @@
 /**
  * Inicia o fluxo OAuth do Google Calendar
  */
-export function connectGoogleCalendar() {
+export async function connectGoogleCalendar() {
   const oauth2Endpoint = "https://accounts.google.com/o/oauth2/v2/auth";
+
+  // Buscar Client ID do ambiente
+  const response = await fetch("/api/oauth-client-id");
+  const { clientId } = await response.json();
 
   // Parâmetros OAuth
   const params = {
-    client_id:
-      "286306256976-hg93orc4eg18phng4gs68fcsrpmun2c4.apps.googleusercontent.com",
+    client_id: clientId,
     redirect_uri: window.location.origin + "/pages/oauth2callback.html",
     response_type: "code",
     scope: [
