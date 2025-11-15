@@ -4,6 +4,7 @@
   "description": "Aplicação PWA para cálculo de horas extras (AC-4), com histórico, exportação em PDF, suporte a desconto de pensão, e agora com Tailwind CSS e ESLint configurados para padronização visual e qualidade de código.",
   "main": "app.js",
   "scripts": {
+    "build": "npm run build:css",
     "build:css": "tailwindcss -i ./src/input.css -o ./dist/tailwind.css --minify",
     "dev:css": "tailwindcss -i ./src/input.css -o ./dist/tailwind.css --watch",
     "lint": "eslint . --ext .js",
