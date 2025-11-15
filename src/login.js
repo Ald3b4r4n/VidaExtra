@@ -141,9 +141,20 @@ async function handleGoogleSignIn() {
 
   try {
     const provider = setupGoogleProvider();
-    console.log("Provider configurado, abrindo popup..."); // DEBUG
+    console.log("Provider configurado, escolhendo método de login..."); // DEBUG
 
-    // Popup de autenticação
+    // Em produção (Vercel), preferir redirect para evitar bloqueios/COOP
+    const isProdHost = /vercel\.app$/.test(window.location.hostname) ||
+      window.location.hostname === "vidaextra-calculadora-ac4.vercel.app";
+
+    if (isProdHost) {
+      console.log("Usando signInWithRedirect por estar em produção (Vercel)...");
+      await signInWithRedirect(auth, provider);
+      return; // Fluxo continua após retorno do redirect
+    }
+
+    // Em desenvolvimento, tentar popup primeiro
+    console.log("Usando signInWithPopup (dev)...");
     const result = await signInWithPopup(auth, provider);
 
     // Extrai credenciais
