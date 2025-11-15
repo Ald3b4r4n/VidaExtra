@@ -143,18 +143,25 @@ async function handleGoogleSignIn() {
     const provider = setupGoogleProvider();
     console.log("Provider configurado, escolhendo método de login..."); // DEBUG
 
-    // Em produção (Vercel), preferir redirect para evitar bloqueios/COOP
+    // Ambiente de produção (Vercel) detectado
     const isProdHost = /vercel\.app$/.test(window.location.hostname) ||
-      window.location.hostname === "vidaextra-calculadora-ac4.vercel.app";
+      window.location.hostname === "vidaextra-calculadora-ac4.vercel.app" ||
+      window.location.hostname === "vida-extra.vercel.app";
+    const redirectFlagKey = "vidaextra-login-redirect-tried";
+    const redirectAttempted = localStorage.getItem(redirectFlagKey) === "true";
 
-    if (isProdHost) {
-      console.log("Usando signInWithRedirect por estar em produção (Vercel)...");
+    // Em produção, tenta primeiro redirect UMA vez.
+    // Se já tentou e falhou (getRedirectResult não retornou), faz fallback para popup.
+    if (isProdHost && !redirectAttempted) {
+      console.log("Usando signInWithRedirect (primeira tentativa em produção)...");
+      localStorage.setItem(redirectFlagKey, "true");
       await signInWithRedirect(auth, provider);
       return; // Fluxo continua após retorno do redirect
     }
 
     // Em desenvolvimento, tentar popup primeiro
-    console.log("Usando signInWithPopup (dev)...");
+    // Em produção, se redirect já falhou, também usa popup como fallback
+    console.log("Usando signInWithPopup (fallback/dev)...");
     const result = await signInWithPopup(auth, provider);
 
     // Extrai credenciais
@@ -183,6 +190,8 @@ async function handleGoogleSignIn() {
 
     // Redireciona para o app
     redirectToApp();
+    // Limpa flag de tentativa de redirect (login concluído)
+    localStorage.removeItem(redirectFlagKey);
   } catch (error) {
     console.error("Erro no login:", error);
 
@@ -305,6 +314,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
   }
+
+  // Se voltamos de um redirect mas não houve resultado, orientar fallback
+  try {
+    const redirectFlagKey = "vidaextra-login-redirect-tried";
+    const redirectAttempted = localStorage.getItem(redirectFlagKey) === "true";
+    if (redirectAttempted) {
+      // Limpa flag para próxima tentativa
+      localStorage.removeItem(redirectFlagKey);
+      showError(
+        "Falha na autorização via redirect. Clique novamente em 'Entrar com Google' para tentar via pop-up."
+      );
+    }
+  } catch {}
 
   // Verifica se já está logado (assíncrono)
   const isLoggedIn = await checkExistingUser();
