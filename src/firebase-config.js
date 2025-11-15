@@ -13,10 +13,12 @@ import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase
 
 console.log("firebase-config.js: Iniciando carregamento..."); // DEBUG
 
-// Buscar configuração do endpoint seguro
+// Variáveis exportadas (serão populadas após init)
 let app, auth, db, analytics;
+let isInitialized = false;
 
-async function initFirebase() {
+// Buscar configuração e inicializar
+const firebasePromise = (async () => {
   try {
     console.log("Buscando config de /api/firebase-config..."); // DEBUG
     const response = await fetch("/api/firebase-config");
@@ -31,6 +33,7 @@ async function initFirebase() {
     auth = getAuth(app);
     db = getFirestore(app);
     analytics = getAnalytics(app);
+    isInitialized = true;
 
     console.log("Firebase inicializado com sucesso!"); // DEBUG
     return { app, auth, db, analytics };
@@ -38,24 +41,7 @@ async function initFirebase() {
     console.error("ERRO ao inicializar Firebase:", error);
     throw error;
   }
-}
-
-// Inicia imediatamente
-const firebasePromise = initFirebase();
-
-// Aguarda inicialização antes de exportar
-const {
-  app: firebaseApp,
-  auth: firebaseAuth,
-  db: firebaseDb,
-  analytics: firebaseAnalytics,
-} = await firebasePromise;
+})();
 
 // Export for use in other modules
-export {
-  firebaseApp as app,
-  firebaseAuth as auth,
-  firebaseDb as db,
-  firebaseAnalytics as analytics,
-};
-export { firebasePromise };
+export { app, auth, db, analytics, firebasePromise, isInitialized };

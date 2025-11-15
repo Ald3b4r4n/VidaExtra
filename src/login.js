@@ -3,13 +3,15 @@
  * VidaExtra® - Google Sign-In with Calendar Scope
  */
 
-import { auth } from "./firebase-config.js";
+import { auth, firebasePromise } from "./firebase-config.js";
 import { apiFetch } from "./api.js";
 import {
   GoogleAuthProvider,
   signInWithPopup,
   getAdditionalUserInfo,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+console.log("login.js: Carregando..."); // DEBUG
 
 // DOM Elements
 const googleSignInBtn = document.getElementById("google-signin-btn");
@@ -217,6 +219,16 @@ function checkExistingUser() {
  */
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("DOM loaded, inicializando..."); // DEBUG
+
+  // Aguarda Firebase inicializar
+  try {
+    await firebasePromise;
+    console.log("Firebase pronto, continuando inicialização..."); // DEBUG
+  } catch (error) {
+    console.error("Erro ao inicializar Firebase:", error);
+    showError("Erro ao conectar com o servidor. Recarregue a página.");
+    return;
+  }
 
   // Verifica se já está logado (assíncrono)
   const isLoggedIn = await checkExistingUser();
