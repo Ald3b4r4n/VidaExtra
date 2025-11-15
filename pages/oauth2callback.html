@@ -53,8 +53,11 @@
     </div>
 
     <script type="module">
-      import { auth } from "../src/firebase-config.js";
-      import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import { firebasePromise } from "../src/firebase-config.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
       const statusEl = document.getElementById("status");
       const errorEl = document.getElementById("error");
@@ -75,6 +78,10 @@
           }
 
           statusEl.textContent = "Aguardando login do Firebase...";
+
+          // Aguarda inicialização do Firebase
+          const { app } = await firebasePromise;
+          const auth = getAuth(app);
 
           // Esperar usuário estar logado
           const user = await new Promise((resolve) => {
