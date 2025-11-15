@@ -5,6 +5,7 @@
 
 import { auth, firebasePromise } from "./firebase-config.js";
 import { apiFetch } from "./api.js";
+import { setLogLevel } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
   GoogleAuthProvider,
   signInWithPopup,
@@ -12,6 +13,14 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 console.log("login.js: Carregando..."); // DEBUG
+
+// Silencia avisos internos do Firebase em produção (inclui COOP/popup)
+try {
+  const isProdHost = /vercel\.app$/.test(window.location.hostname) ||
+    window.location.hostname === "vida-extra.vercel.app" ||
+    window.location.hostname === "vidaextra-calculadora-ac4.vercel.app";
+  if (isProdHost) setLogLevel("error");
+} catch {}
 
 // DOM Elements
 const googleSignInBtn = document.getElementById("google-signin-btn");
