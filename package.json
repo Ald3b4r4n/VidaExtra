@@ -40,6 +40,7 @@
     "firebase-admin": "^13.6.0",
     "googleapis": "^166.0.0",
     "luxon": "^3.7.2",
+    "mongodb": "^6.21.0",
     "nodemailer": "^7.0.10"
   }
 }

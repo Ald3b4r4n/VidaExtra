@@ -887,6 +887,25 @@ document.addEventListener("DOMContentLoaded", function () {
           // Salva dados
           salvarDados();
 
+          try {
+            (async () => {
+              const authMod = await import("./src/auth.js");
+              const idToken = await authMod.getIdToken();
+              const [dia, mes, ano] = (calculo.data || "")
+                .split("/")
+                .map(Number);
+              const ym = `${ano}-${String(mes).padStart(2, "0")}`;
+              await fetch("/api/shifts/delete", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${idToken}`,
+                },
+                body: JSON.stringify({ month: ym, id }),
+              }).catch(() => {});
+            })();
+          } catch {}
+
           // Toca som de exclusão
           tocarSomExclusao();
 
@@ -943,6 +962,43 @@ document.addEventListener("DOMContentLoaded", function () {
           pensao: appState.totalPensao,
         })
       );
+      try {
+        const months = Array.from(
+          new Set(
+            (appState.historico || []).map((it) => {
+              const [d, m, y] = (it.data || "").split("/").map(Number);
+              return `${y}-${String(m).padStart(2, "0")}`;
+            })
+          )
+        ).filter((v) => v && v.length === 7);
+        (async () => {
+          const authMod = await import("./src/auth.js");
+          const idToken = await authMod.getIdToken();
+          for (const ym of months) {
+            const subset = (appState.historico || []).filter((it) => {
+              const [d, m, y] = (it.data || "").split("/").map(Number);
+              const key = `${y}-${String(m).padStart(2, "0")}`;
+              return key === ym;
+            });
+            const hours = subset.reduce(
+              (acc, it) => acc + (Number(it.horasTotais) || 0),
+              0
+            );
+            await fetch("/api/shifts/upsert", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${idToken}`,
+              },
+              body: JSON.stringify({
+                month: ym,
+                shifts: subset,
+                totals: { hours },
+              }),
+            }).catch(() => {});
+          }
+        })();
+      } catch {}
     } catch (error) {
       console.error("Erro ao salvar dados:", error);
     }
@@ -1047,6 +1103,52 @@ document.addEventListener("DOMContentLoaded", function () {
         atualizarTotalPensao();
         calendarSyncAll();
       }
+
+      (async () => {
+        try {
+          const now = new Date();
+          const ym = `${now.getFullYear()}-${String(
+            now.getMonth() + 1
+          ).padStart(2, "0")}`;
+          const hasCurrentMonth = (historico || []).some((it) => {
+            const [d, m, y] = (it.data || "").split("/").map(Number);
+            const key = `${y}-${String(m).padStart(2, "0")}`;
+            return key === ym;
+          });
+          if (historico.length === 0 || !hasCurrentMonth) {
+            const fb = await import("./src/firebase-config.js");
+            await fb.firebasePromise;
+            const authMod = await import("./src/auth.js");
+            let idToken;
+            try {
+              idToken = await authMod.getIdToken();
+            } catch {
+              return;
+            }
+            const res = await fetch(`/api/shifts/list?month=${ym}`, {
+              method: "GET",
+              headers: { Authorization: `Bearer ${idToken}` },
+            });
+            if (res.ok) {
+              const data = await res.json();
+              const remote = Array.isArray(data.shifts) ? data.shifts : [];
+              if (remote.length > 0) {
+                const merged = [
+                  ...historico.filter((it) => {
+                    const [d, m, y] = (it.data || "").split("/").map(Number);
+                    const key = `${y}-${String(m).padStart(2, "0")}`;
+                    return key !== ym;
+                  }),
+                  ...remote,
+                ];
+                appState.historico = merged;
+                salvarDados();
+                window.dispatchEvent(new Event("historico-updated"));
+              }
+            }
+          }
+        } catch {}
+      })();
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
     }

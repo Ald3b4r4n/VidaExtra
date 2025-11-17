@@ -84,7 +84,8 @@ app.post("/api/exchangeCodeForTokens", async (req, res) => {
     const oauth2Client = new google.auth.OAuth2(
       process.env.OAUTH_CLIENT_ID,
       process.env.OAUTH_CLIENT_SECRET,
-      "http://localhost:5500/pages/oauth2callback.html"
+      process.env.OAUTH_REDIRECT_URI ||
+        "http://localhost:5500/pages/oauth2callback.html"
     );
 
     console.log("[LOCAL] Exchanging code for tokens...");
@@ -309,6 +310,188 @@ app.get("/api/getUpcomingEvents", async (req, res) => {
       error: "Internal server error",
       details: error.message,
     });
+  }
+});
+
+const { MongoClient } = require("mongodb");
+const dns = require("dns");
+let mongoClient;
+async function getMongoDb() {
+  if (!mongoClient) {
+    try {
+      dns.setServers(["8.8.8.8", "1.1.1.1"]);
+    } catch {}
+    const uri = process.env.MONGODB_URI;
+    try {
+      mongoClient = new MongoClient(uri, {
+        maxPoolSize: 10,
+        serverSelectionTimeoutMS: 8000,
+      });
+      await mongoClient.connect();
+    } catch (e) {
+      const isSrv = typeof uri === "string" && uri.startsWith("mongodb+srv://");
+      const match = isSrv
+        ? uri.match(/^mongodb\+srv:\/\/([^:]+):([^@]+)@([^\/?]+)(.*)$/)
+        : null;
+      if (!match) throw e;
+      const [, user, pass, host, tail] = match;
+      const https = require("https");
+      const dohUrl = `https://dns.google/resolve?name=_mongodb._tcp.${host}&type=SRV`;
+      const seeds = await new Promise((resolve, reject) => {
+        https.get(dohUrl, (resp) => {
+          let data = "";
+          resp.on("data", (chunk) => (data += chunk));
+          resp.on("end", () => {
+            try {
+              const json = JSON.parse(data);
+              const list = (json.Answer || [])
+                .map((a) => String(a.data))
+                .map((s) => s.replace(/^\d+\s+\d+\s+27017\s+/, "").replace(/\.$/, ""));
+              resolve(list.map((h) => `${h}:27017`));
+            } catch (err) {
+              reject(err);
+            }
+          });
+        }).on("error", reject);
+      });
+      const seedUri = `mongodb://${encodeURIComponent(user)}:${encodeURIComponent(pass)}@${seeds.join(",")}/?tls=true&authSource=admin&retryWrites=true&w=majority`;
+      mongoClient = new MongoClient(seedUri, {
+        maxPoolSize: 10,
+        serverSelectionTimeoutMS: 8000,
+      });
+      await mongoClient.connect();
+    }
+  }
+  return mongoClient.db(process.env.MONGODB_DB || "vidaextra");
+}
+function monthId(uid, ym) {
+  return `${uid}_${ym}`;
+}
+
+app.get("/api/shifts/list", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const idToken = authHeader.split("Bearer ")[1];
+    const decodedToken = await auth.verifyIdToken(idToken);
+    const { uid } = decodedToken;
+
+    const ym = req.query.month || new Date().toISOString().slice(0, 7);
+    const _id = monthId(uid, ym);
+    const dbm = await getMongoDb();
+    const col = dbm.collection("userShifts");
+    const doc = await col.findOne({ _id });
+    if (!doc) {
+      return res.status(200).json({
+        success: true,
+        uid,
+        month: ym,
+        shifts: [],
+        totals: { hours: 0, extraHours: 0 },
+        updatedAt: null,
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      uid,
+      month: ym,
+      shifts: doc.shifts || [],
+      totals: doc.totals || null,
+      updatedAt: doc.updatedAt || null,
+    });
+  } catch (error) {
+    console.error("❌ Error in /api/shifts/list:", error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/api/shifts/upsert", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const idToken = authHeader.split("Bearer ")[1];
+    const decodedToken = await auth.verifyIdToken(idToken);
+    const { uid } = decodedToken;
+
+    const { month, shifts, totals } = req.body || {};
+    if (!month || !Array.isArray(shifts)) {
+      return res.status(400).json({ error: "Missing month or shifts" });
+    }
+    const _id = monthId(uid, month);
+    const dbm = await getMongoDb();
+    const col = dbm.collection("userShifts");
+    const now = new Date();
+    const [year, m] = month.split("-").map((v) => Number(v));
+    await col.updateOne(
+      { _id },
+      {
+        $set: {
+          _id,
+          uid,
+          year,
+          month: m,
+          shifts,
+          totals: totals || null,
+          updatedAt: now,
+        },
+      },
+      { upsert: true }
+    );
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("❌ Error in /api/shifts/upsert:", error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/api/shifts/delete", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const idToken = authHeader.split("Bearer ")[1];
+    const decodedToken = await auth.verifyIdToken(idToken);
+    const { uid } = decodedToken;
+
+    const { month, id } = req.body || {};
+    if (!month || !id) {
+      return res.status(400).json({ error: "Missing month or id" });
+    }
+    const _id = monthId(uid, month);
+    const dbm = await getMongoDb();
+    const col = dbm.collection("userShifts");
+    const now = new Date();
+    await col.updateOne(
+      { _id },
+      { $pull: { shifts: { id } }, $set: { updatedAt: now } }
+    );
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("❌ Error in /api/shifts/delete:", error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+// Simple Mongo connectivity check
+app.get("/api/mongo-ping", async (req, res) => {
+  try {
+    const dbm = await getMongoDb();
+    const col = dbm.collection("userShifts");
+    const count = await col.countDocuments();
+    res.status(200).json({
+      ok: true,
+      db: dbm.databaseName,
+      collection: "userShifts",
+      count,
+    });
+  } catch (error) {
+    console.error("❌ Mongo ping error:", error);
+    res.status(500).json({ ok: false, error: error.message });
   }
 });
 
