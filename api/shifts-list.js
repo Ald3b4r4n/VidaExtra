@@ -27,6 +27,7 @@ export default async function handler(req, res) {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) return res.status(401).json({ error: "Unauthorized" });
+    if (!auth) return res.status(500).json({ error: "Server auth not initialized" });
     const idToken = authHeader.split("Bearer ")[1];
     const decoded = await auth.verifyIdToken(idToken);
     const userId = normalizeUserId(decoded);
@@ -44,6 +45,7 @@ export default async function handler(req, res) {
     if (!doc) return res.status(200).json({ success: true, uid: decoded.uid, email: decoded.email || null, month: ym, shifts: [], totals: { hours: 0, extraHours: 0 }, updatedAt: null });
     return res.status(200).json({ success: true, uid: decoded.uid, email: decoded.email || null, month: ym, shifts: doc.shifts || [], totals: doc.totals || null, updatedAt: doc.updatedAt || null });
   } catch (e) {
-    return res.status(500).json({ error: e.message });
+    const msg = typeof e?.message === "string" ? e.message : String(e);
+    return res.status(500).json({ error: msg });
   }
 }
