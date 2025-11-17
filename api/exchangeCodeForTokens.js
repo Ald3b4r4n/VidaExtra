@@ -76,7 +76,18 @@ module.exports = async (req, res) => {
     );
 
     // Exchange code for tokens
-    const { tokens } = await oauth2Client.getToken(code);
+    let tokens;
+    try {
+      const resp = await oauth2Client.getToken(code);
+      tokens = resp.tokens || {};
+    } catch (err) {
+      const detail = {
+        error: err.message || String(err),
+        response: err.response?.data || null,
+        status: err.response?.status || null,
+      };
+      return res.status(500).json({ error: "oauth_exchange_failed", detail, redirectUri });
+    }
 
     if (!tokens.access_token || !tokens.refresh_token) {
       return res
@@ -118,10 +129,12 @@ module.exports = async (req, res) => {
       message: "Credentials saved successfully",
     });
   } catch (error) {
-    console.error("❌ Error exchanging code for tokens:", error);
-    return res.status(500).json({
-      error: "Internal server error",
-      message: error.message,
-    });
+    const detail = {
+      error: error.message || String(error),
+      response: error.response?.data || null,
+      status: error.response?.status || null,
+    };
+    console.error("❌ Error exchanging code for tokens:", detail);
+    return res.status(500).json({ error: "internal_error", detail });
   }
 };
