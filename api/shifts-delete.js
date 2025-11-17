@@ -11,6 +11,12 @@ try {
   auth = getAuth();
 } catch {}
 
+function normalizeUserId(decoded) {
+  const email = decoded?.email;
+  const uid = decoded?.uid;
+  return (email || uid || "unknown").trim().toLowerCase();
+}
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST,OPTIONS");
@@ -23,12 +29,12 @@ export default async function handler(req, res) {
     if (!authHeader || !authHeader.startsWith("Bearer ")) return res.status(401).json({ error: "Unauthorized" });
     const idToken = authHeader.split("Bearer ")[1];
     const decoded = await auth.verifyIdToken(idToken);
-    const uid = decoded.uid;
+    const userId = normalizeUserId(decoded);
 
     const { month, id } = req.body || {};
     if (!month || !id) return res.status(400).json({ error: "Missing month or id" });
 
-    const _id = monthId(uid, month);
+    const _id = monthId(userId, month);
     const db = await getDb();
     const col = db.collection("userShifts");
 

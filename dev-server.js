@@ -364,8 +364,13 @@ async function getMongoDb() {
   }
   return mongoClient.db(process.env.MONGODB_DB || "vidaextra");
 }
-function monthId(uid, ym) {
-  return `${uid}_${ym}`;
+function normalizeUserId(decoded) {
+  const email = decoded?.email;
+  const uid = decoded?.uid;
+  return (email || uid || "unknown").trim().toLowerCase();
+}
+function monthId(userId, ym) {
+  return `${userId}_${ym}`;
 }
 
 app.get("/api/shifts/list", async (req, res) => {
@@ -376,17 +381,22 @@ app.get("/api/shifts/list", async (req, res) => {
     }
     const idToken = authHeader.split("Bearer ")[1];
     const decodedToken = await auth.verifyIdToken(idToken);
-    const { uid } = decodedToken;
+    const userId = normalizeUserId(decodedToken);
 
     const ym = req.query.month || new Date().toISOString().slice(0, 7);
-    const _id = monthId(uid, ym);
+    const _id = monthId(userId, ym);
     const dbm = await getMongoDb();
     const col = dbm.collection("userShifts");
-    const doc = await col.findOne({ _id });
+    let doc = await col.findOne({ _id });
+    if (!doc) {
+      const legacyId = monthId(decodedToken.uid, ym);
+      doc = await col.findOne({ _id: legacyId });
+    }
     if (!doc) {
       return res.status(200).json({
         success: true,
-        uid,
+        uid: decodedToken.uid,
+        email: decodedToken.email || null,
         month: ym,
         shifts: [],
         totals: { hours: 0, extraHours: 0 },
@@ -395,7 +405,8 @@ app.get("/api/shifts/list", async (req, res) => {
     }
     return res.status(200).json({
       success: true,
-      uid,
+      uid: decodedToken.uid,
+      email: decodedToken.email || null,
       month: ym,
       shifts: doc.shifts || [],
       totals: doc.totals || null,
@@ -415,13 +426,13 @@ app.post("/api/shifts/upsert", async (req, res) => {
     }
     const idToken = authHeader.split("Bearer ")[1];
     const decodedToken = await auth.verifyIdToken(idToken);
-    const { uid } = decodedToken;
+    const userId = normalizeUserId(decodedToken);
 
     const { month, shifts, totals } = req.body || {};
     if (!month || !Array.isArray(shifts)) {
       return res.status(400).json({ error: "Missing month or shifts" });
     }
-    const _id = monthId(uid, month);
+    const _id = monthId(userId, month);
     const dbm = await getMongoDb();
     const col = dbm.collection("userShifts");
     const now = new Date();
@@ -431,7 +442,8 @@ app.post("/api/shifts/upsert", async (req, res) => {
       {
         $set: {
           _id,
-          uid,
+          uid: decodedToken.uid,
+          email: decodedToken.email || null,
           year,
           month: m,
           shifts,
@@ -456,13 +468,13 @@ app.post("/api/shifts/delete", async (req, res) => {
     }
     const idToken = authHeader.split("Bearer ")[1];
     const decodedToken = await auth.verifyIdToken(idToken);
-    const { uid } = decodedToken;
+    const userId = normalizeUserId(decodedToken);
 
     const { month, id } = req.body || {};
     if (!month || !id) {
       return res.status(400).json({ error: "Missing month or id" });
     }
-    const _id = monthId(uid, month);
+    const _id = monthId(userId, month);
     const dbm = await getMongoDb();
     const col = dbm.collection("userShifts");
     const now = new Date();

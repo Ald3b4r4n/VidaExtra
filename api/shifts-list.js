@@ -11,6 +11,12 @@ try {
   auth = getAuth();
 } catch {}
 
+function normalizeUserId(decoded) {
+  const email = decoded?.email;
+  const uid = decoded?.uid;
+  return (email || uid || "unknown").trim().toLowerCase();
+}
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
@@ -23,16 +29,20 @@ export default async function handler(req, res) {
     if (!authHeader || !authHeader.startsWith("Bearer ")) return res.status(401).json({ error: "Unauthorized" });
     const idToken = authHeader.split("Bearer ")[1];
     const decoded = await auth.verifyIdToken(idToken);
-    const uid = decoded.uid;
+    const userId = normalizeUserId(decoded);
 
     const ym = (req.query.month || new Date().toISOString().slice(0, 7));
-    const _id = monthId(uid, ym);
+    const _id = monthId(userId, ym);
     const db = await getDb();
     const col = db.collection("userShifts");
-    const doc = await col.findOne({ _id });
+    let doc = await col.findOne({ _id });
+    if (!doc) {
+      const legacyId = monthId(decoded.uid, ym);
+      doc = await col.findOne({ _id: legacyId });
+    }
 
-    if (!doc) return res.status(200).json({ success: true, uid, month: ym, shifts: [], totals: { hours: 0, extraHours: 0 }, updatedAt: null });
-    return res.status(200).json({ success: true, uid, month: ym, shifts: doc.shifts || [], totals: doc.totals || null, updatedAt: doc.updatedAt || null });
+    if (!doc) return res.status(200).json({ success: true, uid: decoded.uid, email: decoded.email || null, month: ym, shifts: [], totals: { hours: 0, extraHours: 0 }, updatedAt: null });
+    return res.status(200).json({ success: true, uid: decoded.uid, email: decoded.email || null, month: ym, shifts: doc.shifts || [], totals: doc.totals || null, updatedAt: doc.updatedAt || null });
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
