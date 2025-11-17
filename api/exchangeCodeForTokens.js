@@ -65,10 +65,10 @@ module.exports = async (req, res) => {
     }
 
     // Configure OAuth2 client
-    const APP_URL = process.env.APP_URL || "https://vidaextra-calculadora-ac4.vercel.app";
-    const origin = req.headers.origin;
-    const redirectUri =
-      process.env.OAUTH_REDIRECT_URI || `${(origin || APP_URL)}/pages/oauth2callback.html`;
+    const APP_URL = process.env.APP_URL || "https://www.vidaextra.xyz";
+    const bodyRedirect = (req.body && req.body.redirectUri) || null;
+    const envRedirect = process.env.OAUTH_REDIRECT_URI || null;
+    const redirectUri = bodyRedirect || envRedirect || `${APP_URL}/pages/oauth2callback.html`;
     const oauth2Client = new google.auth.OAuth2(
       process.env.OAUTH_CLIENT_ID,
       process.env.OAUTH_CLIENT_SECRET,
