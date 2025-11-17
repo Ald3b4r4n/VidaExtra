@@ -105,13 +105,14 @@ export default async function handler(req, res) {
     // Verify Firebase ID token when Admin is available; otherwise proceed with fallback
     let uid = null;
     const authHeader = req.headers.authorization;
-    if (auth) {
-      if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({ error: "Unauthorized" });
+    if (auth && authHeader && authHeader.startsWith("Bearer ")) {
+      try {
+        const idToken = authHeader.split("Bearer ")[1];
+        const decodedToken = await auth.verifyIdToken(idToken);
+        uid = decodedToken?.uid || null;
+      } catch (_e) {
+        uid = null;
       }
-      const idToken = authHeader.split("Bearer ")[1];
-      const decodedToken = await auth.verifyIdToken(idToken);
-      uid = decodedToken?.uid || null;
     }
 
     // Get request body
@@ -130,12 +131,18 @@ export default async function handler(req, res) {
     }
 
     // Get user's refresh token from Firestore when Admin is available
-    let accessToken = googleAccessToken;
+    let accessToken = googleAccessToken || req.headers["x-google-access-token"] || null;
     if (db && uid) {
       const userDoc = await db.collection("users").doc(uid).get();
       const userData = userDoc.data();
-      if (userData?.refreshToken) {
-        accessToken = await refreshAccessToken(userData.refreshToken);
+      const rt = userData?.refreshToken;
+      const looksLikeRefresh = typeof rt === "string" && /^1\//.test(rt);
+      if (looksLikeRefresh) {
+        try {
+          accessToken = await refreshAccessToken(rt);
+        } catch (e) {
+          console.warn("Refresh token inválido/expirado, usando fallback de access token do cliente", e?.message || String(e));
+        }
       }
     }
 

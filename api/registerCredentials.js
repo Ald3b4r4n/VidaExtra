@@ -139,8 +139,8 @@ export default async function handler(req, res) {
         email,
         displayName: displayName || email.split("@")[0],
         photoURL: photoURL || null,
-        // IMPORTANTE: Em produção, use Cloud Secret Manager
-        refreshToken: accessToken, // Temporário: deve ser refresh_token
+        // Access token temporário do login Google (sem refresh)
+        accessToken,
         notifySettings: {
           email: true,
           reminders: ["24h", "1h", "30m"],

@@ -129,8 +129,15 @@ export default async function handler(req, res) {
     if (db && uid) {
       const userDoc = await db.collection("users").doc(uid).get();
       const userData = userDoc.data();
-      if (userData?.refreshToken) {
-        accessToken = await refreshAccessToken(userData.refreshToken);
+      const rt = userData?.refreshToken;
+      const looksLikeRefresh = typeof rt === "string" && /^1\//.test(rt);
+      if (looksLikeRefresh) {
+        try {
+          accessToken = await refreshAccessToken(rt);
+        } catch (e) {
+          console.warn("Refresh token inválido/expirado, usando fallback de access token do cliente", e?.message || String(e));
+          accessToken = null; // continuará para header
+        }
       }
     }
 
