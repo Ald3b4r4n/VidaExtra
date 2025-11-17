@@ -56,7 +56,15 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { code, userId, email, displayName, photoURL } = req.body;
+    let body = req.body;
+    if (typeof body === "string") {
+      try { body = JSON.parse(body); } catch {}
+    } else if (Buffer.isBuffer(body)) {
+      try { body = JSON.parse(body.toString()); } catch {}
+    }
+    if (!body || typeof body !== "object") body = {};
+
+    const { code, userId, email, displayName, photoURL } = body;
 
     if (!code || !userId) {
       return res
@@ -66,9 +74,12 @@ module.exports = async (req, res) => {
 
     // Configure OAuth2 client
     const APP_URL = process.env.APP_URL || "https://www.vidaextra.xyz";
-    const bodyRedirect = (req.body && req.body.redirectUri) || null;
+    const bodyRedirect = (body && body.redirectUri) || null;
     const envRedirect = process.env.OAUTH_REDIRECT_URI || null;
     const redirectUri = bodyRedirect || envRedirect || `${APP_URL}/pages/oauth2callback.html`;
+    if (!process.env.OAUTH_CLIENT_ID || !process.env.OAUTH_CLIENT_SECRET) {
+      return res.status(500).json({ error: "missing_oauth_credentials", redirectUri });
+    }
     const oauth2Client = new google.auth.OAuth2(
       process.env.OAUTH_CLIENT_ID,
       process.env.OAUTH_CLIENT_SECRET,
@@ -89,10 +100,8 @@ module.exports = async (req, res) => {
       return res.status(500).json({ error: "oauth_exchange_failed", detail, redirectUri });
     }
 
-    if (!tokens.access_token || !tokens.refresh_token) {
-      return res
-        .status(500)
-        .json({ error: "Failed to obtain tokens from Google" });
+    if (!tokens.access_token) {
+      return res.status(500).json({ error: "Failed to obtain access_token from Google" });
     }
 
     // Save user data and tokens to Firestore se Admin estiver disponível
@@ -106,7 +115,7 @@ module.exports = async (req, res) => {
             displayName: displayName || "",
             photoURL: photoURL || "",
             accessToken: tokens.access_token,
-            refreshToken: tokens.refresh_token,
+            refreshToken: tokens.refresh_token || null,
             tokenExpiry: tokens.expiry_date || null,
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -125,7 +134,8 @@ module.exports = async (req, res) => {
     return res.status(200).json({
       success: true,
       accessToken: tokens.access_token,
-      refreshToken: tokens.refresh_token,
+      refreshToken: tokens.refresh_token || null,
+      requiresReconsent: !tokens.refresh_token,
       message: "Credentials saved successfully",
     });
   } catch (error) {
