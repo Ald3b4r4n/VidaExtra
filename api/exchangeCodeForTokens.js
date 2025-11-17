@@ -10,12 +10,24 @@ const { google } = require("googleapis");
 let db = null;
 try {
   if (!admin.apps.length) {
-    const serviceAccount = JSON.parse(
-      process.env.FIREBASE_SERVICE_ACCOUNT || "{}"
-    );
+    const raw = process.env.FIREBASE_SERVICE_ACCOUNT || "{}";
+    let serviceAccount = {};
+    try {
+      serviceAccount = JSON.parse(raw);
+    } catch (e) {
+      console.warn("Service account JSON inválido", e);
+    }
     if (serviceAccount && serviceAccount.project_id) {
+      const pk = typeof serviceAccount.private_key === "string"
+        ? serviceAccount.private_key.replace(/\\n/g, "\n")
+        : serviceAccount.private_key;
+      const saNorm = {
+        project_id: serviceAccount.project_id,
+        client_email: serviceAccount.client_email,
+        private_key: pk,
+      };
       admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
+        credential: admin.credential.cert(saNorm),
       });
       db = admin.firestore();
     }
