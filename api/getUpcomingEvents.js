@@ -115,13 +115,14 @@ export default async function handler(req, res) {
     const authHeader = req.headers.authorization;
     const googleAccessHeader = req.headers["x-google-access-token"];
 
-    if (auth) {
-      if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({ error: "Unauthorized" });
+    if (auth && authHeader && authHeader.startsWith("Bearer ")) {
+      try {
+        const idToken = authHeader.split("Bearer ")[1];
+        const decodedToken = await auth.verifyIdToken(idToken);
+        uid = decodedToken?.uid || null;
+      } catch (_e) {
+        uid = null;
       }
-      const idToken = authHeader.split("Bearer ")[1];
-      const decodedToken = await auth.verifyIdToken(idToken);
-      uid = decodedToken?.uid || null;
     }
 
     // If Admin available, try to use refreshToken from Firestore
