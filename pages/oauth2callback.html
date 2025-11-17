@@ -113,21 +113,22 @@
           });
 
           if (!response.ok) {
-            // Tentar ler como JSON; se falhar, ler como texto usando clones
             let errorMessage = `Erro ${response.status}`;
             try {
               const errorData = await response.clone().json();
-              errorMessage =
-                errorData.error ||
-                errorData.message ||
-                "Erro ao trocar código por tokens";
+              const detailMsg =
+                (errorData.detail && (errorData.detail.error || errorData.detail.message)) ||
+                (errorData.detail && errorData.detail.response && errorData.detail.response.error) ||
+                null;
+              const baseMsg = errorData.error || errorData.message || "Erro ao trocar código por tokens";
+              const redirectInfo = errorData.redirectUri ? ` [redirectUri: ${errorData.redirectUri}]` : "";
+              errorMessage = detailMsg ? `${baseMsg}: ${detailMsg}${redirectInfo}` : `${baseMsg}${redirectInfo}`;
+              console.error("Detalhe do erro OAuth:", errorData);
             } catch (e) {
               try {
                 const errorText = await response.clone().text();
-                errorMessage = `${errorMessage}: ${errorText.substring(0, 200)}`;
-              } catch (_) {
-                // Ignorar
-              }
+                errorMessage = `${errorMessage}: ${errorText.substring(0, 400)}`;
+              } catch (_) {}
             }
             throw new Error(errorMessage);
           }

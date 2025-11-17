@@ -106,22 +106,32 @@ module.exports = async (req, res) => {
 
     // Save user data and tokens to Firestore se Admin estiver disponível
     if (db) {
-      await db
-        .collection("users")
-        .doc(userId)
-        .set(
-          {
-            email: email,
-            displayName: displayName || "",
-            photoURL: photoURL || "",
-            accessToken: tokens.access_token,
-            refreshToken: tokens.refresh_token || null,
-            tokenExpiry: tokens.expiry_date || null,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-          },
-          { merge: true }
-        );
+      let ts;
+      try {
+        ts = admin?.firestore?.FieldValue?.serverTimestamp
+          ? admin.firestore.FieldValue.serverTimestamp()
+          : null;
+      } catch {}
+      try {
+        await db
+          .collection("users")
+          .doc(userId)
+          .set(
+            {
+              email: email,
+              displayName: displayName || "",
+              photoURL: photoURL || "",
+              accessToken: tokens.access_token,
+              refreshToken: tokens.refresh_token || null,
+              tokenExpiry: tokens.expiry_date || null,
+              updatedAt: ts || new Date(),
+              createdAt: ts || new Date(),
+            },
+            { merge: true }
+          );
+      } catch (persistErr) {
+        console.warn("Falha ao salvar no Firestore, seguindo com sucesso:", persistErr?.message || String(persistErr));
+      }
     } else {
       console.warn(
         "Pulando persistência em Firestore: service account não configurado"
