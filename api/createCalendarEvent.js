@@ -89,7 +89,7 @@ export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Authorization,Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Authorization,Content-Type,X-Google-Access-Token");
 
   // Handle preflight
   if (req.method === "OPTIONS") {
@@ -196,10 +196,15 @@ export default async function handler(req, res) {
       },
     });
   } catch (error) {
-    console.error("Error in createCalendarEvent:", error);
+    const detail = {
+      error: error?.message || String(error),
+      status: error?.response?.status || null,
+      data: error?.response?.data || null,
+    };
+    console.error("Error in createCalendarEvent:", detail);
     return res.status(500).json({
       error: "Internal server error",
-      details: error.message,
+      details: detail,
     });
   }
 }

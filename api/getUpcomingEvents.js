@@ -168,10 +168,15 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ events });
   } catch (error) {
-    console.error("Error in getUpcomingEvents:", error);
+    const detail = {
+      error: error?.message || String(error),
+      status: error?.response?.status || null,
+      data: error?.response?.data || null,
+    };
+    console.error("Error in getUpcomingEvents:", detail);
     return res.status(500).json({
       error: "Internal server error",
-      details: error.message,
+      details: detail,
     });
   }
 }
