@@ -15,7 +15,9 @@ function ensureAdmin() {
       if (!sa || !sa.project_id) {
         return { ok: false, error: "FIREBASE_SERVICE_ACCOUNT missing project_id" };
       }
-      initializeApp({ credential: cert(sa) });
+      const pk = typeof sa.private_key === "string" ? sa.private_key.replace(/\\n/g, "\n") : sa.private_key;
+      const saNorm = { project_id: sa.project_id, client_email: sa.client_email, private_key: pk };
+      initializeApp({ credential: cert(saNorm) });
     }
     return { ok: true, auth: getAuth() };
   } catch (e) {
