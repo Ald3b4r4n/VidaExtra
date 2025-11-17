@@ -1,6 +1,6 @@
 import { getApps, initializeApp, cert } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
-import { getDb, monthId } from "./_mongo.js";
+import { getDb, monthId } from "../lib/mongo.js";
 
 let auth = null;
 try {
