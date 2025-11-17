@@ -4,9 +4,6 @@
   "rewrites": [
     { "source": "/api/firebase-config", "destination": "/api/config" },
     { "source": "/api/oauth-client-id", "destination": "/api/config" },
-    { "source": "/api/shifts/list", "destination": "/api/shifts-list" },
-    { "source": "/api/shifts/upsert", "destination": "/api/shifts-upsert" },
-    { "source": "/api/shifts/delete", "destination": "/api/shifts-delete" },
     { "source": "/(.*)", "destination": "/$1" }
   ],
   "headers": [
