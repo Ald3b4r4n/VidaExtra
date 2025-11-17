@@ -8,6 +8,7 @@ functions/node_modules/
 .env.*.local
 functions/.env
 functions/.env.local
+.env.local.example
 
 # Firebase
 .firebase/
