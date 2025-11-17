@@ -51,12 +51,8 @@ Thumbs.db
 coverage/
 
 # Markdown documentation (except README)
-CHANGELOG.md
-TESTES_LOCAIS.md
-SISTEMA_EMAILS_COMPLETO.md
-RECURSO_PAGUE_CAFE.md
-CONFIGURAR_OAUTH_REDIRECT.md
-COMO_FUNCIONAM_EMAILS.md
+*.md
+!README.md
 
 # Backup files
 *.backup.*

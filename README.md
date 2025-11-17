@@ -78,7 +78,7 @@ Simplificar e automatizar o cálculo de horas extras, permitindo aos usuários:
 - **Edição em Linha**: Modifique data, horários, pensão e anotações
 - **Remoção Seletiva**: Delete registros individuais com confirmação
 - **Totalizadores Dinâmicos**: Atualização automática de horas e valores
-- **Persistência Local**: Dados salvos no navegador (localStorage)
+- **Persistência e Sincronização**: Cache local (localStorage) + centralização mensal em MongoDB Atlas
 
 ### 📄 Exportação PDF
 
@@ -124,6 +124,7 @@ Simplificar e automatizar o cálculo de horas extras, permitindo aos usuários:
 | **PostCSS**      | 8.5.6   | Processador CSS para otimizações                     |
 | **Autoprefixer** | 10.4.21 | Adiciona prefixos vendor automaticamente             |
 | **Serve**        | 14.2.5  | Servidor HTTP estático para desenvolvimento          |
+| **MongoDB**      | Atlas   | Armazenamento central de shifts por mês              |
 
 ### PWA
 
@@ -304,6 +305,7 @@ npm run serve
 
 # O servidor iniciará na porta 5500
 # Acesse: http://localhost:5500
+# Em dev, os endpoints são sempre "/api" (mesmos caminhos da produção)
 ```
 
 ### Fluxo de Uso
@@ -662,6 +664,9 @@ O VidaExtra usa **dois sistemas** de email trabalhando em conjunto:
 | `/api/sendWelcomeEmail`      | POST   | Envia boas-vindas              | auth.js → Primeiro login     |
 | `/api/sendEventConfirmation` | POST   | Confirma evento criado         | app.js → Após criar evento   |
 | `/api/sendMonthlyReport`     | POST   | Gera relatório mensal          | Vercel Cron → Dia 1          |
+| `/api/shifts/list`           | GET    | Lista shifts do mês (Mongo)    | app.js (cache + sync)        |
+| `/api/shifts/upsert`         | POST   | Grava shifts do mês (Mongo)    | app.js (cache + sync)        |
+| `/api/shifts/delete`         | POST   | Remove item do mês (Mongo)     | app.js (cache + sync)        |
 | `/api/ping`                  | GET    | Health check                   | Monitoramento                |
 
 ### 📊 Fluxo OAuth Completo
@@ -931,7 +936,7 @@ graph LR
 - ✅ ID tokens Firebase validados em cada requisição
 - ✅ HTTPS obrigatório em produção
 
-Para documentação completa, consulte [CHANGELOG.md](./CHANGELOG.md).
+Observação: documentação interna adicional foi removida do repositório público; este README contém os pontos essenciais.
 
 ---
 
@@ -939,50 +944,27 @@ Para documentação completa, consulte [CHANGELOG.md](./CHANGELOG.md).
 
 Antes de fazer deploy, teste as funcionalidades localmente:
 
-📖 **[Guia Completo de Testes Locais](./TESTES_LOCAIS.md)**
+```powershell
+npm run dev    # inicia dev-server com endpoints /api
+```
 
-### Testes Disponíveis
+Pré-requisitos básicos:
 
-1. **E-mail de Lembrete** (template HTML completo):
-
-   ```powershell
-   node test-reminder-email.js
-   ```
-
-2. **Criação de Evento no Google Calendar**:
-
-   ```powershell
-   node test-calendar-event.js <USER_ID>
-   ```
-
-3. **Vercel Functions Localmente**:
-   ```powershell
-   vercel dev
-   ```
-
-**Pré-requisitos:**
-
-- Criar `.env.local` com credenciais reais
-- Configurar Firebase Service Account
-- Gerar senha de app do Gmail
-- Obter OAuth Client ID/Secret
-
-Consulte [TESTES_LOCAIS.md](./TESTES_LOCAIS.md) para instruções detalhadas.
+- `.env.local` com credenciais reais (Firebase, OAuth, SMTP, Mongo)
+- OAuth Redirect URIs configuradas (localhost + produção)
 
 ---
 
 ## 🆕 Novidades Recentes
 
-### Versão 1.0.0 (Novembro 2024)
+### Atualizações (Novembro 2025)
 
 #### 🎨 Melhorias no Calendário
 
-- ✨ Eventos no mês aparecem como **texto simples** por dia (sem barras atravessando)
-- 🎨 **Borda visual** nos dias com eventos:
-  - **Azul** para eventos de hoje
-  - **Vermelho** para eventos futuros
-- 🌐 Rótulos totalmente em **português**: `mês`, `semana`, `hoje`
-- 🔧 Correção de renderização ao alternar para aba Histórico (recalcula tamanho)
+- Armazenamento de shifts no **MongoDB Atlas**: documento por mês e usuário (chave por e-mail)
+- Sincronização automática de lembretes ao abrir o app quando Calendar está conectado
+- Endpoints unificados `/api` em dev e produção (sem troca de URLs ao testar)
+- Toggle de notificações por e-mail corrigido (atualiza `notifySettings` no Firestore)
 
 #### 📝 Funcionalidade de Edição
 
