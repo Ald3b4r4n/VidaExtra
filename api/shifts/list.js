@@ -2,6 +2,27 @@ import { getApps, initializeApp, cert } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getDb, monthId } from "../../lib/mongo.js";
 
+function ensureAdmin() {
+  try {
+    if (!getApps().length) {
+      const raw = process.env.FIREBASE_SERVICE_ACCOUNT || "{}";
+      let sa;
+      try {
+        sa = JSON.parse(raw);
+      } catch (e) {
+        return { ok: false, error: "FIREBASE_SERVICE_ACCOUNT invalid JSON" };
+      }
+      if (!sa || !sa.project_id) {
+        return { ok: false, error: "FIREBASE_SERVICE_ACCOUNT missing project_id" };
+      }
+      initializeApp({ credential: cert(sa) });
+    }
+    return { ok: true, auth: getAuth() };
+  } catch (e) {
+    return { ok: false, error: typeof e?.message === "string" ? e.message : String(e) };
+  }
+}
+
 let auth = null;
 try {
   if (!getApps().length) {
@@ -27,9 +48,10 @@ export default async function handler(req, res) {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) return res.status(401).json({ error: "Unauthorized" });
-    if (!auth) return res.status(500).json({ error: "Server auth not initialized" });
+    const init = ensureAdmin();
+    if (!init.ok) return res.status(500).json({ error: init.error });
     const idToken = authHeader.split("Bearer ")[1];
-    const decoded = await auth.verifyIdToken(idToken);
+    const decoded = await init.auth.verifyIdToken(idToken);
     const userId = normalizeUserId(decoded);
 
     const ym = (req.query.month || new Date().toISOString().slice(0, 7));
