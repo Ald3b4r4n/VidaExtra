@@ -132,6 +132,12 @@ export default async function handler(req, res) {
 
     // Get user's refresh token from Firestore when Admin is available
     let accessToken = googleAccessToken || req.headers["x-google-access-token"] || null;
+    // Last-chance fallback: use Authorization bearer when it doesn't look like JWT (eyJ)
+    if (!accessToken && authHeader && authHeader.startsWith("Bearer ")) {
+      const candidate = authHeader.split("Bearer ")[1];
+      const looksJwt = typeof candidate === "string" && candidate.startsWith("eyJ");
+      if (!looksJwt) accessToken = candidate;
+    }
     if (db && uid) {
       const userDoc = await db.collection("users").doc(uid).get();
       const userData = userDoc.data();
