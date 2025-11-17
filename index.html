@@ -660,6 +660,10 @@
                 btn.classList.add("btn-success");
                 btn.innerHTML =
                   '<i class="bi bi-check-circle-fill"></i> <span class="btn-text">Google Calendar Conectado</span>';
+                try {
+                  const rem = await import("./src/reminders.js");
+                  await rem.initReminders();
+                } catch {}
               }
             }
           })
@@ -719,7 +723,16 @@
         // Verifica autenticação ao carregar a página
         import("./src/auth.js")
           .then((module) => {
-            module.checkAuth();
+            module.checkAuth().then(async () => {
+              try {
+                const cal = await import("./src/calendar-auth.js");
+                const connected = await cal.isCalendarConnected();
+                if (connected) {
+                  const rem = await import("./src/reminders.js");
+                  await rem.initReminders();
+                }
+              } catch {}
+            });
           })
           .catch((err) => console.error("Error checking auth:", err));
       });

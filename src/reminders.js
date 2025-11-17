@@ -3,6 +3,7 @@
  * Fetch and display upcoming reminders from Google Calendar
  */
 
+import { firebasePromise } from "./firebase-config.js";
 import { getIdToken } from "./auth.js";
 import { apiFetch } from "./api.js";
 
@@ -68,6 +69,7 @@ function getTimeUntil(dateString) {
  */
 export async function fetchUpcomingEvents() {
   try {
+    await firebasePromise;
     const idToken = await getIdToken();
     // Fallback: envia o accessToken do Google obtido no login para o backend usar caso não haja refresh_token salvo ainda
     let googleAccessToken;
@@ -257,6 +259,8 @@ export async function updateNotificationSettings(settings) {
  */
 export async function initReminders() {
   try {
+    await firebasePromise;
+    await (await import("./auth.js")).checkAuth();
     const events = await fetchUpcomingEvents();
     renderReminders(events);
   } catch (error) {
