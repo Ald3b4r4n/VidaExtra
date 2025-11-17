@@ -1125,14 +1125,21 @@ document.addEventListener("DOMContentLoaded", function () {
             } catch {
               return;
             }
-            const res = await fetch(`/api/shifts/list?month=${ym}`, {
-              method: "GET",
-              headers: { Authorization: `Bearer ${idToken}` },
-            });
-            if (res.ok) {
-              const data = await res.json();
-              const remote = Array.isArray(data.shifts) ? data.shifts : [];
-              if (remote.length > 0) {
+          const res = await fetch(`/api/shifts/list?month=${ym}`, {
+            method: "GET",
+            headers: { Authorization: `Bearer ${idToken}` },
+          });
+          if (!res.ok) {
+            try {
+              const text = await res.text();
+              console.error("shifts/list error:", res.status, text);
+            } catch {}
+            return;
+          }
+          if (res.ok) {
+            const data = await res.json();
+            const remote = Array.isArray(data.shifts) ? data.shifts : [];
+            if (remote.length > 0) {
                 const merged = [
                   ...historico.filter((it) => {
                     const [d, m, y] = (it.data || "").split("/").map(Number);
