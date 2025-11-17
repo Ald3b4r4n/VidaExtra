@@ -1,0 +1,16 @@
+{
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2021": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module"
+  },
+  "rules": {
+    "no-async-promise-executor": "off",
+    "no-useless-escape": "warn",
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }]
+  }
+}

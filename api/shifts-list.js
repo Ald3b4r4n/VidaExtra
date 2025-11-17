@@ -34,9 +34,15 @@ export default async function handler(req, res) {
 
     const ym = (req.query.month || new Date().toISOString().slice(0, 7));
     const _id = monthId(userId, ym);
-    const db = await getDb();
-    const col = db.collection("userShifts");
-    let doc = await col.findOne({ _id });
+    let db, col, doc;
+    try {
+      db = await getDb();
+      col = db.collection("userShifts");
+      doc = await col.findOne({ _id });
+    } catch (dbErr) {
+      const msg = typeof dbErr?.message === "string" ? dbErr.message : String(dbErr);
+      return res.status(500).json({ error: msg });
+    }
     if (!doc) {
       const legacyId = monthId(decoded.uid, ym);
       doc = await col.findOne({ _id: legacyId });
