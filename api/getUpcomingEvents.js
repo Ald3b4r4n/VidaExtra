@@ -145,12 +145,6 @@ export default async function handler(req, res) {
     if (!accessToken && googleAccessHeader) {
       accessToken = googleAccessHeader;
     }
-    // Last-chance fallback: if Authorization contains a non-JWT token, treat it as Google access token
-    if (!accessToken && authHeader && authHeader.startsWith("Bearer ")) {
-      const candidate = authHeader.split("Bearer ")[1];
-      const looksJwt = typeof candidate === "string" && candidate.startsWith("eyJ");
-      if (!looksJwt) accessToken = candidate;
-    }
 
     if (!accessToken) {
       return res.status(400).json({
