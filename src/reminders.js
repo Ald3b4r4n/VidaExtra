@@ -71,16 +71,13 @@ export async function fetchUpcomingEvents() {
   try {
     await firebasePromise;
     const idToken = await getIdToken();
-    // Primeiro tenta o access token obtido via oauth2callback; se não existir, usa o do popup
-    let googleAccessToken = null;
+    // Fallback: envia o accessToken do Google obtido no login para o backend usar caso não haja refresh_token salvo ainda
+    let googleAccessToken;
     try {
-      googleAccessToken = localStorage.getItem("googleAccessToken");
-      if (!googleAccessToken) {
-        const ls = localStorage.getItem("vidaextra-user");
-        if (ls) {
-          const parsed = JSON.parse(ls);
-          googleAccessToken = parsed?.accessToken || null;
-        }
+      const ls = localStorage.getItem("vidaextra-user");
+      if (ls) {
+        const parsed = JSON.parse(ls);
+        googleAccessToken = parsed?.accessToken;
       }
     } catch {}
 
@@ -284,16 +281,13 @@ export async function createCalendarEvent({
   reminders,
 }) {
   const idToken = await (await import("./auth.js")).getIdToken();
-  // Primeiro tenta o access token obtido via oauth2callback; se não existir, usa o do popup
-  let googleAccessToken = null;
+  // Fallback: envia o accessToken do Google obtido no login para o backend usar caso não haja refresh_token salvo ainda
+  let googleAccessToken;
   try {
-    googleAccessToken = localStorage.getItem("googleAccessToken");
-    if (!googleAccessToken) {
-      const ls = localStorage.getItem("vidaextra-user");
-      if (ls) {
-        const parsed = JSON.parse(ls);
-        googleAccessToken = parsed?.accessToken || null;
-      }
+    const ls = localStorage.getItem("vidaextra-user");
+    if (ls) {
+      const parsed = JSON.parse(ls);
+      googleAccessToken = parsed?.accessToken;
     }
   } catch {}
   const response = await (
@@ -303,7 +297,6 @@ export async function createCalendarEvent({
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${idToken}`,
-      ...(googleAccessToken ? { "X-Google-Access-Token": googleAccessToken } : {}),
     },
     body: JSON.stringify({
       summary,
