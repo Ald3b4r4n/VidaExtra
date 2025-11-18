@@ -558,6 +558,27 @@ document.addEventListener("DOMContentLoaded", function () {
       anotacoes,
       dataMillis: dataObj.getTime(),
     };
+    
+    // Verifica se já existe duplicata
+    if (verificarDuplicata(novoItem)) {
+      // Reverte os totais que foram adicionados anteriormente
+      appState.totalHoras -= horasTotais;
+      appState.totalValor -= totalLiquido;
+      appState.totalPensao -= descontoPensao;
+      
+      Swal.fire({
+        icon: "warning",
+        title: "Evento duplicado",
+        html: `Já existe um cálculo com os mesmos dados:<br>
+               <strong>${novoItem.data}</strong> - ${novoItem.periodo}<br>
+               Valor: ${formatarMoeda(novoItem.totalLiquido)}<br>
+               ${novoItem.percentualPensao > 0 ? `Pensão: ${novoItem.percentualPensao}%` : "Sem pensão"}`,
+        confirmButtonColor: "#0d6efd",
+        confirmButtonText: "Entendi"
+      });
+      return;
+    }
+    
     adicionarAoHistorico(novoItem);
 
     salvarDados();
@@ -950,6 +971,40 @@ document.addEventListener("DOMContentLoaded", function () {
       appState.totalPensao > 0 ? "block" : "none";
   }
 
+  // Recalcula totais a partir do histórico
+  function recalcularTotaisDoHistorico() {
+    appState.totalHoras = 0;
+    appState.totalValor = 0;
+    appState.totalPensao = 0;
+
+    appState.historico.forEach((item) => {
+      appState.totalHoras += item.horasTotais || 0;
+      appState.totalValor += item.totalLiquido || 0;
+      
+      if (item.percentualPensao > 0 && item.totalBruto) {
+        const descontoPensao = item.totalBruto * (item.percentualPensao / 100);
+        appState.totalPensao += descontoPensao;
+      }
+    });
+
+    atualizarTotais();
+    atualizarTotalPensao();
+  }
+
+  // Verifica se já existe evento duplicado
+  function verificarDuplicata(novoItem) {
+    return appState.historico.some((item) => {
+      // Verifica se tem mesma data, mesmo período e mesmo valor líquido
+      const mesmaData = item.data === novoItem.data;
+      const mesmoPeriodo = item.periodo === novoItem.periodo;
+      const mesmoValor = item.totalLiquido === novoItem.totalLiquido;
+      const mesmaPensao = item.percentualPensao === novoItem.percentualPensao;
+      
+      // Considera duplicata se tem mesma data, mesmo período e mesmo valor
+      return mesmaData && mesmoPeriodo && mesmoValor && mesmaPensao;
+    });
+  }
+
   // Persistência no localStorage
   function salvarDados() {
     try {
@@ -1149,6 +1204,7 @@ document.addEventListener("DOMContentLoaded", function () {
                   ...remote,
                 ];
                 appState.historico = merged;
+                recalcularTotaisDoHistorico();
                 salvarDados();
                 window.dispatchEvent(new Event("historico-updated"));
               }
