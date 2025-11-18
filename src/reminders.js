@@ -71,13 +71,16 @@ export async function fetchUpcomingEvents() {
   try {
     await firebasePromise;
     const idToken = await getIdToken();
-    // Fallback: envia o accessToken do Google obtido no login para o backend usar caso não haja refresh_token salvo ainda
-    let googleAccessToken;
+    // Usa token salvo pelo fluxo oauth2callback; se ausente, cai para o token do popup
+    let googleAccessToken = null;
     try {
-      const ls = localStorage.getItem("vidaextra-user");
-      if (ls) {
-        const parsed = JSON.parse(ls);
-        googleAccessToken = parsed?.accessToken;
+      googleAccessToken = localStorage.getItem("googleAccessToken");
+      if (!googleAccessToken) {
+        const ls = localStorage.getItem("vidaextra-user");
+        if (ls) {
+          const parsed = JSON.parse(ls);
+          googleAccessToken = parsed?.accessToken || null;
+        }
       }
     } catch {}
 
@@ -281,13 +284,16 @@ export async function createCalendarEvent({
   reminders,
 }) {
   const idToken = await (await import("./auth.js")).getIdToken();
-  // Fallback: envia o accessToken do Google obtido no login para o backend usar caso não haja refresh_token salvo ainda
-  let googleAccessToken;
+  // Usa token salvo pelo fluxo oauth2callback; se ausente, cai para o token do popup
+  let googleAccessToken = null;
   try {
-    const ls = localStorage.getItem("vidaextra-user");
-    if (ls) {
-      const parsed = JSON.parse(ls);
-      googleAccessToken = parsed?.accessToken;
+    googleAccessToken = localStorage.getItem("googleAccessToken");
+    if (!googleAccessToken) {
+      const ls = localStorage.getItem("vidaextra-user");
+      if (ls) {
+        const parsed = JSON.parse(ls);
+        googleAccessToken = parsed?.accessToken || null;
+      }
     }
   } catch {}
   const response = await (
