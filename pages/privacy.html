@@ -16,7 +16,7 @@
   <body>
     <div class="container py-5">
       <h1 class="h3 mb-3">Política de Privacidade — VidaExtra®</h1>
-      <p class="text-muted">Última atualização: 15/11/2025</p>
+      <p class="text-muted">Última atualização: 18/11/2025</p>
 
       <p>
         O VidaExtra é uma aplicação web que auxilia no cálculo de horas
@@ -38,14 +38,81 @@
         </li>
       </ul>
 
+      <h2 class="h5 mt-4">Dados do Google Acessados</h2>
+      <p>
+        O VidaExtra acessa os seguintes tipos de dados do Google mediante sua autorização explícita:
+      </p>
+      <ul>
+        <li>
+          <strong>Perfil básico do Google:</strong> Nome, endereço de e-mail e foto do perfil 
+          (através do Google OAuth 2.0 para autenticação)
+        </li>
+        <li>
+          <strong>Google Calendar:</strong> 
+          <ul>
+            <li>Ler eventos do calendário para exibir seus compromissos futuros</li>
+            <li>Criar eventos no calendário quando você gerar cálculos de horas extras</li>
+            <li>Modificar eventos existentes apenas quando solicitado pelo usuário</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Tokens de acesso:</strong> Access tokens e refresh tokens são armazenados 
+          temporariamente para manter a sessão ativa e permitir a sincronização contínua
+        </li>
+      </ul>
+
+      <h2 class="h5 mt-4">Uso dos Dados do Google</h2>
+      <p>
+        Os dados do Google são utilizados exclusivamente para as seguintes finalidades:
+      </p>
+      <ul>
+        <li>
+          <strong>Autenticação e identificação:</strong> Seus dados de perfil do Google 
+          são usados apenas para identificar você no aplicativo e personalizar sua experiência
+        </li>
+        <li>
+          <strong>Sincronização de calendário:</strong> Os eventos do Google Calendar são 
+          acessados para:
+          <ul>
+            <li>Exibir seus compromissos futuros na interface do aplicativo</li>
+            <li>Enviar lembretes por e-mail sobre eventos importantes</li>
+            <li>Evitar conflitos de agendamento ao criar novos eventos de horas extras</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Criação de eventos:</strong> Quando você calcula horas extras e opta por 
+          sincronizar com o calendário, criamos eventos contendo:
+          <ul>
+            <li>Título do evento com informações do cálculo</li>
+            <li>Data e hora específicas do turno trabalhado</li>
+            <li>Descrição detalhada com valores calculados</li>
+            <li>Nenhuma informação financeira sensível é incluída nos eventos</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Gestão de tokens:</strong> Os tokens de acesso são usados apenas durante 
+          a sessão ativa e são automaticamente invalidados quando você faz logout
+        </li>
+      </ul>
+
       <h2 class="h5 mt-4">Como usamos seus dados</h2>
       <ul>
-        <li>Autenticar seu acesso ao aplicativo.</li>
         <li>
-          Ler e criar eventos no Google Calendar somente mediante seu
-          consentimento explícito.
+          Autenticar seu acesso ao aplicativo usando OAuth 2.0 do Google para
+          garantir acesso seguro e autorizado.
         </li>
-        <li>Gerar lembretes e histórico de cálculos.</li>
+        <li>
+          Sincronizar com o Google Calendar para ler eventos existentes e criar
+          novos eventos de horas extras, somente mediante seu consentimento explícito.
+        </li>
+        <li>
+          Gerar lembretes por e-mail baseados nos eventos do seu calendário para
+          melhor gestão do seu tempo.
+        </li>
+        <li>
+          Manter histórico local dos seus cálculos de horas extras para
+          referência futura e relatórios.
+        </li>
       </ul>
 
       <h2 class="h5 mt-4">Bases legais</h2>
@@ -57,11 +124,27 @@
       <h2 class="h5 mt-4">Armazenamento e segurança</h2>
       <ul>
         <li>
-          Tokens são armazenados com segurança no Firebase/Firestore e
-          usados unicamente para a finalidade de sincronização de agenda.
+          <strong>Tokens do Google:</strong> Access tokens e refresh tokens são armazenados 
+          com segurança no Firebase Firestore, criptografados em trânsito e em repouso, 
+          com tempo de expiração configurado conforme as políticas do Google OAuth 2.0.
         </li>
         <li>
-          Empregamos controles de acesso e comunicação segura (HTTPS).
+          <strong>Dados de perfil:</strong> Seus dados básicos do Google (nome, e-mail, foto) 
+          são armazenados temporariamente durante sua sessão e não são retidos após o logout.
+        </li>
+        <li>
+          <strong>Dados de calendário:</strong> Eventos do Google Calendar são acessados 
+          em tempo real e não são armazenados permanentemente no VidaExtra.
+        </li>
+        <li>
+          <strong>Segurança:</strong> Empregamos comunicação segura (HTTPS), controles de 
+          acesso baseados em autenticação OAuth 2.0, e seguimos as melhores práticas de 
+          segurança para proteção de dados.
+        </li>
+        <li>
+          <strong>Retenção:</strong> Os tokens do Google são automaticamente invalidados 
+          após o período de expiração padrão do OAuth 2.0 ou quando você revoga o acesso 
+          através do painel de controle da sua conta Google.
         </li>
       </ul>
 
@@ -81,12 +164,37 @@
 
       <h2 class="h5 mt-4">Conformidade com políticas do Google</h2>
       <p>
-        O VidaExtra cumpre a
+        O VidaExtra cumpre estritamente a
         <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer"
           >Google API Services User Data Policy</a
-        >. Os dados do Google Calendar são utilizados apenas para fornecer
-        funcionalidades do aplicativo e não são usados para publicidade.
+        > e os
+        <a href="https://developers.google.com/terms" target="_blank" rel="noopener noreferrer"
+          >Google APIs Terms of Service</a
+        >. Especificamente:
       </p>
+      <ul>
+        <li>
+          Os dados do Google são utilizados exclusivamente para fornecer
+          funcionalidades do aplicativo relacionadas a cálculo de horas extras
+          e gestão de calendário.
+        </li>
+        <li>
+          Não usamos dados do Google para publicidade, marketing ou qualquer
+          finalidade além das funcionalidades explicitamente descritas.
+        </li>
+        <li>
+          Limitamos o acesso aos dados apenas ao necessário para fornecer
+          os serviços solicitados pelo usuário.
+        </li>
+        <li>
+          Fornecemos transparência completa sobre quais dados são acessados
+          e como são utilizados, conforme exigido pelas políticas do Google.
+        </li>
+        <li>
+          Respeitamos todos os limites de cota e requisitos técnicos das
+          APIs do Google utilizadas.
+        </li>
+      </ul>
 
       <h2 class="h5 mt-4">Contato</h2>
       <p>
