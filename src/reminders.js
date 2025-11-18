@@ -73,8 +73,10 @@ export async function fetchUpcomingEvents() {
     const idToken = await getIdToken();
     // Usa token salvo pelo fluxo oauth2callback; se ausente, cai para o token do popup
     let googleAccessToken = null;
+    let googleRefreshToken = null;
     try {
       googleAccessToken = localStorage.getItem("googleAccessToken");
+      googleRefreshToken = localStorage.getItem("googleRefreshToken");
       if (!googleAccessToken) {
         const ls = localStorage.getItem("vidaextra-user");
         if (ls) {
@@ -88,6 +90,7 @@ export async function fetchUpcomingEvents() {
       headers: {
         Authorization: `Bearer ${idToken}`,
         ...(googleAccessToken ? { "X-Google-Access-Token": googleAccessToken } : {}),
+        ...(googleRefreshToken ? { "X-Google-Refresh-Token": googleRefreshToken } : {}),
       },
     });
 
@@ -286,8 +289,10 @@ export async function createCalendarEvent({
   const idToken = await (await import("./auth.js")).getIdToken();
   // Usa token salvo pelo fluxo oauth2callback; se ausente, cai para o token do popup
   let googleAccessToken = null;
+  let googleRefreshToken = null;
   try {
     googleAccessToken = localStorage.getItem("googleAccessToken");
+    googleRefreshToken = localStorage.getItem("googleRefreshToken");
     if (!googleAccessToken) {
       const ls = localStorage.getItem("vidaextra-user");
       if (ls) {
@@ -312,6 +317,7 @@ export async function createCalendarEvent({
       endISO,
       reminders,
       googleAccessToken,
+      googleRefreshToken,
     }),
   });
   if (!response.ok) {

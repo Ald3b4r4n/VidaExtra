@@ -89,7 +89,7 @@ export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Authorization,Content-Type,X-Google-Access-Token");
+  res.setHeader("Access-Control-Allow-Headers", "Authorization,Content-Type,X-Google-Access-Token,X-Google-Refresh-Token");
 
   // Handle preflight
   if (req.method === "OPTIONS") {
@@ -124,6 +124,7 @@ export default async function handler(req, res) {
       endISO,
       reminders,
       googleAccessToken,
+      googleRefreshToken,
     } = req.body;
 
     if (!summary || !startISO || !endISO) {
@@ -144,6 +145,11 @@ export default async function handler(req, res) {
           console.warn("Refresh token inválido/expirado, usando fallback de access token do cliente", e?.message || String(e));
         }
       }
+    }
+    if (!accessToken && typeof googleRefreshToken === "string" && /^1\//.test(googleRefreshToken)) {
+      try {
+        accessToken = await refreshAccessToken(googleRefreshToken);
+      } catch {}
     }
 
     if (!accessToken) {

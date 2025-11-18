@@ -94,7 +94,7 @@ export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
   res.setHeader(
     "Access-Control-Allow-Headers",
-    "Authorization,Content-Type,X-Google-Access-Token"
+    "Authorization,Content-Type,X-Google-Access-Token,X-Google-Refresh-Token"
   );
 
   // Handle preflight
@@ -114,6 +114,7 @@ export default async function handler(req, res) {
 
     const authHeader = req.headers.authorization;
     const googleAccessHeader = req.headers["x-google-access-token"];
+    const googleRefreshHeader = req.headers["x-google-refresh-token"];
 
     if (auth && authHeader && authHeader.startsWith("Bearer ")) {
       try {
@@ -144,6 +145,14 @@ export default async function handler(req, res) {
     // Fallback: use access token provided via header
     if (!accessToken && googleAccessHeader) {
       accessToken = googleAccessHeader;
+    }
+    // If refresh token provided via header, try to refresh
+    if (!accessToken && googleRefreshHeader && typeof googleRefreshHeader === "string") {
+      try {
+        accessToken = await refreshAccessToken(googleRefreshHeader);
+      } catch (e) {
+        accessToken = null;
+      }
     }
 
     if (!accessToken) {
