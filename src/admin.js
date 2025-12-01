@@ -208,13 +208,17 @@ function renderAdminDashboard(data) {
           <div class="col-6 col-md-6">
             <div class="p-2 bg-light rounded">
               <small class="text-muted d-block" style="font-size: 0.75rem;"><i class="bi bi-calendar-plus"></i> Criado em</small>
-              <strong class="d-block" style="font-size: 0.85rem;">${formatDate(user.createdAt)}</strong>
+              <strong class="d-block" style="font-size: 0.85rem;">${formatDate(
+                user.createdAt
+              )}</strong>
             </div>
           </div>
           <div class="col-6 col-md-6">
             <div class="p-2 bg-light rounded">
               <small class="text-muted d-block" style="font-size: 0.75rem;"><i class="bi bi-clock-history"></i> Último acesso</small>
-              <strong class="d-block" style="font-size: 0.85rem;">${formatDate(user.lastAccess)}</strong>
+              <strong class="d-block" style="font-size: 0.85rem;">${formatDate(
+                user.lastAccess
+              )}</strong>
             </div>
           </div>
         </div>
