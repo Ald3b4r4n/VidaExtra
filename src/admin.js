@@ -264,39 +264,39 @@ function updateAdminStats(data) {
 
   statsContainer.innerHTML = `
     <div class="row g-3">
-      <div class="col-md-3">
+      <div class="col-6 col-md-3">
         <div class="card bg-primary text-white h-100">
-          <div class="card-body text-center">
-            <i class="bi bi-people-fill" style="font-size: 2.5rem;"></i>
-            <h2 class="mt-2 mb-0">${totalUsers}</h2>
-            <small>Total de Usuários</small>
+          <div class="card-body text-center p-2 p-md-3">
+            <i class="bi bi-people-fill" style="font-size: 1.5rem;"></i>
+            <h2 class="mt-2 mb-0 fs-4 fs-md-2">${totalUsers}</h2>
+            <small class="d-block" style="font-size: 0.75rem;">Total de Usuários</small>
           </div>
         </div>
       </div>
-      <div class="col-md-3">
+      <div class="col-6 col-md-3">
         <div class="card bg-success text-white h-100">
-          <div class="card-body text-center">
-            <i class="bi bi-circle-fill" style="font-size: 2.5rem;"></i>
-            <h2 class="mt-2 mb-0">${onlineUsers}</h2>
-            <small>Online Agora</small>
+          <div class="card-body text-center p-2 p-md-3">
+            <i class="bi bi-circle-fill" style="font-size: 1.5rem;"></i>
+            <h2 class="mt-2 mb-0 fs-4 fs-md-2">${onlineUsers}</h2>
+            <small class="d-block" style="font-size: 0.75rem;">Online Agora</small>
           </div>
         </div>
       </div>
-      <div class="col-md-3">
+      <div class="col-6 col-md-3">
         <div class="card bg-info text-white h-100">
-          <div class="card-body text-center">
-            <i class="bi bi-calendar-check-fill" style="font-size: 2.5rem;"></i>
-            <h2 class="mt-2 mb-0">${calendarConnected}</h2>
-            <small>Calendar Conectado</small>
+          <div class="card-body text-center p-2 p-md-3">
+            <i class="bi bi-calendar-check-fill" style="font-size: 1.5rem;"></i>
+            <h2 class="mt-2 mb-0 fs-4 fs-md-2">${calendarConnected}</h2>
+            <small class="d-block" style="font-size: 0.75rem;">Calendar Conectado</small>
           </div>
         </div>
       </div>
-      <div class="col-md-3">
+      <div class="col-6 col-md-3">
         <div class="card bg-warning text-dark h-100">
-          <div class="card-body text-center">
-            <i class="bi bi-clock-history" style="font-size: 2.5rem;"></i>
-            <h2 class="mt-2 mb-0">${totalShifts}</h2>
-            <small>Total de Shifts</small>
+          <div class="card-body text-center p-2 p-md-3">
+            <i class="bi bi-clock-history" style="font-size: 1.5rem;"></i>
+            <h2 class="mt-2 mb-0 fs-4 fs-md-2">${totalShifts}</h2>
+            <small class="d-block" style="font-size: 0.75rem;">Total de Shifts</small>
           </div>
         </div>
       </div>
