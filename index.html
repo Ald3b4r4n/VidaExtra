@@ -7,8 +7,24 @@
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
     <title>VidaExtra® - Calculadora AC-4</title>
-    <meta name="google-site-verification" content="tJ45c-wFzF3AsgePqE161ITVUCZo5CBlkdGl-TujbpM" />
-    <meta name="google-site-verification" content="FNGm0o5Tn_FoDJiLaS7Yyqk6x4fe0Hw7gh21jjIgwRY" />
+    <meta
+      name="google-site-verification"
+      content="tJ45c-wFzF3AsgePqE161ITVUCZo5CBlkdGl-TujbpM"
+    />
+    <meta
+      name="google-site-verification"
+      content="FNGm0o5Tn_FoDJiLaS7Yyqk6x4fe0Hw7gh21jjIgwRY"
+    />
+
+    <!-- Redirect para home.html -->
+    <script>
+      if (
+        window.location.pathname === "/" ||
+        window.location.pathname === "/index.html"
+      ) {
+        window.location.replace("/pages/home.html");
+      }
+    </script>
 
     <!-- Meta Tags PWA -->
     <meta name="theme-color" content="#0d6efd" />
@@ -108,7 +124,6 @@
         </div>
       </header>
 
-
       <!-- Abas de navegação -->
       <div class="d-flex gap-2 mt-2 mb-4 flex-wrap">
         <button type="button" class="btn btn-primary" data-tab="calc">
@@ -128,7 +143,7 @@
           type="button"
           class="btn btn-outline-danger"
           data-tab="admin"
-          style="display: none;"
+          style="display: none"
         >
           <i class="bi bi-shield-lock"></i> Admin
         </button>
@@ -420,16 +435,22 @@
       <!-- Aba: Admin (Hidden by default) -->
       <section id="tab-admin" class="d-none">
         <div class="card shadow-sm border rounded-xl mt-3">
-          <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+          <div
+            class="card-header bg-danger text-white d-flex justify-content-between align-items-center"
+          >
             <div><i class="bi bi-shield-lock"></i> Painel Administrativo</div>
-            <button type="button" id="btn-refresh-admin" class="btn btn-sm btn-light">
+            <button
+              type="button"
+              id="btn-refresh-admin"
+              class="btn btn-sm btn-light"
+            >
               <i class="bi bi-arrow-clockwise"></i> Atualizar
             </button>
           </div>
           <div class="card-body">
             <!-- Stats -->
             <div id="admin-stats" class="mb-4"></div>
-            
+
             <!-- Users List -->
             <h6 class="fw-bold mb-3">
               <i class="bi bi-people"></i> Usuários Registrados
@@ -589,7 +610,7 @@
           document.querySelectorAll("[data-tab]").forEach((btn) => {
             const active = btn.getAttribute("data-tab") === tab;
             const isAdmin = btn.getAttribute("data-tab") === "admin";
-            
+
             if (isAdmin) {
               btn.classList.toggle("btn-danger", active);
               btn.classList.toggle("btn-outline-danger", !active);
@@ -607,7 +628,7 @@
               })
               .catch((err) => console.error("Error loading reminders:", err));
           }
-          
+
           // Carrega admin quando a aba é aberta
           if (tab === "admin") {
             import("./src/admin.js")
@@ -795,7 +816,7 @@
                 // Check if user is admin and initialize admin panel
                 const adminModule = await import("./src/admin.js");
                 await adminModule.initAdminPanel();
-                
+
                 const cal = await import("./src/calendar-auth.js");
                 const connected = await cal.isCalendarConnected();
                 if (connected) {
@@ -882,7 +903,9 @@
     <footer class="text-center py-4 border-top mt-4">
       <small>
         © VidaExtra —
-        <a href="/pages/privacy.html" class="link-primary">Política de Privacidade</a>
+        <a href="/pages/privacy.html" class="link-primary"
+          >Política de Privacidade</a
+        >
       </small>
     </footer>
   </body>

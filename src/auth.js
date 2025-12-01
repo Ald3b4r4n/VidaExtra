@@ -28,6 +28,17 @@ export function checkAuth() {
       if (user) {
         // Usuário está logado
         console.log("User authenticated:", user.email);
+
+        // Se estiver na raiz ou login, redireciona para home
+        const currentPath = window.location.pathname;
+        if (
+          currentPath === "/" ||
+          currentPath === "/index.html" ||
+          currentPath === "/pages/login.html"
+        ) {
+          window.location.replace("/pages/home.html");
+          return resolve(user);
+        }
         updateUIWithUser(user);
 
         // Check if this is a new user (first login)
