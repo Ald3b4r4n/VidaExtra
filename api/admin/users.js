@@ -135,7 +135,28 @@ export default async (req, res) => {
                 `User ${userRecord.email} - Total shifts: ${shiftsCount}`
               );
 
-              shifts = userShifts;
+              // Extract individual shifts from monthly documents
+              const allShifts = [];
+              userShifts.forEach((monthDoc) => {
+                if (monthDoc.shifts && Array.isArray(monthDoc.shifts)) {
+                  monthDoc.shifts.forEach((shift) => {
+                    allShifts.push({
+                      ...shift,
+                      month: monthDoc.month,
+                      year: monthDoc.year,
+                    });
+                  });
+                }
+              });
+
+              // Sort by date (most recent first) and limit to 20
+              allShifts.sort((a, b) => {
+                const dateA = new Date(a.date || a.data || 0);
+                const dateB = new Date(b.date || b.data || 0);
+                return dateB - dateA;
+              });
+
+              shifts = allShifts;
             } catch (err) {
               console.log(
                 `No MongoDB shifts for user ${userRecord.uid}: ${err.message}`
@@ -161,7 +182,9 @@ export default async (req, res) => {
             emailNotifications: firestoreData.notifySettings?.email !== false,
           };
 
-          console.log(`✓ User ${userRecord.email} final shiftsCount: ${userData.shiftsCount}`);
+          console.log(
+            `✓ User ${userRecord.email} final shiftsCount: ${userData.shiftsCount}`
+          );
 
           return userData;
         } catch (error) {

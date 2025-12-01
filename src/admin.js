@@ -252,11 +252,11 @@ function renderAdminDashboard(data) {
                       .map(
                         (shift) => `
                       <tr>
-                        <td>${shift.data || "-"}</td>
+                        <td>${shift.data || shift.date || "-"}</td>
                         <td>${shift.periodo || "-"}</td>
-                        <td>${(shift.horasTotais || 0).toFixed(2)}h</td>
-                        <td>R$ ${(shift.totalLiquido || 0).toFixed(2)}</td>
-                        <td><small>${shift.anotacoes || "-"}</small></td>
+                        <td>${(shift.horasTotais || shift.hours || 0).toFixed(2)}h</td>
+                        <td>R$ ${(shift.totalLiquido || shift.value || 0).toFixed(2)}</td>
+                        <td><small>${shift.anotacoes || shift.notes || "-"}</small></td>
                       </tr>
                     `
                       )
