@@ -235,7 +235,8 @@ function renderAdminDashboard(data) {
               </summary>
               
               <div class="mt-3">
-                <div class="table-responsive">
+                <!-- Desktop View (Table) -->
+                <div class="table-responsive d-none d-md-block">
                   <table class="table table-sm table-striped mb-0">
                     <thead>
                       <tr>
@@ -270,6 +271,33 @@ function renderAdminDashboard(data) {
                         .join("")}
                     </tbody>
                   </table>
+                </div>
+
+                <!-- Mobile View (List Cards) -->
+                <div class="d-md-none">
+                  ${user.shifts
+                    .map(
+                      (shift) => `
+                    <div class="p-3 border rounded mb-2 bg-white shadow-sm">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <strong class="text-primary"><i class="bi bi-calendar3"></i> ${shift.data || shift.date || "-"}</strong>
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">
+                          R$ ${(shift.totalLiquido || shift.value || 0).toFixed(2)}
+                        </span>
+                      </div>
+                      <div class="d-flex justify-content-between align-items-center small text-muted mb-2">
+                        <span><i class="bi bi-clock"></i> ${shift.periodo || "-"}</span>
+                        <span class="fw-bold text-dark">${(shift.horasTotais || shift.hours || 0).toFixed(2)}h</span>
+                      </div>
+                      ${(shift.anotacoes || shift.notes) ? `
+                        <div class="small text-muted bg-light p-2 rounded border-start border-4 border-primary">
+                          <i class="bi bi-sticky"></i> ${shift.anotacoes || shift.notes}
+                        </div>
+                      ` : ''}
+                    </div>
+                  `
+                    )
+                    .join("")}
                 </div>
               </div>
             </details>
