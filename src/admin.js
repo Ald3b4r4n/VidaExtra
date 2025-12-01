@@ -223,57 +223,52 @@ function renderAdminDashboard(data) {
           user.shifts && user.shifts.length > 0
             ? `
           <div class="mt-3">
-            <button 
-              class="btn btn-sm btn-outline-primary" 
-              type="button" 
-              data-bs-toggle="collapse" 
-              data-bs-target="#shifts-${user.uid}" 
-              aria-expanded="false"
-              onclick="event.stopPropagation();"
-            >
-              <i class="bi bi-calendar-event"></i> Ver Shifts (${
-                user.shifts.length
-              })
-            </button>
-            
-            <div class="collapse mt-3" id="shifts-${user.uid}">
-              <div class="table-responsive">
-                <table class="table table-sm table-striped">
-                  <thead>
-                    <tr>
-                      <th>Data</th>
-                      <th>Período</th>
-                      <th>Horas</th>
-                      <th>Valor</th>
-                      <th>Anotações</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${user.shifts
-                      .map(
-                        (shift) => `
+            <details class="border rounded p-2">
+              <summary class="btn btn-sm btn-outline-primary w-100 text-start" style="list-style: none; cursor: pointer;">
+                <i class="bi bi-calendar-event"></i> Ver Shifts (${
+                  user.shifts.length
+                })
+              </summary>
+              
+              <div class="mt-3">
+                <div class="table-responsive">
+                  <table class="table table-sm table-striped">
+                    <thead>
                       <tr>
-                        <td>${shift.data || shift.date || "-"}</td>
-                        <td>${shift.periodo || "-"}</td>
-                        <td>${(shift.horasTotais || shift.hours || 0).toFixed(
-                          2
-                        )}h</td>
-                        <td>R$ ${(
-                          shift.totalLiquido ||
-                          shift.value ||
-                          0
-                        ).toFixed(2)}</td>
-                        <td><small>${
-                          shift.anotacoes || shift.notes || "-"
-                        }</small></td>
+                        <th>Data</th>
+                        <th>Período</th>
+                        <th>Horas</th>
+                        <th>Valor</th>
+                        <th>Anotações</th>
                       </tr>
-                    `
-                      )
-                      .join("")}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      ${user.shifts
+                        .map(
+                          (shift) => `
+                        <tr>
+                          <td>${shift.data || shift.date || "-"}</td>
+                          <td>${shift.periodo || "-"}</td>
+                          <td>${(shift.horasTotais || shift.hours || 0).toFixed(
+                            2
+                          )}h</td>
+                          <td>R$ ${(
+                            shift.totalLiquido ||
+                            shift.value ||
+                            0
+                          ).toFixed(2)}</td>
+                          <td><small>${
+                            shift.anotacoes || shift.notes || "-"
+                          }</small></td>
+                        </tr>
+                      `
+                        )
+                        .join("")}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
+            </details>
           </div>
         `
             : ""
