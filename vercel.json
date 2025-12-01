@@ -2,6 +2,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": ".",
   "rewrites": [
+    { "source": "/", "destination": "/pages/home.html" },
     { "source": "/api/firebase-config", "destination": "/api/config" },
     { "source": "/api/oauth-client-id", "destination": "/api/config" },
     { "source": "/(.*)", "destination": "/$1" }

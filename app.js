@@ -558,27 +558,31 @@ document.addEventListener("DOMContentLoaded", function () {
       anotacoes,
       dataMillis: dataObj.getTime(),
     };
-    
+
     // Verifica se já existe duplicata
     if (verificarDuplicata(novoItem)) {
       // Reverte os totais que foram adicionados anteriormente
       appState.totalHoras -= horasTotais;
       appState.totalValor -= totalLiquido;
       appState.totalPensao -= descontoPensao;
-      
+
       Swal.fire({
         icon: "warning",
         title: "Evento duplicado",
         html: `Já existe um cálculo com os mesmos dados:<br>
                <strong>${novoItem.data}</strong> - ${novoItem.periodo}<br>
                Valor: ${formatarMoeda(novoItem.totalLiquido)}<br>
-               ${novoItem.percentualPensao > 0 ? `Pensão: ${novoItem.percentualPensao}%` : "Sem pensão"}`,
+               ${
+                 novoItem.percentualPensao > 0
+                   ? `Pensão: ${novoItem.percentualPensao}%`
+                   : "Sem pensão"
+               }`,
         confirmButtonColor: "#0d6efd",
-        confirmButtonText: "Entendi"
+        confirmButtonText: "Entendi",
       });
       return;
     }
-    
+
     adicionarAoHistorico(novoItem);
 
     salvarDados();
@@ -916,7 +920,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 .split("/")
                 .map(Number);
               const ym = `${ano}-${String(mes).padStart(2, "0")}`;
-              await fetch("/api/shifts/delete", {
+              await fetch("/api/shifts?action=delete", {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
@@ -980,7 +984,7 @@ document.addEventListener("DOMContentLoaded", function () {
     appState.historico.forEach((item) => {
       appState.totalHoras += item.horasTotais || 0;
       appState.totalValor += item.totalLiquido || 0;
-      
+
       if (item.percentualPensao > 0 && item.totalBruto) {
         const descontoPensao = item.totalBruto * (item.percentualPensao / 100);
         appState.totalPensao += descontoPensao;
@@ -999,7 +1003,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const mesmoPeriodo = item.periodo === novoItem.periodo;
       const mesmoValor = item.totalLiquido === novoItem.totalLiquido;
       const mesmaPensao = item.percentualPensao === novoItem.percentualPensao;
-      
+
       // Considera duplicata se tem mesma data, mesmo período e mesmo valor
       return mesmaData && mesmoPeriodo && mesmoValor && mesmaPensao;
     });
@@ -1039,7 +1043,7 @@ document.addEventListener("DOMContentLoaded", function () {
               (acc, it) => acc + (Number(it.horasTotais) || 0),
               0
             );
-            await fetch("/api/shifts/upsert", {
+            await fetch("/api/shifts", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -1180,21 +1184,21 @@ document.addEventListener("DOMContentLoaded", function () {
             } catch {
               return;
             }
-          const res = await fetch(`/api/shifts/list?month=${ym}`, {
-            method: "GET",
-            headers: { Authorization: `Bearer ${idToken}` },
-          });
-          if (!res.ok) {
-            try {
-              const text = await res.text();
-              console.error("shifts/list error:", res.status, text);
-            } catch {}
-            return;
-          }
-          if (res.ok) {
-            const data = await res.json();
-            const remote = Array.isArray(data.shifts) ? data.shifts : [];
-            if (remote.length > 0) {
+            const res = await fetch(`/api/shifts?month=${ym}`, {
+              method: "GET",
+              headers: { Authorization: `Bearer ${idToken}` },
+            });
+            if (!res.ok) {
+              try {
+                const text = await res.text();
+                console.error("shifts error:", res.status, text);
+              } catch {}
+              return;
+            }
+            if (res.ok) {
+              const data = await res.json();
+              const remote = Array.isArray(data.shifts) ? data.shifts : [];
+              if (remote.length > 0) {
                 const merged = [
                   ...historico.filter((it) => {
                     const [d, m, y] = (it.data || "").split("/").map(Number);
