@@ -67,3 +67,6 @@ test-*.js
 
 # Vercel
 .vercel
+
+# Internal guides and documentation
+GOOGLE_OAUTH_GUIDE.txt

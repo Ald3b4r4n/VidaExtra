@@ -514,6 +514,76 @@ app.post("/api/updateNotifySettings", async (req, res) => {
   }
 });
 
+// Admin endpoint - Get all users
+app.get("/api/admin/users", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const idToken = authHeader.split("Bearer ")[1];
+    const decodedToken = await auth.verifyIdToken(idToken);
+    
+    const ADMIN_EMAIL = 'rafasouzacruz@gmail.com';
+    if (decodedToken.email !== ADMIN_EMAIL) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
+    console.log(`[LOCAL] Admin access granted`);
+
+    const listUsersResult = await auth.listUsers(1000);
+    const mongodb = await getMongoDb().catch(() => null);
+    
+    const usersData = await Promise.all(
+      listUsersResult.users.map(async (userRecord) => {
+        let firestoreData = {};
+        try {
+          const userDoc = await db.collection("users").doc(userRecord.uid).get();
+          if (userDoc.exists) firestoreData = userDoc.data();
+        } catch {}
+
+        let shifts = [];
+        let shiftsCount = 0;
+        if (mongodb) {
+          try {
+            const col = mongodb.collection("shifts");
+            const userShifts = await col.find({ userId: userRecord.uid }).sort({ dataMillis: -1 }).limit(100).toArray();
+            shifts = userShifts;
+            shiftsCount = userShifts.length;
+          } catch {}
+        }
+
+        return {
+          uid: userRecord.uid,
+          email: userRecord.email,
+          displayName: userRecord.displayName || firestoreData.displayName || null,
+          photoURL: userRecord.photoURL || firestoreData.photoURL || null,
+          createdAt: userRecord.metadata.creationTime,
+          lastAccess: userRecord.metadata.lastSignInTime || userRecord.metadata.lastRefreshTime,
+          isOnline: firestoreData.isOnline || false,
+          shifts: shifts.slice(0, 20),
+          shiftsCount: shiftsCount,
+          calendarConnected: !!firestoreData.accessToken,
+          emailNotifications: firestoreData.notifySettings?.email !== false
+        };
+      })
+    );
+
+    usersData.sort((a, b) => new Date(b.lastAccess || b.createdAt) - new Date(a.lastAccess || a.createdAt));
+
+    return res.status(200).json({
+      success: true,
+      users: usersData,
+      totalUsers: usersData.length,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error("❌ Admin API Error:", error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 // Simple Mongo connectivity check
 app.get("/api/mongo-ping", async (req, res) => {
   try {

@@ -109,14 +109,14 @@ export async function handleLogout() {
 
     console.log("User logged out successfully");
 
-    // Redirecionar para login usando replace para evitar download
-    window.location.replace("/pages/login.html");
+    // Redirecionar para landing page
+    window.location.replace("/pages/home.html");
   } catch (error) {
     console.error("Error logging out:", error);
 
     // Mesmo com erro, tenta limpar e redirecionar
     localStorage.clear();
-    window.location.replace("/pages/login.html");
+    window.location.replace("/pages/home.html");
   }
 }
 

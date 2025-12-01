@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Termos de Uso - VidaExtra®</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+            --dark-bg: #0a0e27;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --accent-blue: #0d6efd;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            line-height: 1.8;
+        }
+        
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0a0e27 100%);
+        }
+        
+        header {
+            padding: 2rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 14, 39, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--card-border);
+        }
+        
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .back-button {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: 2px solid var(--accent-blue);
+            border-radius: 50px;
+            color: white;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .back-button:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 5%;
+        }
+        
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ffffff 0%, #a8b5ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .last-updated {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 3rem;
+        }
+        
+        h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+            color: var(--accent-blue);
+        }
+        
+        h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+        
+        ul, ol {
+            color: var(--text-secondary);
+            margin-left: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        li {
+            margin-bottom: 0.75rem;
+        }
+        
+        strong {
+            color: var(--text-primary);
+        }
+        
+        .highlight-box {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-left: 4px solid var(--accent-blue);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            backdrop-filter: blur(10px);
+        }
+        
+        .contact-info {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-top: 3rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .contact-info a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+        
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 3rem 5%;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg"></div>
+    
+    <header>
+        <div class="logo">VidaExtra®</div>
+        <a href="home.html" class="back-button">
+            <i class="bi bi-arrow-left"></i>
+            Voltar
+        </a>
+    </header>
+    
+    <div class="container">
+        <h1>Termos de Uso</h1>
+        <p class="last-updated">
+            <i class="bi bi-calendar-check"></i>
+            Última atualização: 1 de dezembro de 2025
+        </p>
+        
+        <p>
+            Bem-vindo ao <strong>VidaExtra®</strong>. Ao acessar e utilizar nossa aplicação, você concorda com os seguintes Termos de Uso. Leia atentamente antes de usar nossos serviços.
+        </p>
+        
+        <div class="highlight-box">
+            <p style="margin-bottom: 0;">
+                <strong><i class="bi bi-info-circle"></i> Resumo:</strong><br>
+                O VidaExtra é uma ferramenta gratuita para cálculo de horas extras AC-4. Você mantém total propriedade dos seus dados e pode excluí-los a qualquer momento. Não nos responsabilizamos por erros de cálculo - sempre confira os valores.
+            </p>
+        </div>
+        
+        <h2>1. Aceitação dos Termos</h2>
+        
+        <p>
+            Ao criar uma conta, fazer login ou utilizar qualquer funcionalidade do VidaExtra, você declara que:
+        </p>
+        
+        <ul>
+            <li>Tem pelo menos <strong>18 anos de idade</strong></li>
+            <li>Leu, compreendeu e concorda com estes Termos de Uso</li>
+            <li>Leu e concorda com nossa <a href="privacy-policy.html" style="color: var(--accent-blue);">Política de Privacidade</a></li>
+            <li>Utilizará o serviço de forma legal e ética</li>
+        </ul>
+        
+        <h2>2. Descrição do Serviço</h2>
+        
+        <p>
+            O VidaExtra é uma <strong>Progressive Web App (PWA)</strong> que oferece:
+        </p>
+        
+        <ul>
+            <li><strong>Calculadora AC-4:</strong> Cálculo automático de horas extras com valores diferenciados por dia da semana</li>
+            <li><strong>Histórico:</strong> Armazenamento e gerenciamento de registros de turnos</li>
+            <li><strong>Calendário Visual:</strong> Visualização mensal e semanal dos turnos</li>
+            <li><strong>Integração Google Calendar:</strong> Criação automática de eventos e lembretes</li>
+            <li><strong>Exportação PDF:</strong> Geração de relatórios profissionais</li>
+            <li><strong>Emails Automáticos:</strong> Confirmações e relatórios mensais</li>
+            <li><strong>Funcionamento Offline:</strong> Acesso sem internet após primeira carga</li>
+        </ul>
+        
+        <h2>3. Cadastro e Conta de Usuário</h2>
+        
+        <h3>3.1. Autenticação Google</h3>
+        <p>
+            O VidaExtra utiliza <strong>Google Firebase Authentication</strong>. Ao fazer login, você autoriza:
+        </p>
+        <ul>
+            <li>Acesso ao seu nome, email e foto de perfil da conta Google</li>
+            <li>Criação de uma conta VidaExtra vinculada ao seu email Google</li>
+        </ul>
+        
+        <h3>3.2. Responsabilidades do Usuário</h3>
+        <p>Você é responsável por:</p>
+        <ul>
+            <li>Manter a segurança da sua conta Google</li>
+            <li>Todas as atividades realizadas sob sua conta</li>
+            <li>Notificar-nos imediatamente sobre uso não autorizado</li>
+            <li>Não compartilhar credenciais de acesso</li>
+        </ul>
+        
+        <h2>4. Uso Aceitável</h2>
+        
+        <h3>4.1. Você PODE:</h3>
+        <ul>
+            <li>✅ Usar o VidaExtra para cálculo pessoal de horas extras AC-4</li>
+            <li>✅ Exportar e compartilhar seus próprios relatórios</li>
+            <li>✅ Conectar ao Google Calendar para lembretes pessoais</li>
+            <li>✅ Instalar como PWA em múltiplos dispositivos</li>
+        </ul>
+        
+        <h3>4.2. Você NÃO PODE:</h3>
+        <ul>
+            <li>❌ Usar para fins ilegais ou fraudulentos</li>
+            <li>❌ Tentar acessar dados de outros usuários</li>
+            <li>❌ Realizar engenharia reversa do código</li>
+            <li>❌ Sobrecarregar nossos servidores com requisições excessivas</li>
+            <li>❌ Revender ou redistribuir o serviço comercialmente</li>
+            <li>❌ Remover marcas d'água ou atribuições de copyright</li>
+        </ul>
+        
+        <h2>5. Integração com Google Calendar</h2>
+        
+        <h3>5.1. Escopo de Acesso</h3>
+        <p>
+            Ao conectar ao Google Calendar, você autoriza o VidaExtra a:
+        </p>
+        <ul>
+            <li><strong>Criar eventos:</strong> Adicionar turnos AC-4 ao seu calendário</li>
+            <li><strong>Configurar lembretes:</strong> Definir notificações automáticas</li>
+        </ul>
+        
+        <p><strong>O VidaExtra NÃO:</strong></p>
+        <ul>
+            <li>❌ Acessa outros eventos do seu calendário</li>
+            <li>❌ Modifica eventos que não foram criados pelo app</li>
+            <li>❌ Compartilha seus eventos com terceiros</li>
+        </ul>
+        
+        <h3>5.2. Revogação de Acesso</h3>
+        <p>
+            Você pode revogar o acesso ao Google Calendar a qualquer momento através de:
+        </p>
+        <ul>
+            <li>Configurações do VidaExtra (botão "Desconectar Calendar")</li>
+            <li><a href="https://myaccount.google.com/permissions" target="_blank" style="color: var(--accent-blue);">Google Account Permissions</a></li>
+        </ul>
+        
+        <h2>6. Propriedade Intelectual</h2>
+        
+        <h3>6.1. Propriedade do VidaExtra</h3>
+        <p>
+            O VidaExtra, incluindo design, código-fonte, logotipo e conteúdo, é propriedade de <strong>Antonio Rafael Souza Cruz</strong> e está protegido por leis de direitos autorais.
+        </p>
+        
+        <h3>6.2. Seus Dados</h3>
+        <p>
+            Você mantém <strong>total propriedade</strong> sobre:
+        </p>
+        <ul>
+            <li>Todos os cálculos AC-4 que você criar</li>
+            <li>Anotações e observações adicionadas</li>
+            <li>Relatórios exportados em PDF</li>
+        </ul>
+        
+        <h2>7. Isenção de Responsabilidade</h2>
+        
+        <div class="highlight-box">
+            <p style="margin-bottom: 0;">
+                <strong><i class="bi bi-exclamation-triangle"></i> IMPORTANTE:</strong><br>
+                O VidaExtra é fornecido "COMO ESTÁ" e "CONFORME DISPONÍVEL", sem garantias de qualquer tipo. <strong>Sempre confira os valores calculados</strong> antes de usar para fins oficiais ou financeiros.
+            </p>
+        </div>
+        
+        <h3>7.1. Precisão dos Cálculos</h3>
+        <p>
+            Embora nos esforcemos para fornecer cálculos precisos:
+        </p>
+        <ul>
+            <li>❌ Não garantimos 100% de precisão matemática</li>
+            <li>❌ Não nos responsabilizamos por erros de cálculo</li>
+            <li>❌ Não somos responsáveis por perdas financeiras decorrentes de erros</li>
+            <li>✅ Recomendamos sempre <strong>conferir os valores</strong> manualmente</li>
+        </ul>
+        
+        <h3>7.2. Disponibilidade do Serviço</h3>
+        <p>
+            Não garantimos que o VidaExtra estará:
+        </p>
+        <ul>
+            <li>Disponível 24/7 sem interrupções</li>
+            <li>Livre de bugs ou erros</li>
+            <li>Compatível com todos os navegadores/dispositivos</li>
+        </ul>
+        
+        <h3>7.3. Limitação de Responsabilidade</h3>
+        <p>
+            Em nenhuma circunstância seremos responsáveis por:
+        </p>
+        <ul>
+            <li>Perda de dados (faça backups regulares)</li>
+            <li>Danos indiretos, incidentais ou consequenciais</li>
+            <li>Lucros cessantes ou perda de oportunidades</li>
+            <li>Problemas causados por terceiros (Google, Vercel, etc.)</li>
+        </ul>
+        
+        <h2>8. Modificações no Serviço</h2>
+        
+        <p>
+            Reservamos o direito de:
+        </p>
+        <ul>
+            <li>Modificar, suspender ou descontinuar o VidaExtra a qualquer momento</li>
+            <li>Alterar funcionalidades ou recursos</li>
+            <li>Atualizar tabelas de valores AC-4</li>
+            <li>Implementar novos recursos ou remover existentes</li>
+        </ul>
+        
+        <p>
+            Faremos o possível para notificar usuários sobre mudanças significativas com <strong>30 dias de antecedência</strong>.
+        </p>
+        
+        <h2>9. Encerramento de Conta</h2>
+        
+        <h3>9.1. Por Você</h3>
+        <p>
+            Você pode encerrar sua conta a qualquer momento:
+        </p>
+        <ul>
+            <li>Entrando em contato conosco via email</li>
+            <li>Todos os dados serão <strong>permanentemente excluídos</strong> em até 30 dias</li>
+        </ul>
+        
+        <h3>9.2. Por Nós</h3>
+        <p>
+            Podemos suspender ou encerrar sua conta se:
+        </p>
+        <ul>
+            <li>Você violar estes Termos de Uso</li>
+            <li>Detectarmos atividade fraudulenta ou abusiva</li>
+            <li>Você não usar o serviço por mais de 2 anos consecutivos</li>
+        </ul>
+        
+        <h2>10. Privacidade e Proteção de Dados</h2>
+        
+        <p>
+            O tratamento de dados pessoais é regido por nossa <a href="privacy-policy.html" style="color: var(--accent-blue);"><strong>Política de Privacidade</strong></a>, que faz parte integrante destes Termos.
+        </p>
+        
+        <p>Resumo:</p>
+        <ul>
+            <li>✅ Conformidade com LGPD (Lei nº 13.709/2018)</li>
+            <li>✅ Criptografia de dados sensíveis</li>
+            <li>✅ Você pode exportar ou excluir seus dados a qualquer momento</li>
+            <li>✅ Nunca vendemos seus dados a terceiros</li>
+        </ul>
+        
+        <h2>11. Doações (Pague-me um Café)</h2>
+        
+        <p>
+            O VidaExtra é <strong>gratuito</strong>, mas aceitamos doações voluntárias via PIX para manter e melhorar o serviço.
+        </p>
+        
+        <ul>
+            <li>Doações são <strong>100% opcionais</strong></li>
+            <li>Não garantem recursos exclusivos ou suporte prioritário</li>
+            <li>Não são reembolsáveis</li>
+            <li>Não estabelecem relação comercial ou contratual</li>
+        </ul>
+        
+        <h2>12. Lei Aplicável e Jurisdição</h2>
+        
+        <p>
+            Estes Termos são regidos pelas leis da <strong>República Federativa do Brasil</strong>.
+        </p>
+        
+        <p>
+            Quaisquer disputas serão resolvidas no foro da comarca de <strong>Formosa/GO</strong>, com exclusão de qualquer outro, por mais privilegiado que seja.
+        </p>
+        
+        <h2>13. Alterações nos Termos</h2>
+        
+        <p>
+            Podemos atualizar estes Termos periodicamente. Mudanças significativas serão notificadas através de:
+        </p>
+        
+        <ul>
+            <li>Email para usuários registrados</li>
+            <li>Aviso na aplicação</li>
+            <li>Atualização da data "Última atualização"</li>
+        </ul>
+        
+        <p>
+            O uso continuado após alterações constitui aceitação dos novos Termos.
+        </p>
+        
+        <h2>14. Disposições Gerais</h2>
+        
+        <h3>14.1. Independência das Cláusulas</h3>
+        <p>
+            Se qualquer cláusula for considerada inválida, as demais permanecerão em vigor.
+        </p>
+        
+        <h3>14.2. Não Renúncia</h3>
+        <p>
+            Nossa falha em exercer direitos não constitui renúncia a eles.
+        </p>
+        
+        <h3>14.3. Acordo Integral</h3>
+        <p>
+            Estes Termos, junto com a Política de Privacidade, constituem o acordo integral entre você e o VidaExtra.
+        </p>
+        
+        <div class="contact-info">
+            <h2 style="margin-top: 0;">15. Contato</h2>
+            <p>
+                Para dúvidas, sugestões ou suporte relacionado a estes Termos:
+            </p>
+            <p>
+                <strong><i class="bi bi-envelope"></i> Email:</strong> 
+                <a href="mailto:rafasouzacruz@gmail.com">rafasouzacruz@gmail.com</a>
+            </p>
+            <p>
+                <strong><i class="bi bi-person"></i> Desenvolvedor:</strong> 
+                Antônio Rafael Souza Cruz de Noronha
+            </p>
+            <p>
+                <strong><i class="bi bi-github"></i> GitHub:</strong> 
+                <a href="https://github.com/Ald3b4r4n/VidaExtra" target="_blank">github.com/Ald3b4r4n/VidaExtra</a>
+            </p>
+            <p style="margin-bottom: 0;">
+                <strong><i class="bi bi-clock"></i> Tempo de resposta:</strong> 
+                Até 5 dias úteis
+            </p>
+        </div>
+        
+        <div class="highlight-box" style="margin-top: 3rem;">
+            <p style="margin-bottom: 0; text-align: center;">
+                <strong>Obrigado por usar o VidaExtra®!</strong><br>
+                Ao continuar usando nosso serviço, você confirma que leu e concordou com estes Termos de Uso.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

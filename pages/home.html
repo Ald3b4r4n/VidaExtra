@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="VidaExtra - Calculadora AC-4 profissional para cálculo de horas extras com integração ao Google Calendar. Automatize seus turnos e receba lembretes automáticos.">
+    <meta name="keywords" content="AC-4, horas extras, calculadora, Google Calendar, turnos, segurança pública">
+    <meta name="author" content="VidaExtra">
+    
+    <!-- SEO -->
+    <title>VidaExtra® - Calculadora AC-4 | Gestão Profissional de Horas Extras</title>
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="VidaExtra® - Calculadora AC-4">
+    <meta property="og:description" content="Automatize o cálculo de horas extras AC-4 e sincronize com Google Calendar">
+    <meta property="og:type" content="website">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+            --secondary-gradient: linear-gradient(135deg, #20c997 0%, #198754 100%);
+            --success-gradient: linear-gradient(135deg, #0dcaf0 0%, #0d6efd 100%);
+            --dark-bg: #0a0e27;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --accent-blue: #0d6efd;
+            --accent-green: #20c997;
+            --accent-cyan: #0dcaf0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        
+        /* Animated Background */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0a0e27 100%);
+        }
+        
+        .animated-bg::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 50%, rgba(13, 110, 253, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(32, 201, 151, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 20%, rgba(13, 202, 240, 0.1) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(120deg); }
+            66% { transform: translate(-20px, 20px) rotate(240deg); }
+        }
+        
+        /* Header */
+        header {
+            padding: 2rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: rgba(10, 14, 39, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            border-bottom: 1px solid var(--card-border);
+        }
+        
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+        
+        .cta-button {
+            padding: 0.875rem 2rem;
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(13, 110, 253, 0.4);
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(13, 110, 253, 0.6);
+        }
+        
+        /* Hero Section - Grid Layout */
+        .hero {
+            padding: 6rem 5% 4rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+        
+        .hero-content {
+            text-align: left;
+        }
+        
+        .hero h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #ffffff 0%, #a8b5ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero .subtitle {
+            font-size: clamp(1.1rem, 2vw, 1.4rem);
+            color: var(--text-secondary);
+            margin-bottom: 2.5rem;
+            line-height: 1.7;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .hero-image-wrapper {
+            position: relative;
+        }
+        
+        .hero-image {
+            width: 100%;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(13, 110, 253, 0.4);
+            border: 3px solid rgba(13, 110, 253, 0.3);
+            transition: all 0.4s ease;
+        }
+        
+        .hero-image:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 30px 80px rgba(13, 110, 253, 0.5);
+        }
+        
+        .btn-primary {
+            padding: 1.2rem 3rem;
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 8px 30px rgba(13, 110, 253, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(13, 110, 253, 0.6);
+        }
+        
+        .btn-secondary {
+            padding: 1.2rem 3rem;
+            background: transparent;
+            border: 2px solid var(--accent-blue);
+            border-radius: 50px;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(13, 110, 253, 0.1);
+            transform: translateY(-3px);
+        }
+        
+        /* Features Grid */
+        .features {
+            padding: 4rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .section-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ffffff 0%, #a8b5ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            margin-bottom: 4rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+        
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent-blue);
+            box-shadow: 0 20px 60px rgba(13, 110, 253, 0.3);
+        }
+        
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 18px;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 20px rgba(13, 110, 253, 0.4);
+        }
+        
+        .feature-card h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-card p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+        
+        /* Google Calendar Section */
+        .calendar-section {
+            padding: 6rem 5%;
+            background: linear-gradient(135deg, rgba(13, 110, 253, 0.1) 0%, rgba(32, 201, 151, 0.1) 100%);
+            border-top: 1px solid var(--card-border);
+            border-bottom: 1px solid var(--card-border);
+        }
+        
+        .calendar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+        
+        .calendar-text h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ffffff 0%, #a8b5ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .calendar-text p {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+        
+        .calendar-benefits {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+        
+        .calendar-benefits li {
+            padding: 1rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+        
+        .calendar-benefits i {
+            color: var(--accent-cyan);
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .calendar-visual {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .calendar-mockup {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .calendar-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .google-logo {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .calendar-header h4 {
+            color: #333;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .calendar-event {
+            background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+        
+        .calendar-event-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .calendar-event-time {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        /* How It Works */
+        .how-it-works {
+            padding: 6rem 5%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-top: 4rem;
+        }
+        
+        .step {
+            text-align: center;
+            position: relative;
+        }
+        
+        .step-number {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            color: white;
+            font-size: 2rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 8px 25px rgba(13, 110, 253, 0.4);
+        }
+        
+        .step h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .step p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+        
+        /* Screenshots */
+        .screenshots {
+            padding: 6rem 5%;
+            background: linear-gradient(135deg, rgba(32, 201, 151, 0.05) 0%, rgba(13, 202, 240, 0.05) 100%);
+        }
+        
+        .screenshots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 4rem auto 0;
+        }
+        
+        .screenshot-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .screenshot-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(13, 110, 253, 0.3);
+        }
+        
+        .screenshot-placeholder {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, rgba(13, 110, 253, 0.2) 0%, rgba(32, 201, 151, 0.2) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: var(--accent-blue);
+        }
+        
+        .screenshot-info {
+            padding: 1.5rem;
+        }
+        
+        .screenshot-info h4 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .screenshot-info p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        
+        /* Footer */
+        footer {
+            padding: 4rem 5% 2rem;
+            border-top: 1px solid var(--card-border);
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+        
+        .footer-section h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 0.75rem;
+        }
+        
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent-blue);
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid var(--card-border);
+            color: var(--text-secondary);
+        }
+        
+        /* Responsive */
+        @media (max-width: 968px) {
+            .hero-grid {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+            
+            .hero-image-wrapper {
+                order: -1;
+            }
+            
+            .hero-content {
+                text-align: center;
+            }
+            
+            .hero-buttons {
+                justify-content: center;
+            }
+            
+            .calendar-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                padding: 1.5rem 5%;
+            }
+            
+            .logo {
+                font-size: 1.5rem;
+            }
+            
+            .cta-button {
+                padding: 0.75rem 1.5rem;
+                font-size: 0.9rem;
+            }
+            
+            .hero {
+                padding: 4rem 5% 3rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .btn-primary, .btn-secondary {
+                justify-content: center;
+            }
+            
+            .features-grid,
+            .steps,
+            .screenshots-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        
+        /* Scroll Reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg"></div>
+    
+    <header>
+        <div class="logo">VidaExtra®</div>
+        <a href="../index.html" class="cta-button">Acessar Aplicação</a>
+    </header>
+    
+    <main>
+        <!-- Hero Section -->
+        <section class="hero fade-in-up">
+            <div class="hero-grid">
+                <div class="hero-content">
+                    <h1>Calculadora AC-4 Profissional</h1>
+                    <p class="subtitle">
+                        Automatize o cálculo de horas extras, sincronize com Google Calendar e receba lembretes automáticos dos seus turnos. Tudo em uma aplicação moderna e intuitiva.
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="../index.html" class="btn-primary">
+                            <i class="bi bi-calculator"></i>
+                            Começar Agora
+                        </a>
+                        <a href="#como-funciona" class="btn-secondary">
+                            <i class="bi bi-play-circle"></i>
+                            Como Funciona
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="hero-image-wrapper">
+                    <img src="hero-image.jpg" alt="Policial Militar em serviço - Segurança Pública" class="hero-image">
+                </div>
+            </div>
+        </section>
+        
+        <!-- Features Section -->
+        <section class="features reveal">
+            <h2 class="section-title">Recursos Principais</h2>
+            <p class="section-subtitle">
+                Tudo que você precisa para gerenciar suas horas extras de forma profissional
+            </p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-calculator-fill"></i>
+                    </div>
+                    <h3>Cálculo Automático</h3>
+                    <p>
+                        Calcule automaticamente suas horas extras AC-4 com valores diferenciados por dia da semana. Suporte para plantões noturnos e descontos de pensão alimentícia.
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+                    <h3>Calendário Visual</h3>
+                    <p>
+                        Visualize todos os seus turnos em um calendário interativo. Veja rapidamente seus compromissos mensais e semanais com indicadores visuais intuitivos.
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <h3>Histórico Completo</h3>
+                    <p>
+                        Mantenha registro de todos os seus cálculos com possibilidade de edição e remoção. Totalizadores automáticos de horas e valores bruto/líquido.
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-file-earmark-pdf"></i>
+                    </div>
+                    <h3>Exportação PDF</h3>
+                    <p>
+                        Gere relatórios profissionais em PDF com layout formatado, incluindo todas as informações dos seus turnos e totalizadores.
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-phone"></i>
+                    </div>
+                    <h3>PWA - Funciona Offline</h3>
+                    <p>
+                        Instale no seu celular ou desktop como um aplicativo nativo. Funciona sem internet após a primeira carga graças à tecnologia PWA.
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h3>Seguro e Privado</h3>
+                    <p>
+                        Seus dados são armazenados de forma segura com criptografia. Você tem controle total sobre suas informações pessoais.
+                    </p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Google Calendar Integration -->
+        <section class="calendar-section reveal">
+            <div class="calendar-content">
+                <div class="calendar-text">
+                    <h2>Por que usamos Google Calendar?</h2>
+                    <p>
+                        O VidaExtra integra-se ao Google Calendar para criar eventos automaticamente dos seus turnos e serviços AC-4. Isso permite que você:
+                    </p>
+                    
+                    <ul class="calendar-benefits">
+                        <li>
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Receba <strong>lembretes automáticos</strong> por email (24h e 1h antes) e notificações push (30min e 15min antes)</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Sincronize seus turnos em <strong>todos os dispositivos</strong> (celular, tablet, computador)</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Visualize seus compromissos no <strong>calendário nativo</strong> do Google</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Tenha <strong>backup automático</strong> na nuvem de todos os seus eventos</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Funciona <strong>mesmo com o app fechado</strong> - gerenciado 100% pelo Google</span>
+                        </li>
+                    </ul>
+                    
+                    <p style="margin-top: 2rem; font-size: 1rem; font-style: italic;">
+                        <i class="bi bi-info-circle"></i>
+                        O VidaExtra <strong>nunca acessa</strong> outros eventos do seu calendário. Apenas cria e gerencia os eventos de turnos AC-4 que você adicionar no aplicativo.
+                    </p>
+                </div>
+                
+                <div class="calendar-visual">
+                    <div class="calendar-mockup">
+                        <div class="calendar-header">
+                            <svg class="google-logo" viewBox="0 0 24 24">
+                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                            </svg>
+                            <h4>Google Calendar</h4>
+                        </div>
+                        <div class="calendar-event">
+                            <div class="calendar-event-title">🚔 Turno AC-4 - Operação Centro</div>
+                            <div class="calendar-event-time">📅 Hoje, 18:00 - 00:00 (6 horas)</div>
+                        </div>
+                        <div class="calendar-event" style="opacity: 0.7;">
+                            <div class="calendar-event-title">🚔 Turno AC-4 - Patrulhamento</div>
+                            <div class="calendar-event-time">📅 Amanhã, 14:00 - 20:00 (6 horas)</div>
+                        </div>
+                        <div class="calendar-event" style="opacity: 0.5;">
+                            <div class="calendar-event-title">🚔 Turno AC-4 - Plantão</div>
+                            <div class="calendar-event-time">📅 Sábado, 08:00 - 20:00 (12 horas)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- How It Works -->
+        <section id="como-funciona" class="how-it-works reveal">
+            <h2 class="section-title">Como Funciona</h2>
+            <p class="section-subtitle">
+                Comece a usar em 3 passos simples
+            </p>
+            
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Faça Login</h3>
+                    <p>
+                        Entre com sua conta Google de forma segura. Seus dados ficam protegidos e você pode acessar de qualquer dispositivo.
+                    </p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Calcule AC-4</h3>
+                    <p>
+                        Insira a data, horários do turno e anotações. O sistema calcula automaticamente os valores e adiciona ao histórico.
+                    </p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Sincronize</h3>
+                    <p>
+                        Conecte ao Google Calendar para receber lembretes automáticos e visualizar seus turnos em todos os dispositivos.
+                    </p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Screenshots -->
+        <section class="screenshots reveal">
+            <h2 class="section-title">Interface Moderna e Intuitiva</h2>
+            <p class="section-subtitle">
+                Design profissional pensado para facilitar seu dia a dia
+            </p>
+            
+            <div class="screenshots-grid">
+                <div class="screenshot-card">
+                    <div class="screenshot-placeholder">
+                        <i class="bi bi-calculator"></i>
+                    </div>
+                    <div class="screenshot-info">
+                        <h4>Calculadora AC-4</h4>
+                        <p>Interface limpa e intuitiva para cálculo rápido de horas extras</p>
+                    </div>
+                </div>
+                
+                <div class="screenshot-card">
+                    <div class="screenshot-placeholder">
+                        <i class="bi bi-calendar3"></i>
+                    </div>
+                    <div class="screenshot-info">
+                        <h4>Calendário Visual</h4>
+                        <p>Visualização mensal e semanal de todos os seus turnos</p>
+                    </div>
+                </div>
+                
+                <div class="screenshot-card">
+                    <div class="screenshot-placeholder">
+                        <i class="bi bi-list-check"></i>
+                    </div>
+                    <div class="screenshot-info">
+                        <h4>Histórico Detalhado</h4>
+                        <p>Edite, remova e exporte seus registros com facilidade</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- CTA Section -->
+        <section class="hero" style="padding-top: 4rem; text-align: center;">
+            <h2 class="section-title">Pronto para começar?</h2>
+            <p class="section-subtitle">
+                Junte-se aos profissionais que já automatizaram o cálculo de horas extras
+            </p>
+            <div class="hero-buttons" style="justify-content: center;">
+                <a href="../index.html" class="btn-primary">
+                    <i class="bi bi-rocket-takeoff"></i>
+                    Começar Gratuitamente
+                </a>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>VidaExtra®</h3>
+                <p style="color: var(--text-secondary); line-height: 1.7;">
+                    Calculadora AC-4 profissional para gestão de horas extras com integração ao Google Calendar.
+                </p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Links Úteis</h3>
+                <ul class="footer-links">
+                    <li><a href="../index.html">Acessar Aplicação</a></li>
+                    <li><a href="#como-funciona">Como Funciona</a></li>
+                    <li><a href="https://github.com/Ald3b4r4n/VidaExtra" target="_blank">GitHub</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Legal</h3>
+                <ul class="footer-links">
+                    <li><a href="privacy-policy.html">Política de Privacidade</a></li>
+                    <li><a href="terms.html">Termos de Uso</a></li>
+                    <li><a href="mailto:rafasouzacruz@gmail.com">Contato</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Suporte</h3>
+                <ul class="footer-links">
+                    <li><a href="mailto:rafasouzacruz@gmail.com">
+                        <i class="bi bi-envelope"></i> rafasouzacruz@gmail.com
+                    </a></li>
+                    <li><a href="https://wa.me/5561982887294" target="_blank">
+                        <i class="bi bi-whatsapp"></i> WhatsApp
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 VidaExtra®. Todos os direitos reservados.</p>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+                Desenvolvido por Antônio Rafael Souza Cruz de Noronha
+            </p>
+        </div>
+    </footer>
+    
+    <script>
+        // Scroll Reveal Animation
+        const revealElements = document.querySelectorAll('.reveal');
+        
+        const revealOnScroll = () => {
+            const windowHeight = window.innerHeight;
+            
+            revealElements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const revealPoint = 100;
+                
+                if (elementTop < windowHeight - revealPoint) {
+                    element.classList.add('active');
+                }
+            });
+        };
+        
+        window.addEventListener('scroll', revealOnScroll);
+        revealOnScroll(); // Initial check
+        
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
