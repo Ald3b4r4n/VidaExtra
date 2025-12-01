@@ -46,11 +46,7 @@
   },
   "crons": [
     {
-      "path": "/api/sendMonthlyReport",
-      "schedule": "0 0 1 * *"
-    },
-    {
-      "path": "/api/cleanupOldData",
+      "path": "/api/monthlyTasks",
       "schedule": "0 3 1 * *"
     }
   ]
