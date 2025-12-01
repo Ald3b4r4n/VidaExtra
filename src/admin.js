@@ -229,6 +229,7 @@ function renderAdminDashboard(data) {
               data-bs-toggle="collapse" 
               data-bs-target="#shifts-${user.uid}" 
               aria-expanded="false"
+              onclick="event.stopPropagation();"
             >
               <i class="bi bi-calendar-event"></i> Ver Shifts (${
                 user.shifts.length
@@ -254,9 +255,17 @@ function renderAdminDashboard(data) {
                       <tr>
                         <td>${shift.data || shift.date || "-"}</td>
                         <td>${shift.periodo || "-"}</td>
-                        <td>${(shift.horasTotais || shift.hours || 0).toFixed(2)}h</td>
-                        <td>R$ ${(shift.totalLiquido || shift.value || 0).toFixed(2)}</td>
-                        <td><small>${shift.anotacoes || shift.notes || "-"}</small></td>
+                        <td>${(shift.horasTotais || shift.hours || 0).toFixed(
+                          2
+                        )}h</td>
+                        <td>R$ ${(
+                          shift.totalLiquido ||
+                          shift.value ||
+                          0
+                        ).toFixed(2)}</td>
+                        <td><small>${
+                          shift.anotacoes || shift.notes || "-"
+                        }</small></td>
                       </tr>
                     `
                       )
