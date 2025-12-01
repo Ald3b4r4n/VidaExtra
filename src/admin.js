@@ -163,20 +163,20 @@ function renderAdminDashboard(data) {
             (user) => `
     <div class="card mb-3 border shadow-sm">
       <div class="card-body">
-        <div class="d-flex justify-content-between align-items-start mb-3">
-          <div class="d-flex align-items-center gap-3">
+        <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+          <div class="d-flex align-items-center gap-3 flex-grow-1" style="min-width: 0;">
             ${
               user.photoURL
-                ? `<img src="${user.photoURL}" alt="${user.displayName}" class="rounded-circle" style="width: 56px; height: 56px; object-fit: cover; border: 2px solid #0d6efd;">`
-                : `<div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; font-size: 24px; font-weight: bold; border: 2px solid #0d6efd;">
+                ? `<img src="${user.photoURL}" alt="${user.displayName}" class="rounded-circle flex-shrink-0" style="width: 56px; height: 56px; object-fit: cover; border: 2px solid #0d6efd;">`
+                : `<div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width: 56px; height: 56px; font-size: 24px; font-weight: bold; border: 2px solid #0d6efd;">
                 ${(user.displayName || user.email || "U")
                   .charAt(0)
                   .toUpperCase()}
               </div>`
             }
-            <div>
-              <h6 class="mb-1 fw-bold">${user.displayName || "Sem nome"}</h6>
-              <small class="text-muted"><i class="bi bi-envelope"></i> ${
+            <div style="min-width: 0;">
+              <h6 class="mb-1 fw-bold text-break">${user.displayName || "Sem nome"}</h6>
+              <small class="text-muted text-break d-block"><i class="bi bi-envelope"></i> ${
                 user.email
               }</small>
               <div class="mt-1">
@@ -195,7 +195,7 @@ function renderAdminDashboard(data) {
           </div>
           <span class="badge ${
             user.isOnline ? "bg-success" : "bg-secondary"
-          } fs-6">
+          } fs-6 ms-auto">
             ${
               user.isOnline
                 ? '<i class="bi bi-circle-fill"></i> Online'
@@ -206,17 +206,17 @@ function renderAdminDashboard(data) {
 
         <div class="row g-2 g-md-3">
           <div class="col-6 col-md-6">
-            <div class="p-2 bg-light rounded">
+            <div class="p-2 bg-light rounded h-100">
               <small class="text-muted d-block" style="font-size: 0.75rem;"><i class="bi bi-calendar-plus"></i> Criado em</small>
-              <strong class="d-block" style="font-size: 0.85rem;">${formatDate(
+              <strong class="d-block text-break" style="font-size: 0.85rem;">${formatDate(
                 user.createdAt
               )}</strong>
             </div>
           </div>
           <div class="col-6 col-md-6">
-            <div class="p-2 bg-light rounded">
+            <div class="p-2 bg-light rounded h-100">
               <small class="text-muted d-block" style="font-size: 0.75rem;"><i class="bi bi-clock-history"></i> Último acesso</small>
-              <strong class="d-block" style="font-size: 0.85rem;">${formatDate(
+              <strong class="d-block text-break" style="font-size: 0.85rem;">${formatDate(
                 user.lastAccess
               )}</strong>
             </div>
@@ -236,7 +236,7 @@ function renderAdminDashboard(data) {
               
               <div class="mt-3">
                 <div class="table-responsive">
-                  <table class="table table-sm table-striped">
+                  <table class="table table-sm table-striped mb-0">
                     <thead>
                       <tr>
                         <th>Data</th>
@@ -251,17 +251,17 @@ function renderAdminDashboard(data) {
                         .map(
                           (shift) => `
                         <tr>
-                          <td>${shift.data || shift.date || "-"}</td>
-                          <td>${shift.periodo || "-"}</td>
-                          <td>${(shift.horasTotais || shift.hours || 0).toFixed(
+                          <td class="text-nowrap">${shift.data || shift.date || "-"}</td>
+                          <td class="text-nowrap">${shift.periodo || "-"}</td>
+                          <td class="text-nowrap">${(shift.horasTotais || shift.hours || 0).toFixed(
                             2
                           )}h</td>
-                          <td>R$ ${(
+                          <td class="text-nowrap">R$ ${(
                             shift.totalLiquido ||
                             shift.value ||
                             0
                           ).toFixed(2)}</td>
-                          <td><small>${
+                          <td style="min-width: 150px;"><small>${
                             shift.anotacoes || shift.notes || "-"
                           }</small></td>
                         </tr>
@@ -321,40 +321,40 @@ function updateAdminStats(data) {
   }).length;
 
   statsContainer.innerHTML = `
-    <div class="row g-3">
+    <div class="row g-2 g-md-3">
       <div class="col-6 col-md-3">
         <div class="card bg-primary text-white h-100">
-          <div class="card-body text-center p-2 p-md-3">
+          <div class="card-body text-center p-2 p-md-3 d-flex flex-column justify-content-center align-items-center">
             <i class="bi bi-people-fill" style="font-size: 1.5rem;"></i>
             <h2 class="mt-2 mb-0 fs-4 fs-md-2">${totalUsers}</h2>
-            <small class="d-block" style="font-size: 0.75rem;">Total de Usuários</small>
+            <small class="d-block lh-1" style="font-size: 0.75rem;">Total de Usuários</small>
           </div>
         </div>
       </div>
       <div class="col-6 col-md-3">
         <div class="card bg-success text-white h-100">
-          <div class="card-body text-center p-2 p-md-3">
+          <div class="card-body text-center p-2 p-md-3 d-flex flex-column justify-content-center align-items-center">
             <i class="bi bi-circle-fill" style="font-size: 1.5rem;"></i>
             <h2 class="mt-2 mb-0 fs-4 fs-md-2">${onlineUsers}</h2>
-            <small class="d-block" style="font-size: 0.75rem;">Online Agora</small>
+            <small class="d-block lh-1" style="font-size: 0.75rem;">Online Agora</small>
           </div>
         </div>
       </div>
       <div class="col-6 col-md-3">
         <div class="card bg-info text-white h-100">
-          <div class="card-body text-center p-2 p-md-3">
+          <div class="card-body text-center p-2 p-md-3 d-flex flex-column justify-content-center align-items-center">
             <i class="bi bi-calendar-check-fill" style="font-size: 1.5rem;"></i>
             <h2 class="mt-2 mb-0 fs-4 fs-md-2">${calendarConnected}</h2>
-            <small class="d-block" style="font-size: 0.75rem;">Calendar Conectado</small>
+            <small class="d-block lh-1" style="font-size: 0.75rem;">Calendar Conectado</small>
           </div>
         </div>
       </div>
       <div class="col-6 col-md-3">
         <div class="card bg-warning text-dark h-100">
-          <div class="card-body text-center p-2 p-md-3">
+          <div class="card-body text-center p-2 p-md-3 d-flex flex-column justify-content-center align-items-center">
             <i class="bi bi-clock-history" style="font-size: 1.5rem;"></i>
             <h2 class="mt-2 mb-0 fs-4 fs-md-2">${totalShifts}</h2>
-            <small class="d-block" style="font-size: 0.75rem;">Total de Shifts</small>
+            <small class="d-block lh-1" style="font-size: 0.75rem;">Total de Shifts</small>
           </div>
         </div>
       </div>
