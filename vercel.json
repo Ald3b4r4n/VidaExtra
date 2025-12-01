@@ -1,8 +1,10 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": ".",
+  "redirects": [
+    { "source": "/", "destination": "/pages/home.html", "permanent": false }
+  ],
   "rewrites": [
-    { "source": "/", "destination": "/pages/home.html" },
     { "source": "/api/firebase-config", "destination": "/api/config" },
     { "source": "/api/oauth-client-id", "destination": "/api/config" },
     { "source": "/(.*)", "destination": "/$1" }
