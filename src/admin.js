@@ -298,6 +298,10 @@ function renderAdminDashboard(data) {
                   `
                     )
                     .join("")}
+                    
+                    <button type="button" class="btn btn-outline-secondary w-100 mt-2" onclick="this.closest('details').removeAttribute('open')">
+                      <i class="bi bi-chevron-up"></i> Fechar Lista
+                    </button>
                 </div>
               </div>
             </details>
