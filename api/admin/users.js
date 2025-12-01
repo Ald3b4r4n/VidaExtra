@@ -88,6 +88,7 @@ export default async (req, res) => {
     // Fetch user data with shifts
     const usersData = await Promise.all(
       listUsersResult.users.map(async (userRecord) => {
+        console.log(`Processing user: ${userRecord.email} (${userRecord.uid})`);
         try {
           // Get user document from Firestore (may not exist for all users)
           let firestoreData = {};
@@ -142,7 +143,7 @@ export default async (req, res) => {
             }
           }
 
-          return {
+          const userData = {
             uid: userRecord.uid,
             email: userRecord.email,
             displayName:
@@ -159,6 +160,10 @@ export default async (req, res) => {
             calendarConnected: !!firestoreData.accessToken,
             emailNotifications: firestoreData.notifySettings?.email !== false,
           };
+
+          console.log(`✓ User ${userRecord.email} final shiftsCount: ${userData.shiftsCount}`);
+
+          return userData;
         } catch (error) {
           console.error(
             `Error fetching data for user ${userRecord.uid}:`,
