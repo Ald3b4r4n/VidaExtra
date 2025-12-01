@@ -54,6 +54,7 @@ coverage/
 # Markdown documentation (except README)
 *.md
 !README.md
+!MONGODB_CLEANUP.md
 
 # Backup files
 *.backup.*
