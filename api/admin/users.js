@@ -110,21 +110,35 @@ export default async (req, res) => {
           if (mongodb) {
             try {
               const shiftsCollection = mongodb.collection("userShifts");
-              // Buscar por _id que começa com o uid do usuário (formato: email_YYYY-MM)
+              // Buscar por uid que corresponde ao usuário
               const userShifts = await shiftsCollection
                 .find({ uid: userRecord.uid })
                 .sort({ updatedAt: -1 })
                 .limit(12)
                 .toArray();
 
+              console.log(
+                `User ${userRecord.email} - MongoDB documents found: ${userShifts.length}`
+              );
+
               // Contar total de shifts (somar shifts.length de cada mês)
               shiftsCount = userShifts.reduce((total, monthDoc) => {
-                return total + (monthDoc.shifts?.length || 0);
+                const monthShifts = monthDoc.shifts?.length || 0;
+                console.log(
+                  `  Month ${monthDoc.month}/${monthDoc.year}: ${monthShifts} shifts`
+                );
+                return total + monthShifts;
               }, 0);
+
+              console.log(
+                `User ${userRecord.email} - Total shifts: ${shiftsCount}`
+              );
 
               shifts = userShifts;
             } catch (err) {
-              console.log(`No MongoDB shifts for user ${userRecord.uid}`);
+              console.log(
+                `No MongoDB shifts for user ${userRecord.uid}: ${err.message}`
+              );
             }
           }
 
