@@ -29,14 +29,8 @@ export function checkAuth() {
         // Usuário está logado
         console.log("User authenticated:", user.email);
 
-        // Se estiver na raiz, redireciona para home (landing page)
-        const currentPath = window.location.pathname;
-        if (currentPath === "/" || currentPath === "/index.html") {
-          window.location.replace("/pages/home.html");
-          return resolve(user);
-        }
-
         // Se estiver na página de login, redireciona para a aplicação
+        const currentPath = window.location.pathname;
         if (currentPath === "/pages/login.html") {
           window.location.replace("/index.html");
           return resolve(user);
