@@ -186,8 +186,8 @@ function renderAdminDashboard(data) {
                     : ""
                 }
                 ${
-                  user.shiftsCount > 0
-                    ? `<span class="badge bg-info"><i class="bi bi-clock-history"></i> ${user.shiftsCount} shifts</span>`
+                  user.shifts && user.shifts.length > 0
+                    ? `<span class="badge bg-info"><i class="bi bi-clock-history"></i> ${user.shifts.length} shifts</span>`
                     : ""
                 }
               </div>
@@ -204,17 +204,17 @@ function renderAdminDashboard(data) {
           </span>
         </div>
 
-        <div class="row g-3">
-          <div class="col-md-6">
+        <div class="row g-2 g-md-3">
+          <div class="col-6 col-md-6">
             <div class="p-2 bg-light rounded">
-              <small class="text-muted d-block"><i class="bi bi-calendar-plus"></i> Criado em</small>
-              <strong>${formatDate(user.createdAt)}</strong>
+              <small class="text-muted d-block" style="font-size: 0.75rem;"><i class="bi bi-calendar-plus"></i> Criado em</small>
+              <strong class="d-block" style="font-size: 0.85rem;">${formatDate(user.createdAt)}</strong>
             </div>
           </div>
-          <div class="col-md-6">
+          <div class="col-6 col-md-6">
             <div class="p-2 bg-light rounded">
-              <small class="text-muted d-block"><i class="bi bi-clock-history"></i> Último acesso</small>
-              <strong>${formatDate(user.lastAccess)}</strong>
+              <small class="text-muted d-block" style="font-size: 0.75rem;"><i class="bi bi-clock-history"></i> Último acesso</small>
+              <strong class="d-block" style="font-size: 0.85rem;">${formatDate(user.lastAccess)}</strong>
             </div>
           </div>
         </div>
@@ -304,7 +304,7 @@ function updateAdminStats(data) {
     (u) => u.calendarConnected
   ).length;
   const totalShifts = data.users.reduce(
-    (sum, u) => sum + (u.shiftsCount || 0),
+    (sum, u) => sum + ((u.shifts && u.shifts.length) || 0),
     0
   );
 
