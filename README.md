@@ -115,6 +115,7 @@ Simplificar e automatizar o cálculo de horas extras, permitindo aos usuários:
 | **Luxon**           | 3.x    | Manipulação e formatação de datas                  |
 | **SweetAlert2**     | 11.x   | Modais e diálogos elegantes                        |
 | **html2pdf.js**     | 0.10.1 | Geração de PDF a partir de HTML                    |
+| **Air Datepicker**  | 3.4.0  | Seletor de data e hora mobile-friendly             |
 
 ### Build & Qualidade
 
