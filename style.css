@@ -535,3 +535,49 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     min-width: 100px;
   }
 }
+
+/* ========================================= */
+/* AIR DATEPICKER - ESTILOS CUSTOMIZADOS */
+/* ========================================= */
+
+/* Container principal */
+.air-datepicker {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  z-index: 99999 !important;
+}
+
+/* Ajuste para mobile */
+.air-datepicker.-is-mobile- {
+  z-index: 99999 !important;
+}
+
+/* Cores do tema */
+.air-datepicker--time-current-hours,
+.air-datepicker--time-current-minutes {
+  color: var(--pm-blue);
+}
+
+.air-datepicker--time-range-slider.-active- {
+  background: var(--pm-blue);
+}
+
+/* Botões */
+.air-datepicker-button {
+  color: var(--pm-blue);
+  font-weight: 600;
+}
+
+.air-datepicker-button:hover {
+  background: rgba(13, 110, 253, 0.1);
+  color: var(--pm-blue);
+}
+
+/* Inputs readonly com cursor pointer */
+input[type="text"].air-datepicker-input {
+  cursor: pointer;
+  background-color: #fff !important; /* Força branco mesmo readonly */
+}
+

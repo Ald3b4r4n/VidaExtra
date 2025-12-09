@@ -47,6 +47,11 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css"
     />
+    <!-- Air Datepicker -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/air-datepicker@3.4.0/air-datepicker.css"
+    />
 
     <!-- CSS Local -->
     <link rel="stylesheet" href="style.css" />
@@ -164,18 +169,20 @@
                     <div class="col-md-6">
                       <label class="form-label fw-bold">Hora Inicial</label>
                       <input
-                        type="time"
+                        type="text"
                         id="hora-inicio"
                         class="form-control"
+                        placeholder="informe a hora inicial"
                         required
                       />
                     </div>
                     <div class="col-md-6">
                       <label class="form-label fw-bold">Hora Final</label>
                       <input
-                        type="time"
+                        type="text"
                         id="hora-fim"
                         class="form-control"
+                        placeholder="informe a hora final"
                         required
                       />
                     </div>
@@ -574,11 +581,16 @@
     <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Air Datepicker JS -->
+    <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.4.0/air-datepicker.min.js"></script>
 
     <!-- Firebase and Authentication -->
     <script type="module" src="./src/firebase-config.js"></script>
     <script type="module" src="./src/auth.js"></script>
     <script type="module" src="./src/reminders.js"></script>
+    
+    <!-- Time Picker Initialization -->
+    <script src="./src/timepicker.js"></script>
 
     <!-- Script Local -->
     <script>
