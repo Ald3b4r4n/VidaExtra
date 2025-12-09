@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --pm-blue: #0d6efd;
   --pm-red: #dc3545;
   --pm-dark: #212529;
@@ -18,11 +18,12 @@ body {
 
 .text-gradient {
   background: linear-gradient(to right, var(--pm-blue), #20c997);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-/* Subtítulo do cabeçalho */
+/* SubtÃ­tulo do cabeÃ§alho */
 .app-subtitle {
   font-size: 0.95rem;
   color: #6c757d;
@@ -200,17 +201,17 @@ body {
   }
 }
 
-/* Pequenas otimizações para telas muito pequenas */
+/* Pequenas otimizaÃ§Ãµes para telas muito pequenas */
 @media (max-width: 576px) {
-  /* Cabeçalho: permitir quebra e compactar ações */
+  /* CabeÃ§alho: permitir quebra e compactar aÃ§Ãµes */
   .header-bar { row-gap: .5rem; }
   .header-actions .btn .btn-text { display: none; }
   .header-actions .btn { padding: 0.375rem 0.5rem; }
 
-  /* Rodapé: botões largura total para melhor toque */
+  /* RodapÃ©: botÃµes largura total para melhor toque */
   .footer-btn { width: 100%; }
 
-  /* Totais centralizados para leitura agradável */
+  /* Totais centralizados para leitura agradÃ¡vel */
   #total-acumulado,
   #total-perdido-pensao { text-align: center; }
 
@@ -235,7 +236,7 @@ body {
   font-size: 0.9rem;
 }
 
-/* Área de ações nos itens do histórico */
+/* Ãrea de aÃ§Ãµes nos itens do histÃ³rico */
 .list-group-item .btn-group {
   display: inline-flex;
   gap: 6px;
@@ -247,7 +248,7 @@ body {
   font-size: 0.85rem;
 }
 
-/* Valor original com pensão */
+/* Valor original com pensÃ£o */
 .valor-original {
   font-size: 0.85rem;
   color: #6c757d;
@@ -255,13 +256,13 @@ body {
   margin-right: 5px;
 }
 
-/* Valor líquido */
+/* Valor lÃ­quido */
 .valor-liquido {
   font-weight: bold;
   color: #198754;
 }
 
-/* Estilo para anotações */
+/* Estilo para anotaÃ§Ãµes */
 #resumo-anotacoes {
   background-color: #f9fafb;
   border-left: 3px solid var(--pm-blue);
@@ -314,12 +315,12 @@ body {
   color: #212529 !important; 
 }
 
-/* Chip de evento dentro da célula do dia */
+/* Chip de evento dentro da cÃ©lula do dia */
 #historico-calendario .ve-event-chip {
   display: block;
   width: 100%;
   padding: 2px 6px;
-  border: 1px solid transparent; /* texto sem borda por padrão */
+  border: 1px solid transparent; /* texto sem borda por padrÃ£o */
   border-radius: 6px;
   line-height: 1.2;
   white-space: nowrap;
@@ -430,11 +431,11 @@ body {
   background-color: #198754;
   color: #fff;
 }
-/* Exibir eventos específicos por visualização */
+/* Exibir eventos especÃ­ficos por visualizaÃ§Ã£o */
 #historico-calendario .fc-daygrid .ve-week-only { display: none !important; }
 #historico-calendario .fc-timegrid .ve-month-only { display: none !important; }
 
-/* Tooltip custom (Bootstrap) para calendário do Histórico */
+/* Tooltip custom (Bootstrap) para calendÃ¡rio do HistÃ³rico */
 .tooltip.ve-tooltip-bs .tooltip-inner {
   background: #111827; /* slate-900 */
   color: #f8fafc; /* near-white */
@@ -458,22 +459,79 @@ body {
 .hist-legend-hover, .hist-legend-tap { display: none; }
 @media (hover: hover) { .hist-legend-hover { display: inline; } }
 @media (hover: none) { .hist-legend-tap { display: inline; } }
+/* Modal PIX Cafe */
+#pixCafeModal .modal-content { border-radius: 15px; overflow: hidden; }
+#pixCafeModal .modal-header { border-bottom: none; padding: 1.5rem; }
+#pixCafeModal .modal-body { padding: 1.5rem; }
+#pix-code { background-color: #f8f9fa; border: 2px dashed #ffc107; border-radius: 8px; font-size: 0.75rem; line-height: 1.4; padding: 0.75rem; transition: all 0.3s ease; }
+#pix-code:hover { background-color: #fff; border-color: #ff9800; box-shadow: 0 2px 8px rgba(255, 152, 0, 0.2); }
+#btn-copy-pix { transition: all 0.3s ease; }
+#btn-copy-pix:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4); }
+.footer-btn { transition: all 0.3s ease; }
+.footer-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
 
-/* Espaçamento da legenda no bloco Calendário */
-.hist-legend-bar { gap: 8px; }
-.hist-legend { margin-left: 6px; }
-@media (max-width: 576px) {
-  .hist-legend-bar { flex-wrap: wrap; }
-  .hist-legend { margin-left: 0; margin-top: 6px; width: 100%; }
-} 
- / *   M o d a l   P I X   C a f e   * /  
- # p i x C a f e M o d a l   . m o d a l - c o n t e n t   {   b o r d e r - r a d i u s :   1 5 p x ;   o v e r f l o w :   h i d d e n ;   }  
- # p i x C a f e M o d a l   . m o d a l - h e a d e r   {   b o r d e r - b o t t o m :   n o n e ;   p a d d i n g :   1 . 5 r e m ;   }  
- # p i x C a f e M o d a l   . m o d a l - b o d y   {   p a d d i n g :   1 . 5 r e m ;   }  
- # p i x - c o d e   {   b a c k g r o u n d - c o l o r :   # f 8 f 9 f a ;   b o r d e r :   2 p x   d a s h e d   # f f c 1 0 7 ;   b o r d e r - r a d i u s :   8 p x ;   f o n t - s i z e :   0 . 7 5 r e m ;   l i n e - h e i g h t :   1 . 4 ;   p a d d i n g :   0 . 7 5 r e m ;   t r a n s i t i o n :   a l l   0 . 3 s   e a s e ;   }  
- # p i x - c o d e : h o v e r   {   b a c k g r o u n d - c o l o r :   # f f f ;   b o r d e r - c o l o r :   # f f 9 8 0 0 ;   b o x - s h a d o w :   0   2 p x   8 p x   r g b a ( 2 5 5 ,   1 5 2 ,   0 ,   0 . 2 ) ;   }  
- # b t n - c o p y - p i x   {   t r a n s i t i o n :   a l l   0 . 3 s   e a s e ;   }  
- # b t n - c o p y - p i x : h o v e r   {   t r a n s f o r m :   t r a n s l a t e Y ( - 2 p x ) ;   b o x - s h a d o w :   0   4 p x   1 2 p x   r g b a ( 2 5 5 ,   1 9 3 ,   7 ,   0 . 4 ) ;   }  
- . f o o t e r - b t n   {   t r a n s i t i o n :   a l l   0 . 3 s   e a s e ;   }  
- . f o o t e r - b t n : h o v e r   {   t r a n s f o r m :   t r a n s l a t e Y ( - 2 p x ) ;   b o x - s h a d o w :   0   4 p x   1 2 p x   r g b a ( 0 ,   0 ,   0 ,   0 . 1 5 ) ;   }  
- 
+/* Otimização para o time picker (selector de hora) no mobile */
+/* Soluciona o problema de texto cortado nos botões do modal nativo */
+input[type="time"],
+input[type="date"] {
+  font-size: 16px;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+input[type="time"]:focus,
+input[type="date"]:focus {
+  border-color: var(--pm-blue);
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Estilos específicos para WebKit (Chrome, Safari, Edge) */
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: brightness(0) saturate(100%) invert(35%) sepia(62%) saturate(1978%) hue-rotate(181deg) brightness(95%) contrast(101%);
+  opacity: 0.7;
+  padding: 0.25rem;
+  margin-left: 0.5rem;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator:hover,
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* Força um espaçamento maior para evitar corte de texto no modal nativo */
+input[type="time"]::-webkit-datetime-edit,
+input[type="date"]::-webkit-datetime-edit {
+  padding: 0.375rem 0;
+}
+
+input[type="time"]::-webkit-datetime-edit-fields-wrapper,
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+/* Otimização específica para mobile */
+@media (max-width: 768px) {
+  input[type="time"],
+  input[type="date"] {
+    font-size: clamp(14px, 4vw, 16px);
+    padding: 0.625rem 0.75rem;
+    min-height: 48px; /* Maior área de toque para mobile */
+  }
+  
+  /* Melhora o espaçamento para evitar overflow/corte */
+  input[type="time"]::-webkit-datetime-edit,
+  input[type="date"]::-webkit-datetime-edit {
+    padding: 0.5rem 0;
+    min-width: 100px;
+  }
+}
