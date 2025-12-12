@@ -421,21 +421,47 @@ npm run postinstall  # = npm run build:css
 VidaExtra/
 │
 ├── 📁 src/
+│   ├── 📁 modules/                  # Módulos ES6 da aplicação
+│   │   ├── index.js                 # Re-exports de todos os módulos
+│   │   ├── state.js                 # Estado global e referências DOM
+│   │   ├── utils.js                 # Funções utilitárias (formatação, validação)
+│   │   ├── sounds.js                # Efeitos sonoros (Web Audio API)
+│   │   ├── calendar.js              # Integração com FullCalendar
+│   │   ├── calculator.js            # Lógica de cálculo de horas extras
+│   │   ├── history.js               # CRUD do histórico e persistência
+│   │   └── pdf-export.js            # Geração de relatórios em PDF
+│   │
+│   ├── auth.js                      # Autenticação Firebase
+│   ├── calendar-auth.js             # OAuth Google Calendar
+│   ├── firebase-config.js           # Configuração Firebase
+│   ├── reminders.js                 # Sistema de lembretes
+│   ├── admin.js                     # Painel administrativo
+│   ├── login.js                     # Lógica de login
+│   ├── timepicker.js                # Seletor de hora customizado
 │   └── input.css                    # Arquivo fonte Tailwind
+│
+├── 📁 api/                          # Serverless Functions (Vercel)
+│   ├── createCalendarEvent.js       # Cria eventos no Google Calendar
+│   ├── getUpcomingEvents.js         # Lista próximos eventos
+│   ├── exchangeCodeForTokens.js     # Troca código OAuth por tokens
+│   ├── sendWelcomeEmail.js          # Email de boas-vindas
+│   ├── sendEventConfirmation.js     # Email de confirmação de evento
+│   ├── sendMonthlyReport.js         # Relatório mensal automático
+│   ├── shifts.js                    # CRUD shifts MongoDB
+│   └── ping.js                      # Health check
+│
+├── 📁 pages/                        # Páginas auxiliares
+│   ├── oauth2callback.html          # Callback OAuth
+│   ├── login.html                   # Página de login
+│   ├── privacy.html                 # Política de privacidade
+│   └── pix-cafe.html                # Página de doações
 │
 ├── 📁 dist/
 │   └── tailwind.css                 # CSS compilado e minificado
 │
-├── 📁 node_modules/                 # Dependências (não versionado)
-│
 ├── 📄 index.html                    # Página principal da aplicação
-├── 📄 app.js                        # Lógica principal (ES2021)
+├── 📄 app.js                        # Ponto de entrada (orquestrador ES6)
 ├── 📄 style.css                     # Estilos customizados complementares
-│
-├── 📄 dashboard-preview.html        # Preview alternativo 1
-├── 📄 dashboard-alt-preview.html    # Preview alternativo 2
-├── 📄 dashboard-a-preview.html      # Preview alternativo 3
-├── 📄 index.backup-opcaoA.html      # Backup de versão anterior
 │
 ├── 📄 valores-ac4.json              # Tabela de valores por dia/horário
 │
@@ -443,7 +469,7 @@ VidaExtra/
 ├── 📄 sw.js                         # Service Worker
 │
 ├── 📄 package.json                  # Configuração do projeto e dependências
-├── 📄 package-lock.json             # Lock de versões das dependências
+├── 📄 vercel.json                   # Configuração Vercel + Cron Jobs
 │
 ├── 📄 tailwind.config.js            # Configuração Tailwind CSS
 ├── 📄 postcss.config.js             # Configuração PostCSS
@@ -452,28 +478,43 @@ VidaExtra/
 └── 📄 README.md                     # Este arquivo
 ```
 
+### Arquitetura Modular
+
+O código foi modularizado em **ES6 modules** para melhor manutenibilidade:
+
+| Módulo | Linhas | Responsabilidade |
+|--------|--------|------------------|
+| `app.js` | ~70 | Orquestrador e inicialização |
+| `state.js` | ~100 | Estado global e refs DOM |
+| `utils.js` | ~80 | Funções utilitárias |
+| `sounds.js` | ~80 | Efeitos sonoros |
+| `calendar.js` | ~380 | Integração FullCalendar |
+| `calculator.js` | ~330 | Lógica de cálculo |
+| `pdf-export.js` | ~320 | Exportação PDF |
+| `history.js` | ~800 | CRUD do histórico |
+
 ### Arquivos Principais
-
-#### `index.html`
-
-Página principal da aplicação com:
-
-- Importação de bibliotecas via CDN (Bootstrap, FullCalendar, etc.)
-- Estrutura HTML semântica
-- Sistema de abas (Cálculo, Resultado, Histórico)
-- Links para folhas de estilo
 
 #### `app.js`
 
-Código principal com:
+Ponto de entrada da aplicação que:
 
-- Carregamento de valores do JSON
-- Funções de cálculo de horas extras
-- Gerenciamento de histórico (adicionar, editar, remover)
-- Integração com FullCalendar
-- Geração de PDF
-- Persistência em localStorage
-- Feedback sonoro
+- Importa todos os módulos de `src/modules/`
+- Inicializa referências DOM e estado
+- Configura event listeners principais
+- Orquestra o carregamento da aplicação
+
+#### `src/modules/`
+
+Módulos ES6 com responsabilidades específicas:
+
+- **state.js**: Estado global (`appState`, `calendarState`, `domRefs`)
+- **utils.js**: Formatação de moeda, data, escape HTML
+- **sounds.js**: Web Audio API para feedback sonoro
+- **calendar.js**: FullCalendar (init, eventos, tooltips)
+- **calculator.js**: Cálculo de horas extras AC-4
+- **history.js**: Adicionar, editar, remover, persistir histórico
+- **pdf-export.js**: Geração de PDF com html2pdf.js
 
 #### `valores-ac4.json`
 
