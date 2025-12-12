@@ -65,7 +65,6 @@ export function exportarPDF() {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     width: 100%;
     background: linear-gradient(180deg, #f8f9fa 0%, #e7f5ff 50%, #f8f9fa 100%);
-    min-height: 100vh;
     padding: 0;
     margin: 0;
   `;
@@ -210,32 +209,32 @@ export function exportarPDF() {
       ">
         <thead>
           <tr style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);">
-            <th style="padding: 14px 12px; text-align: left; color: white; font-weight: 600; font-size: 13px; width: 12%;">Data</th>
-            <th style="padding: 14px 12px; text-align: left; color: white; font-weight: 600; font-size: 13px; width: 20%;">Período</th>
-            <th style="padding: 14px 12px; text-align: left; color: white; font-weight: 600; font-size: 13px; width: 40%;">Anotações</th>
-            <th style="padding: 14px 12px; text-align: center; color: white; font-weight: 600; font-size: 13px; width: 10%;">Horas</th>
-            <th style="padding: 14px 12px; text-align: right; color: white; font-weight: 600; font-size: 13px; width: 18%;">Valor</th>
+            <th style="padding: 14px 8px; text-align: left; color: white; font-weight: 600; font-size: 12px; width: 70px;">Data</th>
+            <th style="padding: 14px 8px; text-align: left; color: white; font-weight: 600; font-size: 12px; width: 100px;">Período</th>
+            <th style="padding: 14px 8px; text-align: left; color: white; font-weight: 600; font-size: 12px;">Anotações</th>
+            <th style="padding: 14px 8px; text-align: center; color: white; font-weight: 600; font-size: 12px; width: 55px;">Horas</th>
+            <th style="padding: 14px 8px; text-align: right; color: white; font-weight: 600; font-size: 12px; width: 80px;">Valor</th>
           </tr>
         </thead>
         <tbody>
           ${historicoOrdenado.map((item, index) => `
             <tr style="background-color: ${index % 2 === 0 ? '#ffffff' : '#f8f9fa'}; page-break-inside: avoid; break-inside: avoid;">
-              <td style="padding: 12px; border-bottom: 1px solid #e9ecef; font-weight: 600; color: #0d6efd; word-wrap: break-word; overflow-wrap: break-word;">${item.data}</td>
-              <td style="padding: 12px; border-bottom: 1px solid #e9ecef; color: #495057; word-wrap: break-word; overflow-wrap: break-word;">${item.periodo}</td>
-              <td style="padding: 12px; border-bottom: 1px solid #e9ecef; color: #6c757d; font-size: 12px; word-wrap: break-word; word-break: break-word; white-space: pre-wrap; overflow-wrap: break-word; vertical-align: top;">${item.anotacoes || '-'}</td>
-              <td style="padding: 12px; border-bottom: 1px solid #e9ecef; text-align: center;">
+              <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-weight: 600; color: #0d6efd; font-size: 11px; white-space: nowrap;">${item.data}</td>
+              <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; color: #495057; font-size: 11px; white-space: nowrap;">${item.periodo}</td>
+              <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; color: #6c757d; font-size: 11px; word-wrap: break-word; word-break: break-word; white-space: pre-wrap; overflow-wrap: break-word; vertical-align: top; line-height: 1.4;">${item.anotacoes || '-'}</td>
+              <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; text-align: center; white-space: nowrap;">
                 <span style="
                   background: #e7f5ff;
                   color: #0d6efd;
-                  padding: 4px 10px;
+                  padding: 3px 8px;
                   border-radius: 20px;
                   font-weight: 600;
-                  font-size: 12px;
+                  font-size: 11px;
                 ">${item.horas}h</span>
               </td>
-              <td style="padding: 12px; border-bottom: 1px solid #e9ecef; text-align: right;">
-                ${item.valorOriginal ? `<span style="text-decoration: line-through; color: #adb5bd; font-size: 11px; display: block;">${item.valorOriginal}</span>` : ''}
-                <span style="color: #198754; font-weight: 700;">${item.valor}</span>
+              <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; text-align: right; white-space: nowrap;">
+                ${item.valorOriginal ? `<span style="text-decoration: line-through; color: #adb5bd; font-size: 10px; display: block;">${item.valorOriginal}</span>` : ''}
+                <span style="color: #198754; font-weight: 700; font-size: 11px;">${item.valor}</span>
               </td>
             </tr>
           `).join('')}
