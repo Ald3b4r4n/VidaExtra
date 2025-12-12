@@ -206,22 +206,23 @@ export function exportarPDF() {
         border-radius: 12px;
         overflow: hidden;
         box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        table-layout: fixed;
       ">
         <thead>
           <tr style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);">
-            <th style="padding: 14px 12px; text-align: left; color: white; font-weight: 600; font-size: 13px;">Data</th>
-            <th style="padding: 14px 12px; text-align: left; color: white; font-weight: 600; font-size: 13px;">Período</th>
-            <th style="padding: 14px 12px; text-align: left; color: white; font-weight: 600; font-size: 13px;">Anotações</th>
-            <th style="padding: 14px 12px; text-align: center; color: white; font-weight: 600; font-size: 13px;">Horas</th>
-            <th style="padding: 14px 12px; text-align: right; color: white; font-weight: 600; font-size: 13px;">Valor</th>
+            <th style="padding: 14px 12px; text-align: left; color: white; font-weight: 600; font-size: 13px; width: 12%;">Data</th>
+            <th style="padding: 14px 12px; text-align: left; color: white; font-weight: 600; font-size: 13px; width: 20%;">Período</th>
+            <th style="padding: 14px 12px; text-align: left; color: white; font-weight: 600; font-size: 13px; width: 40%;">Anotações</th>
+            <th style="padding: 14px 12px; text-align: center; color: white; font-weight: 600; font-size: 13px; width: 10%;">Horas</th>
+            <th style="padding: 14px 12px; text-align: right; color: white; font-weight: 600; font-size: 13px; width: 18%;">Valor</th>
           </tr>
         </thead>
         <tbody>
           ${historicoOrdenado.map((item, index) => `
             <tr style="background-color: ${index % 2 === 0 ? '#ffffff' : '#f8f9fa'}; page-break-inside: avoid; break-inside: avoid;">
-              <td style="padding: 12px; border-bottom: 1px solid #e9ecef; font-weight: 600; color: #0d6efd;">${item.data}</td>
-              <td style="padding: 12px; border-bottom: 1px solid #e9ecef; color: #495057;">${item.periodo}</td>
-              <td style="padding: 12px; border-bottom: 1px solid #e9ecef; color: #6c757d; font-size: 12px; max-width: 200px;">${item.anotacoes || '-'}</td>
+              <td style="padding: 12px; border-bottom: 1px solid #e9ecef; font-weight: 600; color: #0d6efd; word-wrap: break-word; overflow-wrap: break-word;">${item.data}</td>
+              <td style="padding: 12px; border-bottom: 1px solid #e9ecef; color: #495057; word-wrap: break-word; overflow-wrap: break-word;">${item.periodo}</td>
+              <td style="padding: 12px; border-bottom: 1px solid #e9ecef; color: #6c757d; font-size: 12px; word-wrap: break-word; word-break: break-word; white-space: pre-wrap; overflow-wrap: break-word; vertical-align: top;">${item.anotacoes || '-'}</td>
               <td style="padding: 12px; border-bottom: 1px solid #e9ecef; text-align: center;">
                 <span style="
                   background: #e7f5ff;
