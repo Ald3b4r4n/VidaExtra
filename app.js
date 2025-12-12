@@ -1807,58 +1807,62 @@ document.addEventListener("DOMContentLoaded", function () {
         <!-- Cards de resumo -->
         <div style="
           display: flex;
-          gap: 15px;
+          gap: 12px;
           margin-bottom: 25px;
-          flex-wrap: wrap;
+          flex-wrap: nowrap;
         ">
           <div style="
             flex: 1;
-            min-width: 150px;
+            min-width: 0;
             background: white;
             border-radius: 12px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             border-left: 4px solid #0d6efd;
+            overflow: hidden;
           ">
-            <p style="margin: 0; font-size: 12px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px;">Total de Registros</p>
-            <p style="margin: 8px 0 0 0; font-size: 28px; font-weight: 700; color: #0d6efd;">${historicoOrdenado.length}</p>
+            <p style="margin: 0; font-size: 11px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;">Total de Registros</p>
+            <p style="margin: 8px 0 0 0; font-size: 24px; font-weight: 700; color: #0d6efd;">${historicoOrdenado.length}</p>
           </div>
           <div style="
             flex: 1;
-            min-width: 150px;
+            min-width: 0;
             background: white;
             border-radius: 12px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             border-left: 4px solid #20c997;
+            overflow: hidden;
           ">
-            <p style="margin: 0; font-size: 12px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px;">Horas Trabalhadas</p>
-            <p style="margin: 8px 0 0 0; font-size: 28px; font-weight: 700; color: #20c997;">${appState.totalHoras.toFixed(2)}h</p>
+            <p style="margin: 0; font-size: 11px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;">Horas Trabalhadas</p>
+            <p style="margin: 8px 0 0 0; font-size: 24px; font-weight: 700; color: #20c997;">${appState.totalHoras.toFixed(2)}h</p>
           </div>
           <div style="
             flex: 1;
-            min-width: 150px;
+            min-width: 0;
             background: white;
             border-radius: 12px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             border-left: 4px solid #198754;
+            overflow: hidden;
           ">
-            <p style="margin: 0; font-size: 12px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px;">Valor Total Líquido</p>
-            <p style="margin: 8px 0 0 0; font-size: 28px; font-weight: 700; color: #198754;">${formatarMoeda(appState.totalValor)}</p>
+            <p style="margin: 0; font-size: 11px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;">Valor Total Líquido</p>
+            <p style="margin: 8px 0 0 0; font-size: 20px; font-weight: 700; color: #198754; white-space: nowrap;">${formatarMoeda(appState.totalValor)}</p>
           </div>
           ${appState.totalPensao > 0 ? `
           <div style="
             flex: 1;
-            min-width: 150px;
+            min-width: 0;
             background: white;
             border-radius: 12px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             border-left: 4px solid #dc3545;
+            overflow: hidden;
           ">
-            <p style="margin: 0; font-size: 12px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px;">Desconto Pensão</p>
-            <p style="margin: 8px 0 0 0; font-size: 28px; font-weight: 700; color: #dc3545;">${formatarMoeda(appState.totalPensao)}</p>
+            <p style="margin: 0; font-size: 11px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;">Desconto Pensão</p>
+            <p style="margin: 8px 0 0 0; font-size: 20px; font-weight: 700; color: #dc3545; white-space: nowrap;">${formatarMoeda(appState.totalPensao)}</p>
           </div>
           ` : ''}
         </div>
@@ -1907,7 +1911,7 @@ document.addEventListener("DOMContentLoaded", function () {
           </thead>
           <tbody>
             ${historicoOrdenado.map((item, index) => `
-              <tr style="background-color: ${index % 2 === 0 ? '#ffffff' : '#f8f9fa'};">
+              <tr style="background-color: ${index % 2 === 0 ? '#ffffff' : '#f8f9fa'}; page-break-inside: avoid; break-inside: avoid;">
                 <td style="padding: 12px; border-bottom: 1px solid #e9ecef; font-weight: 600; color: #0d6efd;">${item.data}</td>
                 <td style="padding: 12px; border-bottom: 1px solid #e9ecef; color: #495057;">${item.periodo}</td>
                 <td style="padding: 12px; border-bottom: 1px solid #e9ecef; color: #6c757d; font-size: 12px; max-width: 200px;">${item.anotacoes || '-'}</td>
@@ -1938,6 +1942,8 @@ document.addEventListener("DOMContentLoaded", function () {
         background: linear-gradient(135deg, #212529 0%, #343a40 100%);
         color: white;
         border-radius: 20px 20px 0 0;
+        page-break-inside: avoid;
+        break-inside: avoid;
       ">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
           <div>
@@ -1962,7 +1968,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Configurações do PDF
     const opt = {
-      margin: 0,
+      margin: [10, 0, 10, 0], // top, right, bottom, left (mm)
       filename: `vidaextra_ac4_${new Date().toISOString().slice(0, 10)}.pdf`,
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: {
@@ -1979,6 +1985,12 @@ document.addEventListener("DOMContentLoaded", function () {
         format: "a4",
         orientation: "portrait",
       },
+      pagebreak: {
+        mode: ['avoid-all', 'css', 'legacy'],
+        before: '.page-break-before',
+        after: '.page-break-after',
+        avoid: 'tr, .avoid-break'
+      }
     };
 
     // Gerar PDF
