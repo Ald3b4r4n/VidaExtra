@@ -757,10 +757,10 @@
             const btn = document.getElementById("btn-refresh-lembretes");
             const originalText = btn.innerHTML;
 
-            // Feedback visual
+            // Feedback visual - usa apenas spinner sem misturar com ícone bi
             btn.disabled = true;
             btn.innerHTML =
-              '<i class="bi bi-arrow-clockwise spinner-border spinner-border-sm"></i> Atualizando...';
+              '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Atualizando...';
 
             try {
               const module = await import("./src/reminders.js");

@@ -271,6 +271,11 @@ function renderAdminDashboard(data) {
                         .join("")}
                     </tbody>
                   </table>
+                  ${user.shifts.length > 5 ? `
+                    <button type="button" class="btn btn-sm btn-outline-secondary w-100 mt-2" onclick="this.closest('details').scrollIntoView({behavior: 'smooth', block: 'start'})">
+                      <i class="bi bi-chevron-up"></i> Voltar ao Topo
+                    </button>
+                  ` : ""}
                 </div>
 
                 <!-- Mobile View (List Cards) -->
@@ -302,6 +307,11 @@ function renderAdminDashboard(data) {
                     <button type="button" class="btn btn-outline-secondary w-100 mt-2" onclick="this.closest('details').removeAttribute('open')">
                       <i class="bi bi-chevron-up"></i> Fechar Lista
                     </button>
+                    ${user.shifts.length > 5 ? `
+                      <button type="button" class="btn btn-sm btn-outline-primary w-100 mt-2" onclick="this.closest('details').scrollIntoView({behavior: 'smooth', block: 'start'})">
+                        <i class="bi bi-arrow-up"></i> Voltar ao Topo dos Shifts
+                      </button>
+                    ` : ""}
                 </div>
               </div>
             </details>
@@ -319,12 +329,54 @@ function renderAdminDashboard(data) {
 
   // Update stats
   updateAdminStats(data);
+  
+  // Initialize back to top button for admin section
+  initBackToTopButton();
 
   // Expose filter function globally
   window.filterUsersByLetter = (letter) => {
     currentFilter = letter;
     renderAdminDashboard(data);
   };
+}
+
+/**
+ * Initialize back to top button
+ */
+function initBackToTopButton() {
+  // Remove existing button if any
+  let existingBtn = document.getElementById("admin-back-to-top");
+  if (existingBtn) existingBtn.remove();
+  
+  // Create the button
+  const btn = document.createElement("button");
+  btn.id = "admin-back-to-top";
+  btn.className = "btn-back-to-top";
+  btn.innerHTML = '<i class="bi bi-arrow-up"></i>';
+  btn.setAttribute("aria-label", "Voltar ao topo");
+  btn.title = "Voltar ao topo";
+  
+  document.body.appendChild(btn);
+  
+  // Show/hide based on scroll position
+  const toggleVisibility = () => {
+    if (window.scrollY > 300) {
+      btn.classList.add("visible");
+    } else {
+      btn.classList.remove("visible");
+    }
+  };
+  
+  // Initial check
+  toggleVisibility();
+  
+  // Listen for scroll
+  window.addEventListener("scroll", toggleVisibility, { passive: true });
+  
+  // Click handler
+  btn.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
 }
 
 /**
@@ -344,13 +396,7 @@ function updateAdminStats(data) {
     0
   );
 
-  // Count new users (last 24 hours)
-  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  const newUsersToday = data.users.filter((u) => {
-    if (!u.createdAt) return false;
-    const created = new Date(u.createdAt);
-    return created > oneDayAgo;
-  }).length;
+
 
   statsContainer.innerHTML = `
     <div class="row g-2 g-md-3">
@@ -452,10 +498,39 @@ function showAdminError(message) {
 /**
  * Refresh admin data
  */
-export function refreshAdminData() {
+export async function refreshAdminData() {
+  const btn = document.getElementById("btn-refresh-admin");
+  let originalContent = "";
+
+  if (btn) {
+    originalContent = btn.innerHTML;
+    btn.disabled = true;
+    // Mantém o ícone girando
+    const icon = btn.querySelector("i");
+    if (icon) {
+      icon.classList.add("spin-anim"); // Adicionaremos CSS para isso ou usaremos bootstrap
+      // Ou substitui por spinner do bootstrap
+      btn.innerHTML =
+        '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Atualizando...';
+    }
+  }
+
   cachedData = null; // Clear cache
-  if (!isLoading) {
-    loadAdminData();
+
+  try {
+    if (!isLoading) {
+      await loadAdminData();
+    }
+  } catch (error) {
+    console.error("Error refreshing:", error);
+  } finally {
+    if (btn) {
+      // Pequeno delay para o usuário perceber que atualizou
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalContent;
+      }, 500);
+    }
   }
 }
 

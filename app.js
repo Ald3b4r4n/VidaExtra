@@ -1272,11 +1272,11 @@ document.addEventListener("DOMContentLoaded", function () {
           <div class="row g-2 mt-2">
             <div class="col">
               <label class="form-label fw-bold">Hora Inicial</label>
-              <input type="time" id="edit-inicio" class="form-control" value="${horaInicio}">
+              <input type="text" id="edit-inicio" class="form-control air-datepicker-input" value="${horaInicio}" readonly>
             </div>
             <div class="col">
               <label class="form-label fw-bold">Hora Final</label>
-              <input type="time" id="edit-fim" class="form-control" value="${horaFim}">
+              <input type="text" id="edit-fim" class="form-control air-datepicker-input" value="${horaFim}" readonly>
             </div>
           </div>
           <label class="form-label fw-bold mt-2">Percentual de Pensão (%)</label>
@@ -1293,6 +1293,49 @@ document.addEventListener("DOMContentLoaded", function () {
       showCancelButton: true,
       confirmButtonText: "Salvar",
       cancelButtonText: "Cancelar",
+      didOpen: () => {
+        // Inicializa Air Datepicker nos campos de hora
+        if (typeof AirDatepicker !== "undefined" && window.AirDatepickerLocalePt) {
+          const confirmBtn = window.AirDatepickerConfirmBtn || {
+            content: "Confirmar",
+            onClick: (dp) => dp.hide()
+          };
+          
+          const [hI, mI] = horaInicio.split(":");
+          const [hF, mF] = horaFim.split(":");
+          
+          const editInicioInput = document.getElementById("edit-inicio");
+          const editFimInput = document.getElementById("edit-fim");
+          
+          if (editInicioInput) {
+            new AirDatepicker(editInicioInput, {
+              locale: window.AirDatepickerLocalePt,
+              timepicker: true,
+              onlyTimepicker: true,
+              classes: "vidaextra-datepicker",
+              autoClose: false,
+              isMobile: true,
+              minutesStep: 1,
+              buttons: ["clear", confirmBtn],
+              selectedDates: [new Date().setHours(parseInt(hI) || 8, parseInt(mI) || 0, 0, 0)],
+            });
+          }
+          
+          if (editFimInput) {
+            new AirDatepicker(editFimInput, {
+              locale: window.AirDatepickerLocalePt,
+              timepicker: true,
+              onlyTimepicker: true,
+              classes: "vidaextra-datepicker",
+              autoClose: false,
+              isMobile: true,
+              minutesStep: 1,
+              buttons: ["clear", confirmBtn],
+              selectedDates: [new Date().setHours(parseInt(hF) || 17, parseInt(mF) || 0, 0, 0)],
+            });
+          }
+        }
+      },
       preConfirm: () => {
         const data = document.getElementById("edit-data").value;
         const inicio = document.getElementById("edit-inicio").value;
@@ -1311,6 +1354,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }).then((result) => {
       if (!result.isConfirmed) return;
       const { data, inicio, fim, pensao, notas } = result.value;
+
 
       // Recalcula valores
       const [anoN, mesN, diaN] = data.split("-").map(Number);
@@ -1670,106 +1714,265 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    // Criar elemento temporário com estilos inline
+    // Coletar dados do histórico
+    const historicoOrdenado = Array.from(historicoLista.children)
+      .sort(
+        (a, b) =>
+          Number(
+            a.dataset.dateMilli ||
+              obterMillisDeDataBR(a.querySelector("h6").textContent)
+          ) -
+          Number(
+            b.dataset.dateMilli ||
+              obterMillisDeDataBR(b.querySelector("h6").textContent)
+          )
+      )
+      .map((item) => {
+        const data = item.querySelector("h6").textContent;
+        const periodo = item.querySelector("small").textContent;
+        const anotacoesEl = item.querySelector(".mt-1.text-muted");
+        const anotacoes = anotacoesEl
+          ? anotacoesEl.textContent.replace(/^Anotações:\s*/i, "")
+          : "";
+        const horas = item
+          .querySelector(".badge.bg-primary")
+          .textContent.replace("h totais", "");
+        const valor = item.querySelector(".valor-liquido").textContent;
+        const valorOriginal =
+          item.querySelector(".valor-original")?.textContent || "";
+        return { data, periodo, anotacoes, horas, valor, valorOriginal };
+      });
+
+    // Data de geração
+    const dataGeracao = new Date().toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+
+    // Criar elemento temporário com design premium
     const element = document.createElement("div");
-    element.style.fontFamily = "Arial, sans-serif";
-    element.style.padding = "20px";
-    element.style.width = "100%";
+    element.style.cssText = `
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      width: 100%;
+      background: linear-gradient(180deg, #f8f9fa 0%, #e7f5ff 50%, #f8f9fa 100%);
+      min-height: 100vh;
+      padding: 0;
+      margin: 0;
+    `;
 
-    // Construir o conteúdo do PDF
     element.innerHTML = `
-        <h3 style="text-align:center;color:#0d6efd;margin-bottom:5px;">Histórico AC-4</h3>
-        <p style="text-align:center;color:#6c757d;margin-top:0;">Gerado em ${new Date().toLocaleDateString(
-          "pt-BR"
-        )}</p>
+      <!-- Header com gradiente -->
+      <div style="
+        background: linear-gradient(135deg, #0d6efd 0%, #20c997 100%);
+        color: white;
+        padding: 30px 40px;
+        border-radius: 0 0 20px 20px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 20px rgba(13, 110, 253, 0.3);
+      ">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="
+              width: 60px;
+              height: 60px;
+              background: rgba(255,255,255,0.2);
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 28px;
+              border: 2px solid rgba(255,255,255,0.4);
+            ">🛡️</div>
+            <div>
+              <h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">
+                VidaExtra<sup style="font-size: 14px;">®</sup>
+              </h1>
+              <p style="margin: 4px 0 0 0; font-size: 14px; opacity: 0.9;">
+                Calculadora de Horas Extras AC-4
+              </p>
+            </div>
+          </div>
+          <div style="text-align: right; margin-top: 10px;">
+            <p style="margin: 0; font-size: 12px; opacity: 0.85;">Relatório gerado em</p>
+            <p style="margin: 4px 0 0 0; font-size: 14px; font-weight: 600;">${dataGeracao}</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Conteúdo principal -->
+      <div style="padding: 0 30px;">
+        <!-- Cards de resumo -->
+        <div style="
+          display: flex;
+          gap: 15px;
+          margin-bottom: 25px;
+          flex-wrap: wrap;
+        ">
+          <div style="
+            flex: 1;
+            min-width: 150px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border-left: 4px solid #0d6efd;
+          ">
+            <p style="margin: 0; font-size: 12px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px;">Total de Registros</p>
+            <p style="margin: 8px 0 0 0; font-size: 28px; font-weight: 700; color: #0d6efd;">${historicoOrdenado.length}</p>
+          </div>
+          <div style="
+            flex: 1;
+            min-width: 150px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border-left: 4px solid #20c997;
+          ">
+            <p style="margin: 0; font-size: 12px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px;">Horas Trabalhadas</p>
+            <p style="margin: 8px 0 0 0; font-size: 28px; font-weight: 700; color: #20c997;">${appState.totalHoras.toFixed(2)}h</p>
+          </div>
+          <div style="
+            flex: 1;
+            min-width: 150px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border-left: 4px solid #198754;
+          ">
+            <p style="margin: 0; font-size: 12px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px;">Valor Total Líquido</p>
+            <p style="margin: 8px 0 0 0; font-size: 28px; font-weight: 700; color: #198754;">${formatarMoeda(appState.totalValor)}</p>
+          </div>
+          ${appState.totalPensao > 0 ? `
+          <div style="
+            flex: 1;
+            min-width: 150px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border-left: 4px solid #dc3545;
+          ">
+            <p style="margin: 0; font-size: 12px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px;">Desconto Pensão</p>
+            <p style="margin: 8px 0 0 0; font-size: 28px; font-weight: 700; color: #dc3545;">${formatarMoeda(appState.totalPensao)}</p>
+          </div>
+          ` : ''}
+        </div>
         
-        <table style="width:100%;border-collapse:collapse;margin-top:20px;">
-            <thead>
-                <tr style="background-color:#f8f9fa;">
-                    <th style="border:1px solid #ddd;padding:8px;text-align:left;">Data</th>
-                    <th style="border:1px solid #ddd;padding:8px;text-align:left;">Período</th>
-                    <th style="border:1px solid #ddd;padding:8px;text-align:left;">Anotações</th>
-                    <th style="border:1px solid #ddd;padding:8px;text-align:right;">Horas</th>
-                    <th style="border:1px solid #ddd;padding:8px;text-align:right;">Valor</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${Array.from(historicoLista.children)
-                  .sort(
-                    (a, b) =>
-                      Number(
-                        a.dataset.dateMilli ||
-                          obterMillisDeDataBR(a.querySelector("h6").textContent)
-                      ) -
-                      Number(
-                        b.dataset.dateMilli ||
-                          obterMillisDeDataBR(b.querySelector("h6").textContent)
-                      )
-                  )
-                  .map((item) => {
-                    const data = item.querySelector("h6").textContent;
-                    const periodo = item.querySelector("small").textContent;
-                    const anotacoesEl = item.querySelector(".mt-1.text-muted");
-                    const anotacoes = anotacoesEl
-                      ? anotacoesEl.textContent.replace(/^Anotações:\s*/i, "")
-                      : "";
-                    const horas = item
-                      .querySelector(".badge.bg-primary")
-                      .textContent.replace("h totais", "");
-                    const valor =
-                      item.querySelector(".valor-liquido").textContent;
-                    const valorOriginal =
-                      item.querySelector(".valor-original")?.textContent || "";
-
-                    return `
-                    <tr>
-                      <td style="border:1px solid #ddd;padding:8px;">${data}</td>
-                      <td style="border:1px solid #ddd;padding:8px;">${periodo}</td>
-                      <td style="border:1px solid #ddd;padding:8px;">${anotacoes}</td>
-                      <td style="border:1px solid #ddd;padding:8px;text-align:right;">${horas}</td>
-                      <td style="border:1px solid #ddd;padding:8px;text-align:right;">
-                        ${
-                          valorOriginal
-                            ? `<span style="text-decoration:line-through;color:#999;">${valorOriginal}</span><br>`
-                            : ""
-                        }
-                        ${valor}
-                      </td>
-                    </tr>
-                  `;
-                  })
-                  .join("")}
-            </tbody>
+        <!-- Título da tabela -->
+        <h2 style="
+          font-size: 18px;
+          color: #212529;
+          margin: 0 0 15px 0;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        ">
+          <span style="
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #0d6efd 0%, #20c997 100%);
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+          ">📋</span>
+          Detalhamento dos Serviços
+        </h2>
+        
+        <!-- Tabela estilizada -->
+        <table style="
+          width: 100%;
+          border-collapse: separate;
+          border-spacing: 0;
+          background: white;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        ">
+          <thead>
+            <tr style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);">
+              <th style="padding: 14px 12px; text-align: left; color: white; font-weight: 600; font-size: 13px;">Data</th>
+              <th style="padding: 14px 12px; text-align: left; color: white; font-weight: 600; font-size: 13px;">Período</th>
+              <th style="padding: 14px 12px; text-align: left; color: white; font-weight: 600; font-size: 13px;">Anotações</th>
+              <th style="padding: 14px 12px; text-align: center; color: white; font-weight: 600; font-size: 13px;">Horas</th>
+              <th style="padding: 14px 12px; text-align: right; color: white; font-weight: 600; font-size: 13px;">Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${historicoOrdenado.map((item, index) => `
+              <tr style="background-color: ${index % 2 === 0 ? '#ffffff' : '#f8f9fa'};">
+                <td style="padding: 12px; border-bottom: 1px solid #e9ecef; font-weight: 600; color: #0d6efd;">${item.data}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e9ecef; color: #495057;">${item.periodo}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e9ecef; color: #6c757d; font-size: 12px; max-width: 200px;">${item.anotacoes || '-'}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e9ecef; text-align: center;">
+                  <span style="
+                    background: #e7f5ff;
+                    color: #0d6efd;
+                    padding: 4px 10px;
+                    border-radius: 20px;
+                    font-weight: 600;
+                    font-size: 12px;
+                  ">${item.horas}h</span>
+                </td>
+                <td style="padding: 12px; border-bottom: 1px solid #e9ecef; text-align: right;">
+                  ${item.valorOriginal ? `<span style="text-decoration: line-through; color: #adb5bd; font-size: 11px; display: block;">${item.valorOriginal}</span>` : ''}
+                  <span style="color: #198754; font-weight: 700;">${item.valor}</span>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
         </table>
-        
-        <div style="margin-top:20px;text-align:right;font-weight:bold;">
-            Total Acumulado: ${formatarMoeda(
-              appState.totalValor
-            )} (${appState.totalHoras.toFixed(2)}h)
+      </div>
+      
+      <!-- Footer -->
+      <div style="
+        margin-top: 40px;
+        padding: 25px 40px;
+        background: linear-gradient(135deg, #212529 0%, #343a40 100%);
+        color: white;
+        border-radius: 20px 20px 0 0;
+      ">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+          <div>
+            <p style="margin: 0; font-size: 14px; font-weight: 600;">
+              © VidaExtra® - Todos os direitos reservados
+            </p>
+            <p style="margin: 5px 0 0 0; font-size: 12px; opacity: 0.8;">
+              Desenvolvido por <strong>CB Antônio Rafael</strong> - 14ª CIPM
+            </p>
+          </div>
+          <div style="text-align: right;">
+            <p style="margin: 0; font-size: 11px; opacity: 0.7;">
+              Documento gerado automaticamente
+            </p>
+            <p style="margin: 3px 0 0 0; font-size: 11px; opacity: 0.7;">
+              Este relatório é válido para fins de controle interno
+            </p>
+          </div>
         </div>
-        ${
-          appState.totalPensao > 0
-            ? `
-        <div style="margin-top:10px;text-align:right;font-weight:bold;color:#dc3545;">
-            Total Perdido para Pensão: ${formatarMoeda(appState.totalPensao)}
-        </div>
-        `
-            : ""
-        }
+      </div>
     `;
 
     // Configurações do PDF
     const opt = {
-      margin: 10,
-      filename: `historico_ac4_${new Date().toISOString().slice(0, 10)}.pdf`,
+      margin: 0,
+      filename: `vidaextra_ac4_${new Date().toISOString().slice(0, 10)}.pdf`,
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: {
         scale: 2,
-        logging: true,
+        logging: false,
         useCORS: true,
         allowTaint: true,
         scrollX: 0,
         scrollY: 0,
+        backgroundColor: '#f8f9fa',
       },
       jsPDF: {
         unit: "mm",
@@ -1787,8 +1990,9 @@ document.addEventListener("DOMContentLoaded", function () {
         Swal.fire({
           icon: "success",
           title: "PDF gerado com sucesso!",
+          text: "Seu relatório VidaExtra® foi exportado",
           showConfirmButton: false,
-          timer: 1500,
+          timer: 2000,
         });
       })
       .catch((err) => {
